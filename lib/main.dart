@@ -14,6 +14,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      //Gia Bảo
       title: 'Nhà Xe Nam Hải',
       theme: ThemeData(
         primarySwatch: Colors.deepOrange,

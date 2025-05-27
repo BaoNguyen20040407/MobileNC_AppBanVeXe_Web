@@ -1,48 +1,120 @@
 import 'package:flutter/material.dart';
 import 'reset_password_screen.dart';
 
-class ConfirmEmailScreen extends StatelessWidget {
+class ConfirmEmailScreen extends StatefulWidget {
+  const ConfirmEmailScreen({super.key});
+
+  @override
+  State<ConfirmEmailScreen> createState() => _ConfirmEmailScreenState();
+}
+
+class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
   final TextEditingController emailController = TextEditingController();
 
-  ConfirmEmailScreen({super.key});
+  @override
+  void dispose() {
+    emailController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(automaticallyImplyLeading: true, elevation: 0),
+      backgroundColor: Colors.white,
       body: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text("Xác nhận Email", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.email_outlined),
-                labelText: 'Email',
-                border: OutlineInputBorder(),
-              ),
+            IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.black),
+              padding: EdgeInsets.zero, 
+              constraints: const BoxConstraints(), 
+              onPressed: () {
+                Navigator.pop(context);
+              },
             ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFFF5722),
-                ),
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => ResetPasswordScreen()));
-                },
-                child: const Text("Tiếp tục"),
-              ),
-            ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 64),
             const Text(
-              "Bằng việc xác nhận Email đang dùng, bạn có thể thay đổi mật khẩu mà mình mong muốn",
-              style: TextStyle(fontSize: 13),
+              "Xác nhận Email",
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Inter',
+              ),
+            ),
+            const SizedBox(height: 32),
+            // Email TextField
+              TextField(
+                decoration: InputDecoration(
+                  labelText: "Email",
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.only(left: 12.0, right: 12.0),
+                    child: Icon(Icons.email),
+                  ),
+                  enabledBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFFFF5722)),
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFFFF5722), width: 2.0),
+                  ),
+                    hintStyle: TextStyle(
+                    color: Colors.grey.withOpacity(0.5),
+                  ),
+                  floatingLabelStyle: const TextStyle(
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            const SizedBox(height: 32),
+            SizedBox(
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const ResetPasswordScreen()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF5722),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  elevation: 4,
+                  minimumSize: const Size(double.infinity, 54), // chiều cao cố định, chiều rộng max trong padding
+                ),
+                child: const Text(
+                  "Tiếp tục",
+                  style: TextStyle(
+                    fontSize: 17,
+                    color: Colors.white,
+                    fontFamily: 'Inter',
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 32),
+            RichText(
+              textAlign: TextAlign.justify,
+              text: const TextSpan(
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.black,
+                  fontFamily: 'Inter',
+                  height: 1.5,
+                  letterSpacing: 0.5, // nếu bạn dùng font Inter
+                ),
+                children: [
+                  TextSpan(text: 'Bằng việc xác nhận Email đang dùng, bạn có thể ', style: TextStyle(fontSize: 14, fontFamily: 'Inter')),
+                  TextSpan(
+                    text: 'thay đổi mật khẩu',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  TextSpan(text: ' mà mình mong muốn', style: TextStyle(fontFamily: 'Inter', fontSize: 14)),
+                ],
+              ),
             ),
           ],
         ),

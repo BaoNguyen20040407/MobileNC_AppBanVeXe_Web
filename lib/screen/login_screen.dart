@@ -17,7 +17,7 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32.0),
+          padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 24.0),
           child: ListView(
             children: [
               const SizedBox(height: 32),
@@ -128,10 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 height: 48,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => ConfirmEmailScreen()),
-                    );
+
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF5722),
@@ -150,12 +147,17 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 16),
 
               TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ConfirmEmailScreen()),
+                  );
+                },
                 style: ButtonStyle(
                   overlayColor: MaterialStateProperty.resolveWith<Color?>(
                     (Set<MaterialState> states) {
                       if (states.contains(MaterialState.hovered)) {
-                        return Colors.transparent; 
+                        return Colors.transparent;
                       }
                       return null;
                     },
@@ -163,9 +165,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 child: const Text(
                   "Quên mật khẩu?",
-                  style: TextStyle(color: Color(0xFFFF5722), fontFamily: 'Inter', fontSize: 14, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: Color(0xFFFF5722),
+                    fontFamily: 'Inter',
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
+
 
               const SizedBox(height: 32),
               Center(

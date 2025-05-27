@@ -18,5 +18,13 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/namhailogo.png
+    - assets/image/
+
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/font/inter_18pt_regular.ttf
+          weight: 100
+        - asset: assets/font/inter_18pt_bold.ttf
+          weight: 100
 

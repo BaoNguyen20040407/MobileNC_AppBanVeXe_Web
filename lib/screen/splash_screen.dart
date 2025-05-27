@@ -23,21 +23,21 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9DAD5),
+      backgroundColor: const Color(0xFFFDE5DE),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset("assets/namhailogo.png", height: 150),
-            const SizedBox(height: 20),
+            Image.asset("assets/image/namhailogo.png", height: 200),
+            const SizedBox(height: 16),
             const Text(
               "NHÀ XE NAM HẢI",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.green),
+              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Color(0xFF006400), fontFamily: 'Inter'),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             const Text(
               "Vì những chuyến xe an toàn cho bạn",
-              style: TextStyle(color: Colors.red, fontSize: 14),
+              style: TextStyle(color: Color(0xFFFF0000), fontSize: 20, fontFamily: 'Inter'),
             ),
           ],
         ),

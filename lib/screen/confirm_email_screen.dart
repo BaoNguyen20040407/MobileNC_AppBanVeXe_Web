@@ -21,19 +21,21 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
+        padding: const EdgeInsets.symmetric(horizontal: 32),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.black),
-              padding: EdgeInsets.zero, 
-              constraints: const BoxConstraints(), 
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
             const SizedBox(height: 64),
             const Text(
               "Xác nhận Email",
@@ -49,7 +51,7 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
                 decoration: InputDecoration(
                   labelText: "Email",
                   prefixIcon: Padding(
-                    padding: const EdgeInsets.only(left: 12.0, right: 12.0),
+                    padding: const EdgeInsets.only(left: 16.0, right: 16.0),
                     child: Icon(Icons.email),
                   ),
                   enabledBorder: const OutlineInputBorder(
@@ -63,6 +65,10 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
                   ),
                   floatingLabelStyle: const TextStyle(
                     color: Colors.black,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20.0,
+                    vertical: 18.0,
                   ),
                 ),
               ),
@@ -81,7 +87,7 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   elevation: 4,
-                  minimumSize: const Size(double.infinity, 54), // chiều cao cố định, chiều rộng max trong padding
+                  minimumSize: const Size(double.infinity, 54),
                 ),
                 child: const Text(
                   "Tiếp tục",

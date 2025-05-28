@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:giao_dien_1/screen/phone_number_input.dart';
 import 'confirm_email_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -17,7 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 24.0),
+          padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 21.0),
           child: ListView(
             children: [
               const SizedBox(height: 32),
@@ -67,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: InputDecoration(
                   labelText: "UserName",
                   prefixIcon: Padding(
-                    padding: const EdgeInsets.only(left: 12.0, right: 12.0),
+                    padding: const EdgeInsets.only(left: 16.0, right: 16.0),
                     child: Icon(Icons.person),
                   ),
                   enabledBorder: const OutlineInputBorder(
@@ -82,6 +83,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   floatingLabelStyle: const TextStyle(
                     color: Colors.black,
                   ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20.0,
+                    vertical: 18.0,
+                  ),
                 ),
               ),
 
@@ -93,13 +98,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: InputDecoration(
                   labelText: "Password",
                   prefixIcon: Padding(
-                    padding: const EdgeInsets.only(left: 12.0, right: 12.0),
+                    padding: const EdgeInsets.only(left: 16.0, right: 16.0),
                     child: Icon(Icons.lock),
                   ),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                      color: Colors.grey,
+                      color: Colors.black,
                     ),
                     onPressed: () {
                       setState(() {
@@ -118,6 +123,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   floatingLabelStyle: const TextStyle(
                     color: Colors.black,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20.0,
+                    vertical: 18.0,
                   ),
                 ),
               ),
@@ -183,7 +192,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     const Text("Không có tài khoản? ", style: TextStyle(fontFamily: 'Inter', fontSize: 14),),
                     TextButton(
                       onPressed: () {
-                        // Xử lý sự kiện đăng ký
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => Phone_Number_Input()),
+                        );
                       },
                       style: ButtonStyle(
                         overlayColor: MaterialStateProperty.all(Colors.transparent), // Loại bỏ màu khi nhấn/hover

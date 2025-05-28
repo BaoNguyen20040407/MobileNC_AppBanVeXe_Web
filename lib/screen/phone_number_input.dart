@@ -1,23 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/screen/welcome.dart';
 
-class Phone_Number_Input extends StatelessWidget {
+class Phone_Number_Input extends StatefulWidget {
   const Phone_Number_Input({super.key});
+
+  @override
+  State<Phone_Number_Input> createState() => _PhoneNumberInputState();
+}
+
+class _PhoneNumberInputState extends State<Phone_Number_Input> {
+  final TextEditingController _phoneController = TextEditingController();
+
+  @override
+  void dispose() {
+    _phoneController.dispose(); // Giải phóng bộ nhớ khi widget bị huỷ
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        elevation: 0, 
+        elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
-          Navigator.pop(context);  // quay về trang trước
+            Navigator.pop(context); // quay về trang trước
           },
         ),
       ),
-
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
@@ -26,32 +38,27 @@ class Phone_Number_Input extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              SizedBox(height: 64),
-              Align(
+              const SizedBox(height: 64),
+              const Align(
                 alignment: Alignment.centerLeft,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    const Text(
-                      'Nhập số điện thoại',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  'Nhập số điện thoại',
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
                 ),
               ),
               const SizedBox(height: 32),
-
               TextField(
+                controller: _phoneController,
                 keyboardType: TextInputType.phone,
                 decoration: InputDecoration(
                   labelText: "Số điện thoại",
-                  prefixIcon: Padding(
-                    padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+                  prefixIcon: const Padding(
+                    padding: EdgeInsets.only(left: 16.0, right: 16.0),
                     child: Icon(Icons.phone),
                   ),
                   enabledBorder: const OutlineInputBorder(
@@ -73,41 +80,38 @@ class Phone_Number_Input extends StatelessWidget {
                   ),
                 ),
               ),
-
               const SizedBox(height: 32),
-
               SizedBox(
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
                       context,
-                        MaterialPageRoute(builder: (context) => Welcome()),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF5722),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                      MaterialPageRoute(builder: (context) => const Welcome()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFF5722),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    elevation: 4,
+                    minimumSize: const Size(double.infinity, 54),
                   ),
-                  elevation: 4,
-                  minimumSize: const Size(double.infinity, 54),
-                ),
-                child: const Text(
-                  "Tiếp tục",
-                  style: TextStyle(
-                    fontSize: 17,
-                    color: Colors.white,
-                    fontFamily: 'Inter',
-                    fontWeight: FontWeight.bold,
+                  child: const Text(
+                    "Tiếp tục",
+                    style: TextStyle(
+                      fontSize: 17,
+                      color: Colors.white,
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
               ),
               const SizedBox(height: 32),
-
               RichText(
                 textAlign: TextAlign.justify,
-                text: const TextSpan(
+                text: TextSpan(
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.black,
@@ -117,8 +121,8 @@ class Phone_Number_Input extends StatelessWidget {
                   ),
                   children: [
                     TextSpan(
-                      text: 'Bằng việc nhập số điện thoại, bạn có thể kích hoạt tài khoản và bắt đầu trải nghiệm trên app của ',
-                      style: TextStyle(fontSize: 14, fontFamily: 'Inter'),
+                      text:
+                          'Bằng việc nhập số điện thoại, bạn có thể kích hoạt tài khoản và bắt đầu trải nghiệm trên app của ',
                     ),
                     TextSpan(
                       text: 'Nhà Xe Nam Hải',

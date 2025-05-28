@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:giao_dien_1/screen/register.dart';
 
 class Welcome extends StatelessWidget {
   const Welcome({super.key});
@@ -55,7 +56,7 @@ class Welcome extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "CÙNG BẠN ĐẾN NƠI AN TOÀN",
+                      "CHÀO MỪNG BẠN ĐẾN VỚI APP NHÀ XE NAM HẢI",
                       style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
@@ -100,7 +101,10 @@ class Welcome extends StatelessWidget {
               SizedBox(
                 child: ElevatedButton(
                   onPressed: () {
-                    // TODO: Handle button press
+                    Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const Register()),
+                  );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF5722),

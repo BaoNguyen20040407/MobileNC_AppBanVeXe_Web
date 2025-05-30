@@ -163,9 +163,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   );
                 },
                 style: ButtonStyle(
-                  overlayColor: MaterialStateProperty.resolveWith<Color?>(
-                    (Set<MaterialState> states) {
-                      if (states.contains(MaterialState.hovered)) {
+                  overlayColor: WidgetStateProperty.resolveWith<Color?>(
+                    (Set<WidgetState> states) {
+                      if (states.contains(WidgetState.hovered)) {
                         return Colors.transparent;
                       }
                       return null;
@@ -198,10 +198,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         );
                       },
                       style: ButtonStyle(
-                        overlayColor: MaterialStateProperty.all(Colors.transparent), // Loại bỏ màu khi nhấn/hover
+                        overlayColor: WidgetStateProperty.all(Colors.transparent), // Loại bỏ màu khi nhấn/hover
                         splashFactory: NoSplash.splashFactory, // Loại bỏ hiệu ứng splash
-                        padding: MaterialStateProperty.all(EdgeInsets.zero),
-                        minimumSize: MaterialStateProperty.all(Size(0, 0)),
+                        padding: WidgetStateProperty.all(EdgeInsets.zero),
+                        minimumSize: WidgetStateProperty.all(Size(0, 0)),
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         alignment: Alignment.centerLeft,
                       ),

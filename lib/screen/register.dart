@@ -23,7 +23,7 @@ class _RegisterState extends State<Register> {
 
   //Kiểm tra password
   final TextEditingController _passwordController = TextEditingController();
-  bool _obscurePassword1 = true;
+  final bool _obscurePassword1 = true;
   String? _passwordError;
 
   //Kiểm tra định dạng hình ảnh

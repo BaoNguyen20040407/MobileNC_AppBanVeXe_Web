@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:giao_dien_1/screen/about_us.dart';
 import 'package:giao_dien_1/screen/splash_screen.dart';
 import 'package:giao_dien_1/screen/guide_s1.dart';
 
@@ -18,6 +19,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.deepOrange,
       ),
       home: SplashScreen(),
+      //home: AboutUs(),
     );
   }
 }

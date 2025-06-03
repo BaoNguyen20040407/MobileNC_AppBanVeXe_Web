@@ -1,26 +1,92 @@
 import 'package:flutter/material.dart';
+import 'about_us.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   final Color green = Color(0xFF008000);
+
+  
+  Widget _bottomNavItem(String title, IconData icon, VoidCallback onTap) {
+    return TextButton(
+      onPressed: onTap,
+      style: ButtonStyle(
+        overlayColor: MaterialStateProperty.all(Colors.transparent),
+        foregroundColor: MaterialStateProperty.all(Colors.black),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 32, color: Color(0xFFD9D9D9)),
+          const SizedBox(height: 8),
+          Text(title, style: const TextStyle(fontFamily: 'Inter')),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            Icon(Icons.directions_bus),
-            SizedBox(width: 8),
-            Text('NHÀ XE NAM HẢI', style: TextStyle(color: green)),
-          ],
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(80),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(32, 16, 32, 16),
+          color: const Color(0xffFDE5DE),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Image.asset(
+                "assets/image/namhailogo.png",
+                height: 32,
+                width: 60,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Text(
+                      "NHÀ XE NAM HẢI",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xff006400),
+                        fontFamily: 'Inter'
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      "Vì những chuyến xe an toàn cho bạn",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Color(0xffFF0000),
+                        fontFamily: 'Inter'
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Image.asset(
+                "assets/image/personicon.png",
+                height: 32,
+                width: 32,
+              ),
+            ],
+          ),
         ),
-        actions: [Icon(Icons.account_circle), SizedBox(width: 16)],
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: false,
       ),
+
       body: SingleChildScrollView(
-        child: Column(
+        child: Container(
+          color: Colors.white,
+          child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
+          child: Column(
           children: [
             RouteSearchCard(),
             SizedBox(height: 16),
@@ -31,31 +97,45 @@ class HomePage extends StatelessWidget {
             TrustInfoSection(),
             SizedBox(height: 24),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => AboutUs()));
+              },
               child: Text('Về chúng tôi'),
               style: ElevatedButton.styleFrom(backgroundColor: Color(0xffFF5722)),
             ),
             SizedBox(height: 24),
+            
+          ],
+        ),
+      ), 
+      )
+      ),
+        
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Color(0xFFD9D9D9), // Màu bóng xám
+              offset: Offset(0, -5), // Đẩy bóng lên trên
+              blurRadius: 4, // Độ mờ của bóng
+            ),
+          ],
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 18),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _bottomNavItem("Trang chủ", Icons.home, () => print('Bấm Trang chủ')),
+            _bottomNavItem("Lịch trình", Icons.event_note, () => print('Bấm Lịch trình')),
+            _bottomNavItem("Tra cứu vé", Icons.confirmation_number, () => print('Bấm Tra cứu vé')),
+            _bottomNavItem("Tin tức", Icons.article, () => print('Bấm Tin tức')),
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        selectedItemColor: Color(0xffFF5722),
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Trang chủ'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.schedule),
-            label: 'Lịch trình',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Tra cứu vé',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.article), label: 'Tin tức'),
-        ],
-      ),
-    );
-  }
+
+  );
+}
 }
 
 class RouteSearchCard extends StatefulWidget {
@@ -72,89 +152,242 @@ class _RouteSearchCardState extends State<RouteSearchCard> {
       margin: EdgeInsets.all(16),
       padding: EdgeInsets.all(4),
       decoration: BoxDecoration(
-        border: Border.all(color: Color(0xffFF5722), width: 5),
-        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Color(0xffFF5722), width: 8),
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.white,
       ),
-      child: Card(
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Padding(
-          padding: EdgeInsets.all(16),
-          child: Column(
-            children: [
-              TextField(
-                decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.place),
-                  hintText: 'Nhập điểm đi',
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          children: [
+            TextField(
+              decoration: InputDecoration(
+                prefixIcon: Icon(
+                  Icons.place,
+                  color: Color(0xFFFF5722),
                 ),
-              ),
-              TextField(
-                decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.place),
-                  hintText: 'Nhập điểm đến',
+                hintText: 'Nhập điểm đi',
+                hintStyle: TextStyle(
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'Inter',
+                  fontSize: 14,
                 ),
-              ),
-              TextField(
-                decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.calendar_today),
-                  hintText: 'dd/mm/yyyy',
+                filled: true,
+                fillColor: Colors.white,
+                border: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey.shade400, width: 1),
                 ),
-              ),
-              TextField(
-                decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.airline_seat_recline_normal),
-                  hintText: 'Số vé',
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey.shade400, width: 1),
                 ),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFFFF5722), width: 2),
+                ),
+                hoverColor: Colors.transparent, // Vô hiệu hóa màu hover
+                focusColor: Colors.transparent, // Vô hiệu hóa màu focus (nếu cần)
+                contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
               ),
-              Center(
-  child: Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Row(
-        children: [
-          Radio<bool>(
-            value: true,
-            groupValue: _isOneWay,
-            onChanged: (bool? value) {
-              setState(() {
-                _isOneWay = value!;
-              });
-            },
-          ),
-          Text('Một chiều'),
-        ],
-      ),
-      SizedBox(width: 20),
-      Row(
-        children: [
-          Radio<bool>(
-            value: false,
-            groupValue: _isOneWay,
-            onChanged: (bool? value) {
-              setState(() {
-                _isOneWay = value!;
-              });
-            },
-          ),
-          Text('Khứ hồi'),
-        ],
-      ),
-    ],
-  ),
-),
+              mouseCursor: SystemMouseCursors.text, // Giữ con trỏ chữ nhưng không thay hover
+              cursorColor: Color(0xFFFF5722),
+              style: TextStyle(
+                color: Colors.black87,
+                fontSize: 16,
+              ),
+            ),
 
-              ElevatedButton(
-                onPressed: () {
-                  // handle form submission if needed
-                },
-                child: Text('Tìm chuyến xe'),
-                style: ElevatedButton.styleFrom(backgroundColor: Color(0xffFF5722)),
+            TextField(
+              decoration: InputDecoration(
+                prefixIcon: Icon(
+                  Icons.place,
+                  color: Color(0xFFFF5722),
+                ),
+                hintText: 'Nhập điểm đến',
+                hintStyle: TextStyle(
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'Inter',
+                  fontSize: 14,
+                ),
+                filled: true,
+                fillColor: Colors.white,
+                border: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey.shade400, width: 1),
+                ),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey.shade400, width: 1),
+                ),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFFFF5722), width: 2),
+                ),
+                hoverColor: Colors.transparent, // Vô hiệu hóa màu hover
+                focusColor: Colors.transparent, // Vô hiệu hóa màu focus (nếu cần)
+                contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
               ),
+              mouseCursor: SystemMouseCursors.text, // Giữ con trỏ chữ nhưng không thay hover
+              cursorColor: Color(0xFFFF5722),
+              style: TextStyle(
+                color: Colors.black87,
+                fontSize: 16,
+              ),
+            ),
+
+            TextField(
+              decoration: InputDecoration(
+                prefixIcon: Icon(
+                  Icons.calendar_today,
+                  color: Color(0xFFFF5722),
+                ),
+                hintText: 'dd/mm/yyyy',
+                hintStyle: TextStyle(
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'Inter',
+                  fontSize: 14,
+                ),
+                filled: true,
+                fillColor: Colors.white,
+                border: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey.shade400, width: 1),
+                ),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey.shade400, width: 1),
+                ),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFFFF5722), width: 2),
+                ),
+                hoverColor: Colors.transparent, // Vô hiệu hóa màu hover
+                focusColor: Colors.transparent, // Vô hiệu hóa màu focus (nếu cần)
+                contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+              ),
+              mouseCursor: SystemMouseCursors.text, // Giữ con trỏ chữ nhưng không thay hover
+              cursorColor: Color(0xFFFF5722),
+              style: TextStyle(
+                color: Colors.black87,
+                fontSize: 16,
+              ),
+            ),
+
+            TextField(
+              decoration: InputDecoration(
+                prefixIcon: Icon(
+                  Icons.confirmation_num,
+                  color: Color(0xFFFF5722),
+                ),
+                hintText: 'Số vé',
+                hintStyle: TextStyle(
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'Inter',
+                  fontSize: 14,
+                ),
+                filled: true,
+                fillColor: Colors.white,
+                border: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey.shade400, width: 1),
+                ),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey.shade400, width: 1),
+                ),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFFFF5722), width: 2),
+                ),
+                hoverColor: Colors.transparent, // Vô hiệu hóa màu hover
+                focusColor: Colors.transparent, // Vô hiệu hóa màu focus (nếu cần)
+                contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+              ),
+              mouseCursor: SystemMouseCursors.text, // Giữ con trỏ chữ nhưng không thay hover
+              cursorColor: Color(0xFFFF5722),
+              style: TextStyle(
+                color: Colors.black87,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      const SizedBox(width: 4),
+                      Radio<bool>(
+                        value: true,
+                        groupValue: _isOneWay,
+                        activeColor: Color(0xFFFF5722),
+                        onChanged: (bool? value) {
+                          setState(() {
+                            _isOneWay = value!;
+                          });
+                        },
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Một chiều', 
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(width: 32),
+                  Row(
+                    children: [
+                      Radio<bool>(
+                        value: false,
+                        groupValue: _isOneWay,
+                        activeColor: Color(0xFFFF5722),
+                        onChanged: (bool? value) {
+                          setState(() {
+                            _isOneWay = value!;
+                          });
+                        },
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Khứ hồi', 
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 14
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 16),
+            Center(
+              child: ElevatedButton(
+                onPressed: () {
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFFFF5722),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  shadowColor: Color(0xFFFF5722)
+                ),
+                child: const Text(
+                  "Tìm chuyến xe",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    fontFamily: 'Inter',
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 8),
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 }
 

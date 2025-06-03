@@ -70,7 +70,7 @@ class AboutUs extends StatelessWidget {
                 child: Text(
                   "NHÀ XE NAM HẢI",
                   style: TextStyle(
-                      color: Colors.deepOrange,
+                      color: Color(0xFFFF5722),
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       fontFamily: 'Inter'),
@@ -94,13 +94,13 @@ class AboutUs extends StatelessWidget {
                     TextSpan(
                       text:
                           "Công ty quản lý xe khách Nam Hải (Nhà xe Nam Hải) được thành lập vào ngày 09/09/2004. ",
-                      style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter', fontSize: 16),
+                      style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter', fontSize: 14),
                     ),
                     TextSpan(
                       text:
                           "Với hoạt động kinh doanh chính trong lĩnh vực vận tải hành khách và kinh doanh dịch vụ. "
                           "Nam Hải dần trở thành cái tên quen thuộc trên những nẻo đường của người Việt.",
-                      style: TextStyle(fontFamily: 'Inter', fontSize: 16)
+                      style: TextStyle(fontFamily: 'Inter', fontSize: 14)
                     ),
                   ],
                 ),
@@ -115,7 +115,7 @@ class AboutUs extends StatelessWidget {
                 " Công ty có nhiều giải thưởng danh giá như “Thương hiệu số 1 Việt Nam”, "
                 "“Top 10 dịch vụ hoàn hảo vì quyền lợi người tiêu dùng năm 2024”, "
                 "“Top 5 thương hiệu - sản phẩm uy tín cho các doanh nghiệp tại Việt Nam năm 2024”…",
-                style: TextStyle(color: Colors.black, fontSize: 17, height: 2.0, fontFamily: 'Inter'),
+                style: TextStyle(color: Colors.black, fontSize: 14, height: 2.0, fontFamily: 'Inter'),
                 textAlign: TextAlign.justify,
               ),
               const SizedBox(height: 32),
@@ -123,7 +123,7 @@ class AboutUs extends StatelessWidget {
                 child: Text(
                   "LOGO NHẬN DIỆN",
                   style: TextStyle(
-                      color: Colors.deepOrange,
+                      color: Color(0xffFF5722),
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       fontFamily: 'Inter'),
@@ -194,19 +194,19 @@ class AboutUs extends StatelessWidget {
           children: [
             _bottomNavItem(
                 "Trang chủ",
-                "https://img.icons8.com/?size=100&id=73&format=png&color=000000",
+                Icons.home,
                 () => print('Bấm Trang chủ')),
             _bottomNavItem(
                 "Lịch trình",
-                "https://img.icons8.com/?size=100&id=23&format=png&color=000000",
+                Icons.event_note,
                 () => print('Bấm Lịch trình')),
             _bottomNavItem(
                 "Tra cứu vé",
-                "https://img.icons8.com/?size=100&id=3665&format=png&color=000000",
+                Icons.confirmation_number,
                 () => print('Bấm Tra cứu vé')),
             _bottomNavItem(
                 "Tin tức",
-                "https://img.icons8.com/?size=100&id=532&format=png&color=000000",
+                Icons.article,
                 () => print('Bấm Tin tức')),
           ],
         ),
@@ -215,7 +215,7 @@ class AboutUs extends StatelessWidget {
     );
   }
 
-  Widget _bottomNavItem(String title, String iconUrl, VoidCallback onTap) {
+  Widget _bottomNavItem(String title, IconData icon, VoidCallback onTap) {
     return TextButton(
       onPressed: onTap,
       style: ButtonStyle(
@@ -225,9 +225,9 @@ class AboutUs extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Image.network(iconUrl, width: 24),
+          Icon(icon, size: 32,color: Color(0xFFD9D9D9)),
           const SizedBox(height: 8), // tăng khoảng cách lên 8 px
-          Text(title),
+          Text(title, style: TextStyle(fontFamily: 'Inter'),),
         ],
       ),
     );

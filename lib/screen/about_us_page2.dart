@@ -1,158 +1,321 @@
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/screen/about_us_page3.dart';
 
-class AboutUsPage2 extends StatelessWidget{
-  const AboutUsPage2 ({super.key});
+class AboutUsPage2 extends StatelessWidget {
+  const AboutUsPage2({super.key});
 
   @override
   Widget build(BuildContext context) {
-    //header 
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: AppBar (
-          title: const Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [               
-              Text("Nhà Xe Nam Hải ", style: TextStyle(color: Color.fromARGB(255, 25, 75, 27),fontSize: 25,fontWeight: FontWeight.bold,), ),
-              Text("Vì những chuyến xe an toàn cho bạn", style: TextStyle(color:Colors.deepOrange,fontSize: 15),),                   
-            ],                                  
-        ),         
-        backgroundColor: Color.fromARGB(255, 255, 202, 186),       
-        ),
-        body:  SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 32,vertical: 40),
-        
-          //BODY 
-          
-          child: Column(  mainAxisAlignment:MainAxisAlignment.start,
-      children: [
-        Text("TẦM NHÌN VÀ SỨ MỆNH ",style: TextStyle(color: Colors.deepOrange,fontSize: 25,fontWeight: FontWeight.bold),),
-        SizedBox(height: 10  ,),
-        Text("Vì 1 Việt Nam vững mạnh kinh tế - xã hội",style: TextStyle(color: Colors.black,fontSize: 15,fontWeight: FontWeight.bold),),
-        SizedBox(height: 10,),
-        //       
-        
-        Align(
-  alignment: Alignment.centerLeft,
-  child: Text.rich(
-    TextSpan(
-      style: TextStyle(color: Colors.black, fontSize: 15, height: 1.6),
-      children: [
-        TextSpan(
-          text: "Trở thành công ty uy tín hàng đầu Việt Nam với cam kết:\n",
-          style: TextStyle(fontWeight: FontWeight.normal),
-        ),
-        TextSpan(text: "• Tạo môi trường làm việc năng động, thân thiện.\n"),
-        TextSpan(text: "• Lòng tin của khách hàng là chất lượng của công ty.\n"),
-        TextSpan(text: "• Trở thành công ty vận tải hàng đầu đất nước.\n"),
-        TextSpan(
-          text: "Nam Hải ",
-          style: TextStyle(color: Colors.deepOrange, fontWeight: FontWeight.bold),
-        ),
-        TextSpan(text: "luôn phát triển để tạo nên một Việt Nam vững mạnh về kinh tế - xã hội."),
-      ],
-    ),
-  ),
-),      
-      Image.network("https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcRfyRsY3nWeaT8UpBV-HpSsLCKdDT0coA2YNvgZu_dlTwYlPGc2",width: 300,),
-      Text("GIÁ TRỊ CỐT LÕI",style: TextStyle(color:Colors.deepOrange,fontSize:20,fontWeight: FontWeight.bold),),
-      SizedBox(height: 10,),
-      Text("Giá trị cốt lõi - Nam Hải",style: TextStyle(color: Colors.black,fontSize: 15,fontWeight: FontWeight.bold),),   
-      RichText(
-      text: TextSpan(style:TextStyle(color: Colors.black,fontSize: 14,height: 2),
-      children: [
-        TextSpan(text:"NAM:",style: TextStyle(color: Colors.deepOrange,fontWeight: FontWeight.bold)),       // \n ý nghĩa xuống dòng
-        TextSpan(text:"Tượng trưng cho sự ấm áp, bao dung, hướng tới tương lai.\n "),       
-        TextSpan(text:"HẢI:",style: TextStyle(color: Colors.deepOrange,fontWeight: FontWeight.bold)),
-        TextSpan(text:"Tượng trưng cho sự bao la, rộng lớn và sâu sắc, nối kết các đại lục.\n"),
-        TextSpan(text:"NAM HẢI:",style: TextStyle(color: Colors.deepOrange,fontWeight: FontWeight.bold)),
-        TextSpan(text:"Những chuyến xe nối kết mọi nơi bằng sự ấm áp, bao dung.\n"),  
-        
-      ]      
-      ),
-      ),
-      Image.network("https://www.shutterstock.com/image-photo/hand-holdig-plant-growing-on-260nw-2152039709.jpg",width: 300,),
-      Text("TRIẾT LÝ",style: TextStyle(color: Colors.deepOrange,fontSize: 20,fontWeight: FontWeight.bold,),),
-      Text("Hành trình an toàn",style: TextStyle(color: Colors.black,fontSize: 15,fontWeight: FontWeight.bold,height:2),),
-      Text("Nhà xe Nam Hải cam kết mang đến hành trình an toàn, chất lượng và đáng tin cậy cho mỗi hành khách. "
-      "Chúng tôi đặt sự hài lòng của khách hàng lên hàng đầu, lấy uy tín và tận tâm làm kim chỉ nam trong mọi hoạt động."
-      " Với tinh thần phục vụ chuyên nghiệp và sự đồng hành bền bỉ, Nam Hải không chỉ là phương tiện di chuyển mà còn là người bạn đồng hành tin cậy trên mỗi chặng đường,"
-      " mang đến cho khách hàng những trải nghiệm tốt nhất, chất lượng nhất, sự an toàn chỉnh chu trong từng khâu phục vụ khách hàng, góp phần nâng cao nền kinh tế nước nhà."),
-      Image.network("https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcTbtJh7BPv2DbG6hGatmeEAXj6fckGDMS0GWU3VI5BpRXFJDyZy",width: 300,),      
-      // Tạo nút 
-      ElevatedButton(onPressed: (){
-        Navigator.push(context,
-        MaterialPageRoute(builder:(context) =>const AboutUsPage3()),
-        );
-      },
-      style: ElevatedButton.styleFrom(backgroundColor: Colors.deepOrangeAccent),
-       child: Text("Xem tiếp",style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),),
-       ),
-       Container(          
-          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 18),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(80),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(32, 16, 32, 16),
+          color: const Color(0xffFDE5DE),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              TextButton(
-           onPressed: () {
-            print('Bấm Trang chủ');
-           },
-           child: Column(
-           mainAxisAlignment: MainAxisAlignment.spaceAround,
-         children: [
-       Image.network("https://img.icons8.com/?size=100&id=73&format=png&color=000000",width: 24,),
-        SizedBox(height: 4), // khoảng cách giữa icon và chữ
-       Text('Trang chủ'),
-    ],
-  ),
-),   
-              TextButton(
-                onPressed: () {
-                  print('Bấm Lịch trình');
-                },
+              Image.asset(
+                "assets/image/namhailogo.png",
+                height: 32,
+                width: 60,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround ,
-                  children: [
-                    Image.network("https://img.icons8.com/?size=100&id=23&format=png&color=000000",width: 24,),
-                    SizedBox(height: 4,),
-                    Text("Lịch trình"),
-                    
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Text(
+                      "NHÀ XE NAM HẢI",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xff006400),
+                        fontFamily: 'Inter',
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      "Vì những chuyến xe an toàn cho bạn",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Color(0xffFF0000),
+                        fontFamily: 'Inter',
+                      ),
+                    ),
                   ],
                 ),
               ),
-              TextButton(
-                onPressed: () {
-                  print('Bấm Tra cứu vé');
-                },
-                child: Column(mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Image.network("https://img.icons8.com/?size=100&id=3665&format=png&color=000000",width: 24,),
-                    SizedBox(height: 4,),
-                    Text("Tra cứu vé"),                 
-                ],),
-                
+              Image.asset(
+                "assets/image/personicon.png",
+                height: 32,
+                width: 32,
               ),
-              TextButton(
-                onPressed: () {
-                  print('Bấm Tin tức');
-                },
-                child: Column(mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Image.network("https://img.icons8.com/?size=100&id=532&format=png&color=000000",width: 24,),
-                    SizedBox(height: 4,),
-                    Text("Tin tức"),      
-                  
-                ],),
-              ),
-            ],
-          ),
-
-          )      
-   
             ],
           ),
         ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Center(
+              child: Text(
+                "TẦM NHÌN VÀ SỨ MỆNH",
+                style: TextStyle(
+                  color: Color(0xffFF5722),
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Inter',
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Center(
+              child: Text(
+                "Vì 1 Việt Nam vững mạnh kinh tế - xã hội",
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Inter',
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text.rich(
+              TextSpan(
+                style: const TextStyle(
+                    color: Colors.black, fontSize: 14, height: 2.0, fontFamily: 'Inter'),
+                children: [
+                  const TextSpan(
+                    text:
+                        "Trở thành công ty uy tín hàng đầu Việt Nam với cam kết:\n",
+                  ),
+                  const TextSpan(
+                      text: "  • Tạo môi trường làm việc năng động, thân thiện.\n"),
+                  const TextSpan(
+                      text: "  • Lòng tin của khách hàng là chất lượng của công ty.\n"),
+                  const TextSpan(
+                      text: "  • Trở thành công ty vận tải hàng đầu đất nước.\n"),
+                  const TextSpan(
+                      text: "Nam Hải ",
+                      style: TextStyle(
+                          color: Color(0xffFF5722), fontWeight: FontWeight.bold)),
+                  const TextSpan(
+                      text:
+                          "luôn phát triển để tạo nên một Việt Nam vững mạnh về kinh tế - xã hội."),
+                ],
+              ),
+              textAlign: TextAlign.justify,
+            ),
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              height: 345, 
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.asset(
+                  'image/about_us_1.png',
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 32),
+            const Center(
+              child: Text(
+                "GIÁ TRỊ CỐT LÕI",
+                style: TextStyle(
+                  color: Color(0xffFF5722),
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Inter',
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Center(
+              child: Text(
+                "Giá trị cốt lõi - Nam Hải",
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Inter',
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text.rich(
+              TextSpan(
+                style: TextStyle(
+                    color: Colors.black, fontSize: 14, height: 2, fontFamily: 'Inter'),
+                children: [
+                  TextSpan(
+                      text: "NAM:",
+                      style: TextStyle(
+                          color: Color(0xffFF5722), fontWeight: FontWeight.bold)),
+                  TextSpan(
+                      text:
+                          " Tượng trưng cho sự ấm áp, bao dung, hướng tới tương lai.\n"),
+                  TextSpan(
+                      text: "HẢI:",
+                      style: TextStyle(
+                          color: Color(0xffFF5722), fontWeight: FontWeight.bold)),
+                  TextSpan(
+                      text:
+                          " Tượng trưng cho sự bao la, rộng lớn và sâu sắc, nối kết các đại lục.\n"),
+                  TextSpan(
+                      text: "NAM HẢI:",
+                      style: TextStyle(
+                          color: Color(0xffFF5722), fontWeight: FontWeight.bold)),
+                  TextSpan(
+                      text:
+                          " Những chuyến xe nối kết mọi nơi bằng sự ấm áp, bao dung.\n"),
+                ],
+              ),
+              textAlign: TextAlign.justify,
+            ),
+            Container(
+              width: double.infinity,
+              height: 345, 
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.asset(
+                  'image/about_us_2.png',
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 32),
+            const Center(
+              child: Text(
+                "TRIẾT LÝ",
+                style: TextStyle(
+                  color: Color(0xffFF5722),
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Inter',
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Center(
+              child: Text(
+                "Hành trình an toàn",
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Inter',
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              "Nhà xe Nam Hải cam kết mang đến hành trình an toàn, chất lượng và đáng tin cậy cho mỗi hành khách. "
+              "Chúng tôi đặt sự hài lòng của khách hàng lên hàng đầu, lấy uy tín và tận tâm làm kim chỉ nam trong mọi hoạt động."
+              " Với tinh thần phục vụ chuyên nghiệp và sự đồng hành bền bỉ, Nam Hải không chỉ là phương tiện di chuyển mà còn là người bạn đồng hành tin cậy trên mỗi chặng đường,"
+              " mang đến cho khách hàng những trải nghiệm tốt nhất, chất lượng nhất, sự an toàn chỉnh chu trong từng khâu phục vụ khách hàng, góp phần nâng cao nền kinh tế nước nhà.",
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 14,
+                height: 2,
+                fontFamily: 'Inter',
+              ),
+              textAlign: TextAlign.justify,
+            ),
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              height: 345, 
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.asset(
+                  'image/about_us_3.png',
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
+            Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const AboutUsPage3()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepOrangeAccent,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 64, vertical: 18),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  elevation: 5,
+                  shadowColor: Colors.orangeAccent.withOpacity(0.6),
+                ),
+                child: const Text(
+                  "Xem tiếp",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 17,
+                    fontFamily: 'Inter',
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 30),
+          ],
+        ),
+      ),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              offset: const Offset(0, -3),
+              blurRadius: 6,
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _bottomNavItem("Trang chủ", Icons.home, () => print('Bấm Trang chủ')),
+            _bottomNavItem("Lịch trình", Icons.event_note, () => print('Bấm Lịch trình')),
+            _bottomNavItem("Tra cứu vé", Icons.confirmation_number, () => print('Bấm Tra cứu vé')),
+            _bottomNavItem("Tin tức", Icons.article, () => print('Bấm Tin tức')),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _bottomNavItem(String title, IconData icon, VoidCallback onTap) {
+    return TextButton(
+      onPressed: onTap,
+      style: ButtonStyle(
+        overlayColor: MaterialStateProperty.all(Colors.transparent),
+        foregroundColor: MaterialStateProperty.all(Colors.black),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 32, color: Color(0xFFD9D9D9)),
+          const SizedBox(height: 8),
+          Text(title, style: const TextStyle(fontFamily: 'Inter')),
+        ],
       ),
     );
   }

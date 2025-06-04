@@ -44,20 +44,37 @@ class _RegisterState extends State<Register> {
   }
 
   Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate ?? DateTime(2000, 1, 1),
-      firstDate: DateTime(1900),
-      lastDate: DateTime.now(),
-      helpText: 'Chọn ngày sinh',
-    );
-    if (picked != null) {
-      setState(() {
-        _selectedDate = picked;
-        _dobController.text = formatDate(picked);
-      });
-    }
+  final DateTime? picked = await showDatePicker(
+    context: context,
+    initialDate: _selectedDate ?? DateTime(2000, 1, 1),
+    firstDate: DateTime(1900),
+    lastDate: DateTime.now(),
+    helpText: 'Chọn ngày sinh',
+     builder: (context, child) {
+      return Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: ColorScheme.light(
+            primary: Color(0xFFFF5722),
+            onPrimary: Colors.white,
+            onSurface: Colors.black,
+          ),
+          textButtonTheme: TextButtonThemeData(
+            style: TextButton.styleFrom(
+              foregroundColor: Color(0xFFFF5722),
+            ),
+          ),
+        ),
+        child: child!,
+      );
+    },
+  );
+  if (picked != null) {
+    setState(() {
+      _selectedDate = picked;
+      _dobController.text = formatDate(picked);  // formatDate theo dd/mm/yyyy
+    });
   }
+}
 
   @override
   Widget build(BuildContext context) {

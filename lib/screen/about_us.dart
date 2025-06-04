@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/screen/about_us_page2.dart';
+import 'package:giao_dien_1/screen/news.dart';
+import 'homepage.dart';
 
 class AboutUs extends StatelessWidget {
   const AboutUs({super.key});
@@ -59,7 +61,6 @@ class AboutUs extends StatelessWidget {
         ),
       ),
 
-      // ✅ Nội dung cuộn được
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
@@ -156,7 +157,7 @@ class AboutUs extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10), // bo tròn mềm mại
                   ),
                   elevation: 5, // đổ bóng nhẹ
-                  shadowColor: Colors.orangeAccent.withOpacity(0.6),
+                  shadowColor: Color(0xFFFF5722),
                 ),
                 child: const Text(
                   "Xem tiếp",
@@ -176,7 +177,7 @@ class AboutUs extends StatelessWidget {
         ),
       ),
 
-      // ✅ Thanh dưới cùng (giữ nguyên)
+      //Footer
       bottomNavigationBar: Container(
         padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
         decoration: BoxDecoration(
@@ -193,41 +194,59 @@ class AboutUs extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             _bottomNavItem(
-                "Trang chủ",
-                Icons.home,
-                () => print('Bấm Trang chủ')),
+              context,
+              "Trang chủ",
+              Icons.home,
+              HomePage(),
+            ),
             _bottomNavItem(
-                "Lịch trình",
-                Icons.event_note,
-                () => print('Bấm Lịch trình')),
+              context,
+              "Lịch trình",
+              Icons.event_note,
+              HomePage(),
+            ),
             _bottomNavItem(
-                "Tra cứu vé",
-                Icons.confirmation_number,
-                () => print('Bấm Tra cứu vé')),
+              context,
+              "Tra cứu vé",
+              Icons.confirmation_number,
+              HomePage(),
+            ),
             _bottomNavItem(
-                "Tin tức",
-                Icons.article,
-                () => print('Bấm Tin tức')),
+              context,
+              "Tin tức",
+              Icons.article,
+              News(),
+            ),
           ],
         ),
       ),
-
     );
   }
 
-  Widget _bottomNavItem(String title, IconData icon, VoidCallback onTap) {
-    return TextButton(
-      onPressed: onTap,
-      style: ButtonStyle(
-        overlayColor: MaterialStateProperty.all(Colors.transparent), // tắt màu nền khi hover/pressed
-        foregroundColor: MaterialStateProperty.all(Colors.black), // chữ luôn màu đen
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 32,color: Color(0xFFD9D9D9)),
-          const SizedBox(height: 8), // tăng khoảng cách lên 8 px
-          Text(title, style: TextStyle(fontFamily: 'Inter'),),
+  Widget _bottomNavItem(
+    BuildContext context,
+    String title,
+    IconData icon,
+    Widget destinationScreen,
+    ) 
+  {
+  return TextButton(
+    onPressed: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => destinationScreen),
+      );
+    },
+    style: ButtonStyle(
+      overlayColor: MaterialStateProperty.all(Colors.transparent),
+      foregroundColor: MaterialStateProperty.all(Colors.black),
+    ),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 32, color: const Color(0xFFD9D9D9)),
+        const SizedBox(height: 8),
+        Text(title, style: const TextStyle(fontFamily: 'Inter')),
         ],
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:giao_dien_1/screen/homepage.dart';
 import 'package:giao_dien_1/screen/phone_number_input.dart';
 import 'confirm_email_screen.dart';
 
@@ -137,7 +138,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 height: 48,
                 child: ElevatedButton(
                   onPressed: () {
-
+                    Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => HomePage()),
+                  );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF5722),

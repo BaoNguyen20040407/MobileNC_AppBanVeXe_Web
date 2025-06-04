@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:giao_dien_1/screen/news.dart';
 import 'about_us.dart';
 
 class HomePage extends StatefulWidget {
@@ -9,16 +10,18 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final Color green = Color(0xFF006400);
   int _selectedIndex = 0;
+  DateTime? _selectedDate;              // biến lưu ngày chọn
+  final TextEditingController _dobController = TextEditingController();
 
   Widget _bottomNavItem(String title, IconData icon, int index, VoidCallback onTap) {
     final isSelected = _selectedIndex == index;
-
+    
     return TextButton(
       onPressed: () {
         setState(() {
           _selectedIndex = index;
         });
-        onTap(); // gọi hành động điều hướng
+        onTap();
       },
       style: ButtonStyle(
         overlayColor: MaterialStateProperty.all(Colors.transparent),
@@ -34,6 +37,46 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
+  String formatDate(DateTime date) {
+  String day = date.day.toString().padLeft(2, '0');
+  String month = date.month.toString().padLeft(2, '0');
+  String year = date.year.toString();
+  return '$day/$month/$year';
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+  final DateTime? picked = await showDatePicker(
+    context: context,
+    initialDate: _selectedDate ?? DateTime(2000, 1, 1),
+    firstDate: DateTime(1900),
+    lastDate: DateTime.now(),
+    helpText: 'Chọn ngày sinh',
+     builder: (context, child) {
+      return Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: ColorScheme.light(
+            primary: Color(0xFFFF5722),
+            onPrimary: Colors.white,
+            onSurface: Colors.black,
+          ),
+          textButtonTheme: TextButtonThemeData(
+            style: TextButton.styleFrom(
+              foregroundColor: Color(0xFFFF5722),
+            ),
+          ),
+        ),
+        child: child!,
+      );
+    },
+  );
+  if (picked != null) {
+    setState(() {
+      _selectedDate = picked;
+      _dobController.text = formatDate(picked);  // formatDate theo dd/mm/yyyy
+    });
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +125,7 @@ class _HomePageState extends State<HomePage> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
           child: Column(
             children: [
-              RouteSearchCard(),
+              RouteSearchCard(dobController: _dobController, selectDateCallback: _selectDate,),
               SizedBox(height: 16),
               PromotionSection(),
               SizedBox(height: 16),
@@ -147,7 +190,7 @@ class _HomePageState extends State<HomePage> {
               //Navigator.push(context, MaterialPageRoute(builder: (context) => TraCuuVePage()));
             }),
             _bottomNavItem("Tin tức", Icons.article, 3, () {
-              //Navigator.push(context, MaterialPageRoute(builder: (context) => TinTucPage()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => News()));
             }),
           ],
         ),
@@ -158,13 +201,22 @@ class _HomePageState extends State<HomePage> {
 
 
 class RouteSearchCard extends StatefulWidget {
+  final TextEditingController dobController;
+  final Future<void> Function(BuildContext) selectDateCallback;
+
+  const RouteSearchCard({
+    Key? key,
+    required this.dobController,
+    required this.selectDateCallback,
+  }) : super(key: key);
+
   @override
   _RouteSearchCardState createState() => _RouteSearchCardState();
 }
 
 class _RouteSearchCardState extends State<RouteSearchCard> {
-  bool _isOneWay = true; // default selected
-
+  bool _isOneWay = true;
+  
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -252,6 +304,9 @@ class _RouteSearchCardState extends State<RouteSearchCard> {
             ),
 
             TextField(
+              controller: widget.dobController,
+              readOnly: true,
+              onTap: () => widget.selectDateCallback(context),  // mở date picker khi nhấn
               decoration: InputDecoration(
                 prefixIcon: Icon(
                   Icons.calendar_today,
@@ -273,10 +328,10 @@ class _RouteSearchCardState extends State<RouteSearchCard> {
                   borderSide: BorderSide(color: Colors.grey.shade400, width: 1),
                 ),
                 focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFFFF5722), width: 2),
+                  borderSide: BorderSide(color: Color(0xFFFF5722), width: 2), // Màu cam
                 ),
-                hoverColor: Colors.transparent, 
-                focusColor: Colors.transparent, 
+                hoverColor: Colors.transparent,
+                focusColor: Colors.transparent,
                 contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
               ),
               mouseCursor: SystemMouseCursors.text,
@@ -668,68 +723,68 @@ class PopularRoutesSection extends StatelessWidget {
                 ),
 
                 Expanded(
-  child: Padding(
-    padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
-    child: ListView.separated(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(), // nếu bạn muốn tránh scroll riêng bên trong
-      itemCount: destinations.length,
-      separatorBuilder: (context, index) {
-        return Divider(
-          color: Colors.grey.shade300,
-          thickness: 1,
-          height: 1,
-          indent: 0,
-          endIndent: 0,
-        );
-      },
-      itemBuilder: (context, index) {
-        final route = destinations[index];
-        return Padding(
-          padding: const EdgeInsets.only(top: 8, bottom: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,  
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    route['to']!,
-                    style: TextStyle(
-                      color: Color(0xFF006400),
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Inter',
-                      fontSize: 14, 
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(), // nếu bạn muốn tránh scroll riêng bên trong
+                      itemCount: destinations.length,
+                      separatorBuilder: (context, index) {
+                        return Divider(
+                          color: Colors.grey.shade300,
+                          thickness: 1,
+                          height: 1,
+                          indent: 0,
+                          endIndent: 0,
+                        );
+                      },
+                      itemBuilder: (context, index) {
+                        final route = destinations[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 8, bottom: 8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,  
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    route['to']!,
+                                    style: TextStyle(
+                                      color: Color(0xFF006400),
+                                      fontWeight: FontWeight.w600,
+                                      fontFamily: 'Inter',
+                                      fontSize: 14, 
+                                    ),
+                                  ),
+                                  Text(
+                                    route['price']!,
+                                    style: TextStyle(
+                                      color: Color(0xffFF5722),
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Inter',
+                                      fontSize: 14, 
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                '${route['distance']} - ${route['duration']} - ${route['date']}',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 14,
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
                   ),
-                  Text(
-                    route['price']!,
-                    style: TextStyle(
-                      color: Color(0xffFF5722),
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Inter',
-                      fontSize: 14, 
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 8),
-              Text(
-                '${route['distance']} - ${route['duration']} - ${route['date']}',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 14,
-                  fontFamily: 'Inter',
                 ),
-              ),
-            ],
-          ),
-        );
-      },
-    ),
-  ),
-),
 
               ],
             ),

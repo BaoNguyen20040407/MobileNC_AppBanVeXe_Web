@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:giao_dien_1/screen/news.dart';
+import 'homepage.dart';
 
 class AboutUsPage3 extends StatelessWidget {
   const AboutUsPage3({super.key});
@@ -193,17 +195,20 @@ class AboutUsPage3 extends StatelessWidget {
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).popUntil((route) => route.isFirst);
+                    Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => HomePage()),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepOrangeAccent,
+                  backgroundColor: Color(0xFFFF5722),
                   padding:
                       const EdgeInsets.symmetric(horizontal: 64, vertical: 18),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                   elevation: 5,
-                  shadowColor: Colors.orangeAccent.withOpacity(0.6),
+                  shadowColor: Color(0xFFFF5722),
                 ),
                 child: const Text(
                   "Trở về trang chủ",
@@ -220,14 +225,15 @@ class AboutUsPage3 extends StatelessWidget {
           ],
         ),
       ),
+      //Footer
       bottomNavigationBar: Container(
         padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Colors.white, // nền trắng hoặc màu bạn muốn
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.15),
-              offset: const Offset(0, -3),
+              color: Colors.black.withOpacity(0.15), // màu bóng, bạn chỉnh opacity cho nhẹ/dày
+              offset: const Offset(0, -3), // bóng nằm phía trên (hướng lên trên)
               blurRadius: 6,
             ),
           ],
@@ -235,29 +241,60 @@ class AboutUsPage3 extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _bottomNavItem("Trang chủ", Icons.home, () => print('Bấm Trang chủ')),
-            _bottomNavItem("Lịch trình", Icons.event_note, () => print('Bấm Lịch trình')),
-            _bottomNavItem("Tra cứu vé", Icons.confirmation_number, () => print('Bấm Tra cứu vé')),
-            _bottomNavItem("Tin tức", Icons.article, () => print('Bấm Tin tức')),
+            _bottomNavItem(
+              context,
+              "Trang chủ",
+              Icons.home,
+              HomePage(),
+            ),
+            _bottomNavItem(
+              context,
+              "Lịch trình",
+              Icons.event_note,
+              HomePage(),
+            ),
+            _bottomNavItem(
+              context,
+              "Tra cứu vé",
+              Icons.confirmation_number,
+              HomePage(),
+            ),
+            _bottomNavItem(
+              context,
+              "Tin tức",
+              Icons.article,
+              News(),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _bottomNavItem(String title, IconData icon, VoidCallback onTap) {
-    return TextButton(
-      onPressed: onTap,
-      style: ButtonStyle(
-        overlayColor: MaterialStateProperty.all(Colors.transparent),
-        foregroundColor: MaterialStateProperty.all(Colors.black),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 32, color: Color(0xFFD9D9D9)),
-          const SizedBox(height: 8),
-          Text(title, style: const TextStyle(fontFamily: 'Inter')),
+  Widget _bottomNavItem(
+    BuildContext context,
+    String title,
+    IconData icon,
+    Widget destinationScreen,
+    ) 
+  {
+  return TextButton(
+    onPressed: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => destinationScreen),
+      );
+    },
+    style: ButtonStyle(
+      overlayColor: MaterialStateProperty.all(Colors.transparent),
+      foregroundColor: MaterialStateProperty.all(Colors.black),
+    ),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 32, color: const Color(0xFFD9D9D9)),
+        const SizedBox(height: 8),
+        Text(title, style: const TextStyle(fontFamily: 'Inter')),
         ],
       ),
     );

@@ -56,14 +56,16 @@ class Welcome extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "CHÀO MỪNG BẠN ĐẾN VỚI APP NHÀ XE NAM HẢI",
+                      "CHÀO MỪNG BẠN ĐẾN VỚI APP\nNHÀ XE NAM HẢI",
                       style: TextStyle(
-                        fontSize: 17,
+                        fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFFFF5722),
                         fontFamily: 'Inter',
                         letterSpacing: 0.5,
+                        height: 1.5,
                       ),
+                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),

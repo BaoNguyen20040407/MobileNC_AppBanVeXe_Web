@@ -7,12 +7,19 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final Color green = Color(0xFF008000);
+  final Color green = Color(0xFF006400);
+  int _selectedIndex = 0;
 
-  
-  Widget _bottomNavItem(String title, IconData icon, VoidCallback onTap) {
+  Widget _bottomNavItem(String title, IconData icon, int index, VoidCallback onTap) {
+    final isSelected = _selectedIndex == index;
+
     return TextButton(
-      onPressed: onTap,
+      onPressed: () {
+        setState(() {
+          _selectedIndex = index;
+        });
+        onTap(); // gọi hành động điều hướng
+      },
       style: ButtonStyle(
         overlayColor: MaterialStateProperty.all(Colors.transparent),
         foregroundColor: MaterialStateProperty.all(Colors.black),
@@ -20,7 +27,7 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 32, color: Color(0xFFD9D9D9)),
+          Icon(icon, size: 32, color: isSelected ? Color(0xFFFF5722) : Color(0xFFD9D9D9)),
           const SizedBox(height: 8),
           Text(title, style: const TextStyle(fontFamily: 'Inter')),
         ],
@@ -39,43 +46,31 @@ class _HomePageState extends State<HomePage> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Image.asset(
-                "assets/image/namhailogo.png",
-                height: 32,
-                width: 60,
-              ),
+              Image.asset("assets/image/namhailogo.png", height: 32, width: 60),
               const SizedBox(width: 8),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: const [
-                    Text(
-                      "NHÀ XE NAM HẢI",
+                    Text("NHÀ XE NAM HẢI",
                       style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xff006400),
-                        fontFamily: 'Inter'
-                      ),
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xff006400),
+                          fontFamily: 'Inter'),
                     ),
                     SizedBox(height: 2),
-                    Text(
-                      "Vì những chuyến xe an toàn cho bạn",
+                    Text("Vì những chuyến xe an toàn cho bạn",
                       style: TextStyle(
-                        fontSize: 14,
-                        color: Color(0xffFF0000),
-                        fontFamily: 'Inter'
-                      ),
+                          fontSize: 14,
+                          color: Color(0xffFF0000),
+                          fontFamily: 'Inter'),
                     ),
                   ],
                 ),
               ),
-              Image.asset(
-                "assets/image/personicon.png",
-                height: 32,
-                width: 32,
-              ),
+              Image.asset("assets/image/personicon.png", height: 32, width: 32),
             ],
           ),
         ),
@@ -84,41 +79,58 @@ class _HomePageState extends State<HomePage> {
       body: SingleChildScrollView(
         child: Container(
           color: Colors.white,
-          child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
           child: Column(
-          children: [
-            RouteSearchCard(),
-            SizedBox(height: 16),
-            PromotionSection(),
-            SizedBox(height: 16),
-            PopularRoutesSection(),
-            SizedBox(height: 16),
-            TrustInfoSection(),
-            SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => AboutUs()));
-              },
-              child: Text('Về chúng tôi'),
-              style: ElevatedButton.styleFrom(backgroundColor: Color(0xffFF5722)),
-            ),
-            SizedBox(height: 24),
-            
-          ],
+            children: [
+              RouteSearchCard(),
+              SizedBox(height: 16),
+              PromotionSection(),
+              SizedBox(height: 16),
+              PopularRoutesSection(),
+              SizedBox(height: 16),
+              TrustInfoSection(),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const AboutUs()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFFFF5722),
+                    padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 18),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    elevation: 5,
+                    shadowColor: Color(0xFFFF5722).withOpacity(0.6),
+                  ),
+                  child: const Text(
+                    "Về chúng tôi",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 17,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 30),
+            ],
+          ),
         ),
-      ), 
-      )
       ),
-        
+
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Color(0xFFD9D9D9), // Màu bóng xám
-              offset: Offset(0, -5), // Đẩy bóng lên trên
-              blurRadius: 4, // Độ mờ của bóng
+              color: Color(0xFFD9D9D9),
+              offset: Offset(0, -5),
+              blurRadius: 4,
             ),
           ],
         ),
@@ -126,17 +138,24 @@ class _HomePageState extends State<HomePage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _bottomNavItem("Trang chủ", Icons.home, () => print('Bấm Trang chủ')),
-            _bottomNavItem("Lịch trình", Icons.event_note, () => print('Bấm Lịch trình')),
-            _bottomNavItem("Tra cứu vé", Icons.confirmation_number, () => print('Bấm Tra cứu vé')),
-            _bottomNavItem("Tin tức", Icons.article, () => print('Bấm Tin tức')),
+            _bottomNavItem("Trang chủ", Icons.home, 0, () {
+            }),
+            _bottomNavItem("Lịch trình", Icons.event_note, 1, () {
+              //Navigator.push(context, MaterialPageRoute(builder: (context) => LichTrinhPage()));
+            }),
+            _bottomNavItem("Tra cứu vé", Icons.confirmation_number, 2, () {
+              //Navigator.push(context, MaterialPageRoute(builder: (context) => TraCuuVePage()));
+            }),
+            _bottomNavItem("Tin tức", Icons.article, 3, () {
+              //Navigator.push(context, MaterialPageRoute(builder: (context) => TinTucPage()));
+            }),
           ],
         ),
       ),
+    );
+  }
+}
 
-  );
-}
-}
 
 class RouteSearchCard extends StatefulWidget {
   @override
@@ -184,11 +203,11 @@ class _RouteSearchCardState extends State<RouteSearchCard> {
                 focusedBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFFFF5722), width: 2),
                 ),
-                hoverColor: Colors.transparent, // Vô hiệu hóa màu hover
-                focusColor: Colors.transparent, // Vô hiệu hóa màu focus (nếu cần)
+                hoverColor: Colors.transparent, 
+                focusColor: Colors.transparent,
                 contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
               ),
-              mouseCursor: SystemMouseCursors.text, // Giữ con trỏ chữ nhưng không thay hover
+              mouseCursor: SystemMouseCursors.text,
               cursorColor: Color(0xFFFF5722),
               style: TextStyle(
                 color: Colors.black87,
@@ -220,11 +239,11 @@ class _RouteSearchCardState extends State<RouteSearchCard> {
                 focusedBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFFFF5722), width: 2),
                 ),
-                hoverColor: Colors.transparent, // Vô hiệu hóa màu hover
-                focusColor: Colors.transparent, // Vô hiệu hóa màu focus (nếu cần)
+                hoverColor: Colors.transparent, 
+                focusColor: Colors.transparent, 
                 contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
               ),
-              mouseCursor: SystemMouseCursors.text, // Giữ con trỏ chữ nhưng không thay hover
+              mouseCursor: SystemMouseCursors.text, 
               cursorColor: Color(0xFFFF5722),
               style: TextStyle(
                 color: Colors.black87,
@@ -256,11 +275,11 @@ class _RouteSearchCardState extends State<RouteSearchCard> {
                 focusedBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFFFF5722), width: 2),
                 ),
-                hoverColor: Colors.transparent, // Vô hiệu hóa màu hover
-                focusColor: Colors.transparent, // Vô hiệu hóa màu focus (nếu cần)
+                hoverColor: Colors.transparent, 
+                focusColor: Colors.transparent, 
                 contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
               ),
-              mouseCursor: SystemMouseCursors.text, // Giữ con trỏ chữ nhưng không thay hover
+              mouseCursor: SystemMouseCursors.text,
               cursorColor: Color(0xFFFF5722),
               style: TextStyle(
                 color: Colors.black87,
@@ -292,11 +311,11 @@ class _RouteSearchCardState extends State<RouteSearchCard> {
                 focusedBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFFFF5722), width: 2),
                 ),
-                hoverColor: Colors.transparent, // Vô hiệu hóa màu hover
-                focusColor: Colors.transparent, // Vô hiệu hóa màu focus (nếu cần)
+                hoverColor: Colors.transparent,
+                focusColor: Colors.transparent, 
                 contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
               ),
-              mouseCursor: SystemMouseCursors.text, // Giữ con trỏ chữ nhưng không thay hover
+              mouseCursor: SystemMouseCursors.text, 
               cursorColor: Color(0xFFFF5722),
               style: TextStyle(
                 color: Colors.black87,
@@ -401,10 +420,10 @@ class _PromotionSectionState extends State<PromotionSection> {
   late PageController _pageController;
 
   final List<List<String>> placeholderImages = [
-    ['Image 1', 'Image 2'],
-    ['Image 3', 'Image 4'],
-    ['Image 5', 'Image 6'],
-  ];
+  ['image/promote_01.png', 'image/promote_02.png'],
+  ['image/promote_03.png', 'image/promote_04.png'],
+  ['image/promote_05.png', 'image/promote_06.png'],
+];
 
   @override
   void initState() {
@@ -420,37 +439,56 @@ class _PromotionSectionState extends State<PromotionSection> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> pages =
-        placeholderImages.map((page) {
-          return Column(
-            children:
-                page.map((text) {
-                  return Container(
-                    height: 140,
-                    margin: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Center(child: Text(text)),
-                  );
-                }).toList(),
+    List<Widget> pages = placeholderImages.map((page) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: page.map((imagePath) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            child: Container(
+              height: 140,
+              margin: EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.15),
+                    offset: Offset(0, 4), // dịch xuống
+                    blurRadius: 4, // độ mờ
+                    spreadRadius: 1, // độ lan rộng
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Image.asset(
+                  imagePath,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                ),
+              ),
+            ),
           );
-        }).toList();
+        }).toList(),
+      );
+    }).toList();
 
     return Column(
       children: [
+        SizedBox(height: 32),
         Text(
           'KHUYẾN MÃI NỔI BẬT',
           style: TextStyle(
-            fontSize: 18,
+            fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: Colors.green,
+            color: Color(0xFF006400),
+            fontFamily: 'Inter'
           ),
         ),
-        SizedBox(height: 8),
+        SizedBox(height: 16),
         Container(
-          height: 320,
+          height: 352,
           child: PageView(
             controller: _pageController,
             onPageChanged: (int index) {
@@ -473,16 +511,17 @@ class _PromotionSectionState extends State<PromotionSection> {
                 );
               },
               child: Container(
-                margin: EdgeInsets.symmetric(horizontal: 4),
+                margin: EdgeInsets.symmetric(horizontal: 8),
                 child: Icon(
                   _currentPage == index ? Icons.circle : Icons.circle_outlined,
-                  size: 10,
+                  size: 14, 
                   color: _currentPage == index ? Color(0xffFF5722) : Colors.grey,
                 ),
               ),
             );
           }),
         ),
+
       ],
     );
   }
@@ -526,74 +565,288 @@ class PopularRoutesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Nhóm các route theo 'from'
+    final groupedRoutes = <String, List<Map<String, String>>>{};
+    for (var route in routes) {
+      final from = route['from']!;
+      groupedRoutes.putIfAbsent(from, () => []).add(route);
+    }
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'TUYẾN PHỔ BIẾN',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.green,
-          ),
-        ),
-        Text('Được khách hàng tin tưởng và lựa chọn'),
-        SizedBox(height: 8),
-        ...routes.map(
-          (route) => Card(
-            margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: ListTile(
-              title: Text('Tuyến xe từ ${route['from']}'),
-              subtitle: Text(
-                '${route['to']} - ${route['distance']} - ${route['duration']} - ${route['date']}',
-              ),
-              trailing: Text(
-                route['price'] ?? '',
-                style: TextStyle(color: Color(0xffFF5722)),
-              ),
+        SizedBox(height: 32),
+        Center(
+          child: Text(
+            'TUYẾN PHỔ BIẾN',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF006400),
+              fontFamily: 'Inter',
             ),
           ),
         ),
+        SizedBox(height: 4),
+        Center(
+          child: Text(
+            'Được khách hàng tin tưởng và lựa chọn',
+            style: TextStyle(fontSize: 14, fontFamily: 'Inter'),
+          ),
+        ),
+        SizedBox(height: 16),
+        // Các khối tuyến phổ biến
+        ...groupedRoutes.entries.map((entry) {
+          final from = entry.key;
+          final destinations = entry.value;
+
+          // Xác định ảnh tương ứng với điểm đi
+          String imagePath = 'assets/default.jpg';
+          if (from.contains('Hồ Chí Minh')) imagePath = 'image/hochiminh.png';
+          if (from.contains('Hà Nội')) imagePath = 'image/hanoi.png';
+
+          return Container(
+            margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(12),
+              color: Colors.white,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,  // Căn top cho cả Row
+              children: [
+                // Bên trái: ảnh + text
+                Container(
+                  width: 125,
+                  height: 135,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      bottomLeft: Radius.circular(12),
+                    ),
+                    image: DecorationImage(
+                      image: AssetImage(imagePath),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  child: Container(
+                    padding: EdgeInsets.all(8),
+                    alignment: Alignment.topLeft,  // căn trên trái cho Column
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.3),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(12),
+                        bottomLeft: Radius.circular(12),
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,  // tránh giãn cao hơn
+                      children: [
+                        Text(
+                          'Tuyến xe từ',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          from,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                Expanded(
+  child: Padding(
+    padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
+    child: ListView.separated(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(), // nếu bạn muốn tránh scroll riêng bên trong
+      itemCount: destinations.length,
+      separatorBuilder: (context, index) {
+        return Divider(
+          color: Colors.grey.shade300,
+          thickness: 1,
+          height: 1,
+          indent: 0,
+          endIndent: 0,
+        );
+      },
+      itemBuilder: (context, index) {
+        final route = destinations[index];
+        return Padding(
+          padding: const EdgeInsets.only(top: 8, bottom: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,  
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    route['to']!,
+                    style: TextStyle(
+                      color: Color(0xFF006400),
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'Inter',
+                      fontSize: 14, 
+                    ),
+                  ),
+                  Text(
+                    route['price']!,
+                    style: TextStyle(
+                      color: Color(0xffFF5722),
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Inter',
+                      fontSize: 14, 
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 8),
+              Text(
+                '${route['distance']} - ${route['duration']} - ${route['date']}',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 14,
+                  fontFamily: 'Inter',
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    ),
+  ),
+),
+
+              ],
+            ),
+          );
+        }).toList(),
       ],
     );
   }
 }
 
+
 class TrustInfoSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          'NHÀ XE NAM HẢI',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.green,
+    return Center( // Đưa toàn bộ Column ra giữa trang
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(height: 32),
+          Text(
+            'NHÀ XE NAM HẢI',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF006400),
+              fontFamily: 'Inter',
+            ),
+            textAlign: TextAlign.center,
           ),
-        ),
-        Text(
-          'NHỮNG CHUYẾN ĐI AN TOÀN',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.green,
+          Text(
+            'NHỮNG CHUYẾN ĐI AN TOÀN',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF006400),
+              fontFamily: 'Inter',
+            ),
+            textAlign: TextAlign.center,
           ),
-        ),
-        Text('Được khách hàng tin tưởng và lựa chọn'),
-        SizedBox(height: 12),
-        ListTile(
-          leading: Icon(Icons.people, color: Color(0xffFF5722)),
-          title: Text('Hơn 20 triệu lượt khách/năm'),
-        ),
-        ListTile(
-          leading: Icon(Icons.local_post_office, color: Color(0xffFF5722)),
-          title: Text('Hơn 350 phòng vé/ bưu cục trên toàn quốc'),
-        ),
-        ListTile(
-          leading: Icon(Icons.directions_bus, color: Color(0xffFF5722)),
-          title: Text('Hơn 1500 chuyến xe được phục vụ trong 1 năm'),
-        ),
-      ],
+          SizedBox(height: 8),
+          Text(
+            'Được khách hàng tin tưởng và lựa chọn',
+            style: TextStyle(
+              fontSize: 14,
+              fontFamily: 'Inter',
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 16),
+
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center, // Căn giữa theo chiều dọc
+              children: [
+                Image.asset('image/safe_01.png', width: 50, height: 50),
+                const SizedBox(width: 12),
+                Flexible(
+                  child: Text(
+                    'Hơn 20 triệu lượt khách/ năm',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Image.asset('image/safe_02.png', width: 50, height: 50),
+                const SizedBox(width: 12),
+                Flexible(
+                  child: Text(
+                    'Hơn 350 phòng vé/ bưu cục trên toàn quốc',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Image.asset('image/safe_03.png', width: 50, height: 50),
+                const SizedBox(width: 12),
+                Flexible(
+                  child: Text(
+                    'Hơn 1500 chuyến xe được phục vụ mỗi năm',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 32),
+        ],
+      ),
     );
   }
 }

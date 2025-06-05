@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:giao_dien_1/screen/news_detail_01.dart';
 import 'homepage.dart';
 
 class News extends StatefulWidget {
@@ -231,23 +232,33 @@ class _NewsState extends State<News> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: double.infinity,
-                    height: 150,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      image: DecorationImage(
-                        image: AssetImage(_newsList[0].imageUrl),
-                        fit: BoxFit.cover,
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => NewsDetail01(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      height: 150,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        image: DecorationImage(
+                          image: AssetImage(_newsList[0].imageUrl),
+                          fit: BoxFit.cover,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.15),
+                            offset: Offset(0, 4), // dịch xuống
+                            blurRadius: 4, // độ mờ
+                            spreadRadius: 1, // độ lan rộng
+                          ), 
+                        ], 
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.15),
-                          offset: Offset(0, 4), // dịch xuống
-                          blurRadius: 4, // độ mờ
-                          spreadRadius: 1, // độ lan rộng
-                        ), 
-                      ], 
                     ),
                   ),
                   const SizedBox(height: 16),

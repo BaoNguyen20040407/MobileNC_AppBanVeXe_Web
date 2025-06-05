@@ -154,9 +154,9 @@ class AboutUs extends StatelessWidget {
                   backgroundColor: const Color(0xFFFF5722),
                   padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 18),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10), // bo tròn mềm mại
+                    borderRadius: BorderRadius.circular(10), 
                   ),
-                  elevation: 5, // đổ bóng nhẹ
+                  elevation: 5, 
                   shadowColor: Color(0xFFFF5722),
                 ),
                 child: const Text(

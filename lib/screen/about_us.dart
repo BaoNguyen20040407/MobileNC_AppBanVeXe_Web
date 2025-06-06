@@ -179,13 +179,13 @@ class AboutUs extends StatelessWidget {
 
       //Footer
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 14),
         decoration: BoxDecoration(
-          color: Colors.white, // nền trắng hoặc màu bạn muốn
+          color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.15), // màu bóng, bạn chỉnh opacity cho nhẹ/dày
-              offset: const Offset(0, -3), // bóng nằm phía trên (hướng lên trên)
+              color: Colors.black.withOpacity(0.15), 
+              offset: const Offset(0, -3), 
               blurRadius: 6,
             ),
           ],

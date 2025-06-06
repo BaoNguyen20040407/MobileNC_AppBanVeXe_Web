@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/screen/guide_s1.dart';
 import 'package:giao_dien_1/screen/news.dart';
+import 'package:giao_dien_1/screen/news_detail_02.dart';
 import 'about_us.dart';
 
 class HomePage extends StatefulWidget {
@@ -520,96 +521,110 @@ class _PromotionSectionState extends State<PromotionSection> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    List<Widget> pages = placeholderImages.map((page) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: page.map((imagePath) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16.0),
-            child: Container(
-              height: 140,
-              margin: EdgeInsets.symmetric(horizontal: 0),
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
-                    offset: Offset(0, 4), // dịch xuống
-                    blurRadius: 4, // độ mờ
-                    spreadRadius: 1, // độ lan rộng
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: Image.asset(
-                  imagePath,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                ),
-              ),
-            ),
-          );
-        }).toList(),
-      );
-    }).toList();
-
-    return Column(
-      children: [
-        SizedBox(height: 32),
-        Text(
-          'KHUYẾN MÃI NỔI BẬT',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF006400),
-            fontFamily: 'Inter'
-          ),
-        ),
-        SizedBox(height: 16),
-        Container(
-          height: 352,
-          child: PageView(
-            controller: _pageController,
-            onPageChanged: (int index) {
-              setState(() {
-                _currentPage = index;
-              });
-            },
-            children: pages,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(placeholderImages.length, (index) {
-            return GestureDetector(
-              onTap: () {
-                _pageController.animateToPage(
-                  index,
-                  duration: Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                );
-              },
+    @override
+    Widget build(BuildContext context) {
+      List<Widget> pages = placeholderImages.map((page) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: page.map((imagePath) {
+            Widget imageWidget = Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: Container(
-                margin: EdgeInsets.symmetric(horizontal: 16),
-                child: Icon(
-                  _currentPage == index ? Icons.circle : Icons.circle_outlined,
-                  size: 16, 
-                  color: _currentPage == index ? Color(0xffFF5722) : Colors.grey,
+                height: 140,
+                margin: EdgeInsets.symmetric(horizontal: 0),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.15),
+                      offset: Offset(0, 4),
+                      blurRadius: 4,
+                      spreadRadius: 1,
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Image.asset(
+                    imagePath,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                  ),
                 ),
               ),
             );
-          }),
-        ),
 
-      ],
-    );
+            // Nếu là promote_05.png thì thêm GestureDetector để điều hướng
+            if (imagePath == 'assets/image/promote_05.png') {
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => NewsDetail02()),
+                  );
+                },
+                child: imageWidget,
+              );
+            }
+
+            return imageWidget;
+          }).toList(),
+        );
+      }).toList();
+
+      return Column(
+        children: [
+          SizedBox(height: 32),
+          Text(
+            'KHUYẾN MÃI NỔI BẬT',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF006400),
+              fontFamily: 'Inter',
+            ),
+          ),
+          SizedBox(height: 16),
+          Container(
+            height: 352,
+            child: PageView(
+              controller: _pageController,
+              onPageChanged: (int index) {
+                setState(() {
+                  _currentPage = index;
+                });
+              },
+              children: pages,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(placeholderImages.length, (index) {
+              return GestureDetector(
+                onTap: () {
+                  _pageController.animateToPage(
+                    index,
+                    duration: Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                },
+                child: Container(
+                  margin: EdgeInsets.symmetric(horizontal: 16),
+                  child: Icon(
+                    _currentPage == index ? Icons.circle : Icons.circle_outlined,
+                    size: 16,
+                    color: _currentPage == index ? Color(0xffFF5722) : Colors.grey,
+                  ),
+                ),
+              );
+            }),
+          ),
+        ],
+      );
+    }
   }
-}
 
 class PopularRoutesSection extends StatelessWidget {
   final List<Map<String, String>> routes = [

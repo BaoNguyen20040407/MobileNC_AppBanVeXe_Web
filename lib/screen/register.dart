@@ -330,7 +330,7 @@ class _RegisterState extends State<Register> {
                   setState(() {});
                 },
                 decoration: InputDecoration(
-                  labelText: "Mật khẩu",
+                  labelText: "Password",
                   errorText: _passwordError,
                   errorStyle: const TextStyle(
                     color: Colors.red,

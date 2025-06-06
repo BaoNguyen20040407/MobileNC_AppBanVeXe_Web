@@ -28,121 +28,121 @@ class _NewsState extends State<News> {
   NewsItem(
     title: "NHÀ XE NAM HẢI TƯNG BỪNG KHAI TRƯƠNG VĂN PHÒNG MỚI",
     time: "14:00 15/04/2025",
-    imageUrl: "image/news_01.png",
+    imageUrl: "assets/image/news_01.png",
   ),
 
   NewsItem(
     title: "NHÀ XE NAM HẢI TƯNG BỪNG KHAI TRƯƠNG TUYẾN MỚI TRONG THÁNG - BẾN XE BUÔN HỒ - BẾN XE MIỀN TÂY (TP.HCM)",
     time: "09:20 15/04/2025",
-    imageUrl: "image/news_02.png",
+    imageUrl: "assets/image/news_02.png",
   ),
 
   NewsItem(
     title: "CHỈ 100.000 ĐỒNG DI CHUYỂN THUẬN LỢI TỪ BẾN XE MIỀN TÂY - BẾN XE THÁP MƯỜI CÙNG NHÀ XE NAM HẢI",
     time: "08:55 15/04/2025",
-    imageUrl: "image/news_03.png",
+    imageUrl: "assets/image/news_03.png",
   ),
 
   NewsItem(
     title: "NHÀ XE NAM HẢI THÔNG BÁO THAY ĐỔI ĐẦU SỐ TỔNG ĐÀI CHI NHÁNH CÀ MAU",
     time: "08:45 15/04/2025",
-    imageUrl: "image/news_04.png",
+    imageUrl: "assets/image/news_04.png",
   ),
 
   NewsItem(
     title: "THÔNG BÁO ĐIỀU CHỈNH LỘ TRÌNH KẾT NỐI TUYẾN XE BUÝT ĐIỆN TẠI GA BẾN THÀNH - TPHCM TỪ 16/04/2025",
     time: "08:40 15/04/2025",
-    imageUrl: "image/news_06.png",
+    imageUrl: "assets/image/news_06.png",
   ),
 
   NewsItem(
     title: "NHÀ XE NAM HẢI CHÍNH THỨC KHAI TRƯƠNG VĂN PHÒNG MỚI MANG TÊN MỎ CÀY NAM - BẾN TRE TỪ 15/04/2025",
     time: "08:20 15/04/2025",
-    imageUrl: "image/news_07.png",
+    imageUrl: "assets/image/news_07.png",
   ),
 
   NewsItem(
     title: "THÔNG BÁO THAY ĐỔI LỘ TRÌNH HOẠT ĐỘNG TUYẾN XE BUÝT SỐ 165 ĐẠI HỌC NÔNG LÂM - KHU CÔNG NGHỆ CAO",
     time: "08:10 15/04/2025",
-    imageUrl: "image/news_08.jpg",
+    imageUrl: "assets/image/news_08.jpg",
   ),
 
   NewsItem(
     title: "TƯNG BỪNG KHAI TRƯƠNG TUYẾN XE BUÝT LIÊN TỈNH LIỀN KỀ HUẾ - QUẢNG TRỊ VÀ CHẠY CHÍNH THỨC TỪ NGÀY 15/04/2025",
     time: "08:00 15/04/2025",
-    imageUrl: "image/news_05.png",
+    imageUrl: "assets/image/news_05.png",
   ),
 
   NewsItem(
     title: "THỨ TƯ VUI VẺ - THANH TOÁN VÉ XE CỦA NHÀ XE NAM HẢI BẰNG MOMO - GIẢM ĐẾN 50.000Đ CÙNG BẠN VUI VẺ",
     time: "08:50 15/04/2025",
-    imageUrl: "image/news_09.png",
+    imageUrl: "assets/image/news_09.png",
   ),
 
   NewsItem(
     title: "KHUYẾN MÃI LÊN ĐẾN 50.000Đ KHI MUA VÉ NAM HẢI - FUTA BUS LINES & THANH TOÁN BẰNG VNPAY-QR",
     time: "08:40 15/04/2025",
-    imageUrl: "image/news_10.jpg",
+    imageUrl: "assets/image/news_10.jpg",
   ),
 
   NewsItem(
     title: "COMBO 39K SIÊU TIẾT KIỆM, BỔ SUNG NĂNG LƯỢNG CHO CHUYẾN ĐI DÀI CÙNG BẠN VUI VẺ VỚI NHÀ XE",
     time: "08:30 15/04/2025",
-    imageUrl: "image/news_11.png",
+    imageUrl: "assets/image/news_11.png",
   ),
 
   NewsItem(
     title: "NHẬP MÃ NAMHAI100 - GIẢM 15% TỐI ĐA 100K CHO KHÁCH HÀNG MỚI",
     time: "08:20 15/04/2025",
-    imageUrl: "image/news_12.jpg",
+    imageUrl: "assets/image/news_12.jpg",
   ),
 
   NewsItem(
     title: "NHÀ XE NAM HẢI VINH DỰ NHẬN HAI GIẢI THƯỞNG DANH GIÁ TẠI CHƯƠNG TRÌNH THƯƠNG HIỆU MẠNH QUỐC GIA 2025",
     time: "08:20 15/04/2025",
-    imageUrl: "image/news_13.png",
+    imageUrl: "assets/image/news_13.png",
   ),
 
   NewsItem(
     title: "NHÀ XE NAM HẢI VINH DỰ NHẬN GIẢI THƯỞNG NHÀ XE AN TOÀN, VĂN MINH NHẤT NĂM 2024 CỦA BỘ GIAO THÔNG VẬN TẢI",
     time: "08:10 15/04/2025",
-    imageUrl: "image/news_14.jpg",
+    imageUrl: "assets/image/news_14.jpg",
   ),
 
   NewsItem(
     title: "NAM HẢI VINH DỰ NHẬN GIẢI THƯỞNG “THƯƠNG HIỆU QUỐC GIA HỘI NHẬP CHÂU Á - THÁI BÌNH DƯƠNG”",
     time: "08:09 15/04/2025",
-    imageUrl: "image/news_15.jpg",
+    imageUrl: "assets/image/news_15.jpg",
   ),
 
   NewsItem(
     title: "NHÀ XE NAM HẢI  VINH DỰ LỌT TOP 10 THƯƠNG HIỆU MẠNH QUỐC GIA",
     time: "08:08 15/04/2025",
-    imageUrl: "image/news_16.jpg",
+    imageUrl: "assets/image/news_16.jpg",
   ),
 
   NewsItem(
     title: "TRẠM DỪNG PHÚC LỘC - TRẠM DỪNG 5 SAO BỞI KHÔNG GIAN HIỆN ĐẠI, ẤM CÚNG; CON NGƯỜI THÂN THIỆN",
     time: "08:30 15/04/2025",
-    imageUrl: "image/news_17.png",
+    imageUrl: "assets/image/news_17.png",
   ),
 
   NewsItem(
     title: "ƯU ĐÃI ĐẶC BIỆT 'ĐẶT MÓN NGON 39K - CHỈ CÓ FUTA' - TRẢI NGHIỆM BỮA ĂN TRỌN VỊ, TIẾT KIỆM, AN TOÀN",
     time: "08:30 15/04/2025",
-    imageUrl: "image/news_19.png",
+    imageUrl: "assets/image/news_19.png",
   ),
 
   NewsItem(
     title: "TRẠM DỪNG CHÂN TRÊN CAO TỐC - MÔ HÌNH CẦN NHÂN RỘNG - GIÚP KHÁCH HÀNG THOẢI MÁI HƠN",
     time: "08:30 15/04/2025",
-    imageUrl: "image/news_17.png",
+    imageUrl: "assets/image/news_17.png",
   ),
 
   NewsItem(
     title: "ĐA DẠNG MÓN NGON - ĐỦ ĐẦY DINH DƯỠNG - COMBO CHỈ 39K GIÚP BẠN VUI KHỎE",
     time: "08:30 15/04/2025",
-    imageUrl: "image/news_18.png",
+    imageUrl: "assets/image/news_18.png",
   ),
 ];
 
@@ -153,7 +153,7 @@ class _NewsState extends State<News> {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(80),
         child: Container(
-          padding: const EdgeInsets.fromLTRB(32, 16, 32, 16),
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
           color: const Color(0xffFDE5DE),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -172,7 +172,7 @@ class _NewsState extends State<News> {
                     Text(
                       "NHÀ XE NAM HẢI",
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 15,
                         fontWeight: FontWeight.bold,
                         color: Color(0xff006400),
                         fontFamily: 'Inter',
@@ -182,7 +182,7 @@ class _NewsState extends State<News> {
                     Text(
                       "Vì những chuyến xe an toàn cho bạn",
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 12,
                         color: Color(0xffFF0000),
                         fontFamily: 'Inter',
                       ),
@@ -202,7 +202,7 @@ class _NewsState extends State<News> {
 
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
           //Tin tức nổi bật
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1729,7 +1729,7 @@ class _NewsState extends State<News> {
             ),
           ],
         ),
-        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 18),
+        padding: EdgeInsets.symmetric(horizontal: 14, vertical: 4),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -1769,7 +1769,7 @@ class _NewsState extends State<News> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 32, color: isSelected ? const Color(0xFFFF5722) : const Color(0xFFD9D9D9)),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           Text(title, style: const TextStyle(fontFamily: 'Inter')),
         ],
       ),

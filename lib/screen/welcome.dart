@@ -10,7 +10,7 @@ class Welcome extends StatelessWidget {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 125.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 135.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -34,13 +34,13 @@ class Welcome extends StatelessWidget {
                       width: 100,
                       height: 100,
                     ),
-                    SizedBox(width: 16),
+                    SizedBox(width: 8),
                     Image.asset(
                       'assets/image/icons8_bus_100_2.png',
                       width: 100,
                       height: 100,
                     ),
-                    SizedBox(width: 16),
+                    SizedBox(width: 8),
                     Image.asset(
                       'assets/image/icons8_bus_100_2.png',
                       width: 100,
@@ -58,7 +58,7 @@ class Welcome extends StatelessWidget {
                     Text(
                       "CHÀO MỪNG BẠN ĐẾN VỚI APP\nNHÀ XE NAM HẢI",
                       style: TextStyle(
-                        fontSize: 24,
+                        fontSize: 17,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFFFF5722),
                         fontFamily: 'Inter',
@@ -114,7 +114,7 @@ class Welcome extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     elevation: 4,
-                    minimumSize: const Size(double.infinity, 54),
+                    minimumSize: const Size(double.infinity, 48),
                   ),
                   child: const Text(
                     "Tiếp tục",

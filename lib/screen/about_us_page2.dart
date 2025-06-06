@@ -13,7 +13,7 @@ class AboutUsPage2 extends StatelessWidget {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(80),
         child: Container(
-          padding: const EdgeInsets.fromLTRB(32, 16, 32, 16),
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
           color: const Color(0xffFDE5DE),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -32,7 +32,7 @@ class AboutUsPage2 extends StatelessWidget {
                     Text(
                       "NHÀ XE NAM HẢI",
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 15,
                         fontWeight: FontWeight.bold,
                         color: Color(0xff006400),
                         fontFamily: 'Inter',
@@ -42,7 +42,7 @@ class AboutUsPage2 extends StatelessWidget {
                     Text(
                       "Vì những chuyến xe an toàn cho bạn",
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 12,
                         color: Color(0xffFF0000),
                         fontFamily: 'Inter',
                       ),
@@ -60,7 +60,7 @@ class AboutUsPage2 extends StatelessWidget {
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -78,7 +78,7 @@ class AboutUsPage2 extends StatelessWidget {
             const SizedBox(height: 8),
             const Center(
               child: Text(
-                "Vì 1 Việt Nam vững mạnh kinh tế - xã hội",
+                "Vì 1 Việt Nam vươn mình",
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: 18,
@@ -91,7 +91,7 @@ class AboutUsPage2 extends StatelessWidget {
             Text.rich(
               TextSpan(
                 style: const TextStyle(
-                    color: Colors.black, fontSize: 14, height: 2.0, fontFamily: 'Inter'),
+                    color: Colors.black, fontSize: 16, height: 2.0, fontFamily: 'Inter'),
                 children: [
                   const TextSpan(
                     text:
@@ -121,7 +121,7 @@ class AboutUsPage2 extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: Image.asset(
-                  'image/about_us_1.png',
+                  'assets/image/about_us_1.png',
                   fit: BoxFit.cover,
                 ),
               ),
@@ -155,7 +155,7 @@ class AboutUsPage2 extends StatelessWidget {
             const Text.rich(
               TextSpan(
                 style: TextStyle(
-                    color: Colors.black, fontSize: 14, height: 2, fontFamily: 'Inter'),
+                    color: Colors.black, fontSize: 16, height: 2, fontFamily: 'Inter'),
                 children: [
                   TextSpan(
                       text: "NAM:",
@@ -188,7 +188,7 @@ class AboutUsPage2 extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: Image.asset(
-                  'image/about_us_2.png',
+                  'assets/image/about_us_2.png',
                   fit: BoxFit.cover,
                 ),
               ),
@@ -226,7 +226,7 @@ class AboutUsPage2 extends StatelessWidget {
               " mang đến cho khách hàng những trải nghiệm tốt nhất, chất lượng nhất, sự an toàn chỉnh chu trong từng khâu phục vụ khách hàng, góp phần nâng cao nền kinh tế nước nhà.",
               style: TextStyle(
                 color: Colors.black,
-                fontSize: 14,
+                fontSize: 16,
                 height: 2,
                 fontFamily: 'Inter',
               ),
@@ -239,7 +239,7 @@ class AboutUsPage2 extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: Image.asset(
-                  'image/about_us_3.png',
+                  'assets/image/about_us_3.png',
                   fit: BoxFit.cover,
                 ),
               ),
@@ -257,7 +257,7 @@ class AboutUsPage2 extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFFFF5722),
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 64, vertical: 18),
+                      horizontal: 24, vertical: 10),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -281,7 +281,7 @@ class AboutUsPage2 extends StatelessWidget {
       ),
       //Footer
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
         decoration: BoxDecoration(
           color: Colors.white, // nền trắng hoặc màu bạn muốn
           boxShadow: [
@@ -348,7 +348,7 @@ class AboutUsPage2 extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(icon, size: 32, color: const Color(0xFFD9D9D9)),
-        const SizedBox(height: 8),
+        const SizedBox(height: 4),
         Text(title, style: const TextStyle(fontFamily: 'Inter')),
         ],
       ),

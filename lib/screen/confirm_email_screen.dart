@@ -32,7 +32,7 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
+        padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -68,7 +68,7 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 20.0,
-                    vertical: 18.0,
+                    vertical: 16.0,
                   ),
                 ),
               ),
@@ -87,7 +87,7 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   elevation: 4,
-                  minimumSize: const Size(double.infinity, 54),
+                  minimumSize: const Size(double.infinity, 48),
                 ),
                 child: const Text(
                   "Tiếp tục",
@@ -110,7 +110,7 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
                   color: Colors.black,
                   fontFamily: 'Inter',
                   height: 1.5,
-                  letterSpacing: 0.5, // nếu bạn dùng font Inter
+                  letterSpacing: 0.5,
                 ),
                 children: [
                   TextSpan(text: 'Bằng việc xác nhận Email đang dùng, bạn có thể ', style: TextStyle(fontSize: 14, fontFamily: 'Inter')),

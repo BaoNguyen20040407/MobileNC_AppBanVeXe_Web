@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:giao_dien_1/screen/guide_s1.dart';
 import 'package:giao_dien_1/screen/news.dart';
 import 'about_us.dart';
 
@@ -31,7 +32,7 @@ class _HomePageState extends State<HomePage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 32, color: isSelected ? Color(0xFFFF5722) : Color(0xFFD9D9D9)),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           Text(title, style: const TextStyle(fontFamily: 'Inter')),
         ],
       ),
@@ -51,7 +52,7 @@ class _HomePageState extends State<HomePage> {
     initialDate: _selectedDate ?? DateTime(2000, 1, 1),
     firstDate: DateTime(1900),
     lastDate: DateTime.now(),
-    helpText: 'Chọn ngày sinh',
+    helpText: 'Chọn ngày',
      builder: (context, child) {
       return Theme(
         data: Theme.of(context).copyWith(
@@ -84,7 +85,7 @@ class _HomePageState extends State<HomePage> {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(80),
         child: Container(
-          padding: const EdgeInsets.fromLTRB(32, 16, 32, 16),
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
           color: const Color(0xffFDE5DE),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -98,7 +99,7 @@ class _HomePageState extends State<HomePage> {
                   children: const [
                     Text("NHÀ XE NAM HẢI",
                       style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 15,
                           fontWeight: FontWeight.bold,
                           color: Color(0xff006400),
                           fontFamily: 'Inter'),
@@ -106,7 +107,7 @@ class _HomePageState extends State<HomePage> {
                     SizedBox(height: 2),
                     Text("Vì những chuyến xe an toàn cho bạn",
                       style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 12,
                           color: Color(0xffFF0000),
                           fontFamily: 'Inter'),
                     ),
@@ -122,7 +123,7 @@ class _HomePageState extends State<HomePage> {
       body: SingleChildScrollView(
         child: Container(
           color: Colors.white,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
           child: Column(
             children: [
               RouteSearchCard(dobController: _dobController, selectDateCallback: _selectDate,),
@@ -142,7 +143,7 @@ class _HomePageState extends State<HomePage> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFFFF5722),
-                    padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 18),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -177,7 +178,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ],
         ),
-        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 18),
+        padding: EdgeInsets.symmetric(horizontal: 14, vertical: 4),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -220,17 +221,44 @@ class _RouteSearchCardState extends State<RouteSearchCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.all(16),
-      padding: EdgeInsets.all(4),
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         border: Border.all(color: Color(0xffFF5722), width: 8),
         borderRadius: BorderRadius.circular(10),
         color: Colors.white,
       ),
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 0),
         child: Column(
           children: [
+            const SizedBox(height: 4),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () {
+
+                },
+                style: ButtonStyle(
+                  padding: MaterialStateProperty.all(EdgeInsets.zero),
+                  minimumSize: MaterialStateProperty.all(Size(0, 0)),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  alignment: Alignment.centerRight,
+                  splashFactory: NoSplash.splashFactory,
+                  overlayColor: MaterialStateProperty.all(Colors.transparent),
+                  foregroundColor: MaterialStateProperty.all(Color(0xFFFF5722)),
+                ),
+                child: Text(
+                  'Hướng dẫn đặt vé',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    fontFamily: 'Inter',
+                    color: Color(0xFFFF5722),
+                  ),
+                ),
+              ),
+            ),
+
             TextField(
               decoration: InputDecoration(
                 prefixIcon: Icon(
@@ -440,7 +468,7 @@ class _RouteSearchCardState extends State<RouteSearchCard> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFFFF5722),
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -475,9 +503,9 @@ class _PromotionSectionState extends State<PromotionSection> {
   late PageController _pageController;
 
   final List<List<String>> placeholderImages = [
-  ['image/promote_01.png', 'image/promote_02.png'],
-  ['image/promote_03.png', 'image/promote_04.png'],
-  ['image/promote_05.png', 'image/promote_06.png'],
+  ['assets/image/promote_01.png', 'assets/image/promote_02.png'],
+  ['assets/image/promote_03.png', 'assets/image/promote_04.png'],
+  ['assets/image/promote_05.png', 'assets/image/promote_06.png'],
 ];
 
   @override
@@ -502,7 +530,7 @@ class _PromotionSectionState extends State<PromotionSection> {
             padding: const EdgeInsets.symmetric(vertical: 16.0),
             child: Container(
               height: 140,
-              margin: EdgeInsets.symmetric(horizontal: 16),
+              margin: EdgeInsets.symmetric(horizontal: 0),
               decoration: BoxDecoration(
                 color: Colors.grey[300],
                 borderRadius: BorderRadius.circular(20),
@@ -554,6 +582,7 @@ class _PromotionSectionState extends State<PromotionSection> {
             children: pages,
           ),
         ),
+        const SizedBox(height: 16),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(placeholderImages.length, (index) {
@@ -566,10 +595,10 @@ class _PromotionSectionState extends State<PromotionSection> {
                 );
               },
               child: Container(
-                margin: EdgeInsets.symmetric(horizontal: 8),
+                margin: EdgeInsets.symmetric(horizontal: 16),
                 child: Icon(
                   _currentPage == index ? Icons.circle : Icons.circle_outlined,
-                  size: 14, 
+                  size: 16, 
                   color: _currentPage == index ? Color(0xffFF5722) : Colors.grey,
                 ),
               ),
@@ -657,11 +686,11 @@ class PopularRoutesSection extends StatelessWidget {
 
           // Xác định ảnh tương ứng với điểm đi
           String imagePath = 'assets/default.jpg';
-          if (from.contains('Hồ Chí Minh')) imagePath = 'image/hochiminh.png';
-          if (from.contains('Hà Nội')) imagePath = 'image/hanoi.png';
+          if (from.contains('Hồ Chí Minh')) imagePath = 'assets/image/hochiminh.png';
+          if (from.contains('Hà Nội')) imagePath = 'assets/image/hanoi.png';
 
           return Container(
-            margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            margin: EdgeInsets.symmetric(horizontal: 0, vertical: 16),
             decoration: BoxDecoration(
               border: Border.all(color: Colors.grey.shade300),
               borderRadius: BorderRadius.circular(12),
@@ -672,12 +701,12 @@ class PopularRoutesSection extends StatelessWidget {
               children: [
                 // Bên trái: ảnh + text
                 Container(
-                  width: 125,
+                  width: 100,
                   height: 135,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(12),
-                      bottomLeft: Radius.circular(12),
+                      topLeft: Radius.circular(10),
+                      bottomLeft: Radius.circular(10),
                     ),
                     image: DecorationImage(
                       image: AssetImage(imagePath),
@@ -686,12 +715,12 @@ class PopularRoutesSection extends StatelessWidget {
                   ),
                   child: Container(
                     padding: EdgeInsets.all(8),
-                    alignment: Alignment.topLeft,  // căn trên trái cho Column
+                    alignment: Alignment.topLeft,
                     decoration: BoxDecoration(
                       color: Colors.black.withOpacity(0.3),
                       borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(12),
-                        bottomLeft: Radius.circular(12),
+                        topLeft: Radius.circular(10),
+                        bottomLeft: Radius.circular(10),
                       ),
                     ),
                     child: Column(
@@ -799,7 +828,7 @@ class PopularRoutesSection extends StatelessWidget {
 class TrustInfoSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Center( // Đưa toàn bộ Column ra giữa trang
+    return Center( 
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -817,7 +846,7 @@ class TrustInfoSection extends StatelessWidget {
           Text(
             'NHỮNG CHUYẾN ĐI AN TOÀN',
             style: TextStyle(
-              fontSize: 24,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
               color: Color(0xFF006400),
               fontFamily: 'Inter',
@@ -840,7 +869,7 @@ class TrustInfoSection extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center, // Căn giữa theo chiều dọc
               children: [
-                Image.asset('image/safe_01.png', width: 50, height: 50),
+                Image.asset('assets/image/safe_01.png', width: 50, height: 50),
                 const SizedBox(width: 12),
                 Flexible(
                   child: Text(
@@ -862,7 +891,7 @@ class TrustInfoSection extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Image.asset('image/safe_02.png', width: 50, height: 50),
+                Image.asset('assets/image/safe_02.png', width: 50, height: 50),
                 const SizedBox(width: 12),
                 Flexible(
                   child: Text(
@@ -884,7 +913,7 @@ class TrustInfoSection extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Image.asset('image/safe_03.png', width: 50, height: 50),
+                Image.asset('assets/image/safe_03.png', width: 50, height: 50),
                 const SizedBox(width: 12),
                 Flexible(
                   child: Text(

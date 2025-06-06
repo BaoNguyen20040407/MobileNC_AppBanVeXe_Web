@@ -14,7 +14,7 @@ class AboutUs extends StatelessWidget {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(80),
         child: Container(
-          padding: const EdgeInsets.fromLTRB(32, 16, 32, 16),
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
           color: const Color(0xffFDE5DE),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -33,7 +33,7 @@ class AboutUs extends StatelessWidget {
                     Text(
                       "NHÀ XE NAM HẢI",
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 15,
                         fontWeight: FontWeight.bold,
                         color: Color(0xff006400),
                         fontFamily: 'Inter',
@@ -43,7 +43,7 @@ class AboutUs extends StatelessWidget {
                     Text(
                       "Vì những chuyến xe an toàn cho bạn",
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 12,
                         color: Color(0xffFF0000),
                         fontFamily: 'Inter',
                       ),
@@ -63,7 +63,7 @@ class AboutUs extends StatelessWidget {
 
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -95,13 +95,13 @@ class AboutUs extends StatelessWidget {
                     TextSpan(
                       text:
                           "Công ty quản lý xe khách Nam Hải (Nhà xe Nam Hải) được thành lập vào ngày 09/09/2004. ",
-                      style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter', fontSize: 14),
+                      style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter', fontSize: 16),
                     ),
                     TextSpan(
                       text:
                           "Với hoạt động kinh doanh chính trong lĩnh vực vận tải hành khách và kinh doanh dịch vụ. "
                           "Nam Hải dần trở thành cái tên quen thuộc trên những nẻo đường của người Việt.",
-                      style: TextStyle(fontFamily: 'Inter', fontSize: 14)
+                      style: TextStyle(fontFamily: 'Inter', fontSize: 16)
                     ),
                   ],
                 ),
@@ -116,7 +116,7 @@ class AboutUs extends StatelessWidget {
                 " Công ty có nhiều giải thưởng danh giá như “Thương hiệu số 1 Việt Nam”, "
                 "“Top 10 dịch vụ hoàn hảo vì quyền lợi người tiêu dùng năm 2024”, "
                 "“Top 5 thương hiệu - sản phẩm uy tín cho các doanh nghiệp tại Việt Nam năm 2024”…",
-                style: TextStyle(color: Colors.black, fontSize: 14, height: 2.0, fontFamily: 'Inter'),
+                style: TextStyle(color: Colors.black, fontSize: 16, height: 2.0, fontFamily: 'Inter'),
                 textAlign: TextAlign.justify,
               ),
               const SizedBox(height: 32),
@@ -152,7 +152,7 @@ class AboutUs extends StatelessWidget {
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFF5722),
-                  padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 18),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10), 
                   ),
@@ -179,7 +179,7 @@ class AboutUs extends StatelessWidget {
 
       //Footer
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
         decoration: BoxDecoration(
           color: Colors.white, // nền trắng hoặc màu bạn muốn
           boxShadow: [
@@ -245,7 +245,7 @@ class AboutUs extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(icon, size: 32, color: const Color(0xFFD9D9D9)),
-        const SizedBox(height: 8),
+        const SizedBox(height: 4),
         Text(title, style: const TextStyle(fontFamily: 'Inter')),
         ],
       ),

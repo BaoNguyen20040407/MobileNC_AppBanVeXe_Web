@@ -71,7 +71,7 @@ class _RegisterState extends State<Register> {
   if (picked != null) {
     setState(() {
       _selectedDate = picked;
-      _dobController.text = formatDate(picked);  // formatDate theo dd/mm/yyyy
+      _dobController.text = formatDate(picked);  
     });
   }
 }
@@ -94,7 +94,7 @@ class _RegisterState extends State<Register> {
         child: SingleChildScrollView(
         child: Padding(
           padding:
-              const EdgeInsets.symmetric(horizontal: 32.0, vertical: 10.0),
+              const EdgeInsets.symmetric(horizontal: 24.0, vertical: 10.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -144,7 +144,7 @@ class _RegisterState extends State<Register> {
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 20.0,
-                    vertical: 18.0,
+                    vertical: 16.0,
                   ),
                 ),
               ),
@@ -176,7 +176,7 @@ class _RegisterState extends State<Register> {
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 20.0,
-                    vertical: 18.0,
+                    vertical: 16.0,
                   ),
                 ),
               ),
@@ -205,7 +205,7 @@ class _RegisterState extends State<Register> {
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 20.0,
-                    vertical: 18.0,
+                    vertical: 16.0,
                   ),
                 ),
               ),
@@ -257,7 +257,7 @@ class _RegisterState extends State<Register> {
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 20.0,
-                    vertical: 18.0,
+                    vertical: 16.0,
                   ),
                 ),
               ),
@@ -310,7 +310,7 @@ class _RegisterState extends State<Register> {
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 20.0,
-                    vertical: 18.0,
+                    vertical: 16.0,
                   ),
                 ),
               ),
@@ -360,7 +360,7 @@ class _RegisterState extends State<Register> {
                   hintStyle: const TextStyle(color: Colors.grey),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 20.0,
-                    vertical: 18.0,
+                    vertical: 16.0,
                   ),
                   suffixIcon: IconButton(
                     icon: Icon(
@@ -423,7 +423,7 @@ class _RegisterState extends State<Register> {
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 20.0,
-                    vertical: 18.0,
+                    vertical: 16.0,
                   ),
                 ),
               ),
@@ -476,7 +476,7 @@ class _RegisterState extends State<Register> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     elevation: 4,
-                    minimumSize: const Size(double.infinity, 54),
+                    minimumSize: const Size(double.infinity, 48),
                   ),
                   child: const Text(
                     "Đăng ký tài khoản",

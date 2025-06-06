@@ -33,12 +33,12 @@ class _SplashScreenState extends State<SplashScreen> {
             const SizedBox(height: 16),
             const Text(
               "NHÀ XE NAM HẢI",
-              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Color(0xFF006400), fontFamily: 'Inter'),
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF006400), fontFamily: 'Inter'),
             ),
             const SizedBox(height: 4),
             const Text(
               "Vì những chuyến xe an toàn cho bạn",
-              style: TextStyle(color: Color(0xFFFF0000), fontSize: 20, fontFamily: 'Inter'),
+              style: TextStyle(color: Color(0xFFFF0000), fontSize: 18, fontFamily: 'Inter'),
             ),
           ],
         ),

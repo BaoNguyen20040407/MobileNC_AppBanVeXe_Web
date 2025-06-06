@@ -29,25 +29,25 @@ class _NewsDetail01State extends State<NewsDetail01> {
   NewsItem(
     title: "NHÀ XE NAM HẢI TƯNG BỪNG KHAI TRƯƠNG TUYẾN MỚI TRONG THÁNG - BẾN XE BUÔN HỒ - BẾN XE MIỀN TÂY (TP.HCM)",
     time: "09:20 15/04/2025",
-    imageUrl: "image/news_02.png",
+    imageUrl: "assets/image/news_02.png",
   ),
 
   NewsItem(
     title: "CHỈ 100.000 ĐỒNG DI CHUYỂN THUẬN LỢI TỪ BẾN XE MIỀN TÂY - BẾN XE THÁP MƯỜI CÙNG NHÀ XE NAM HẢI",
     time: "08:55 15/04/2025",
-    imageUrl: "image/news_03.png",
+    imageUrl: "assets/image/news_03.png",
   ),
 
   NewsItem(
     title: "NHÀ XE NAM HẢI THÔNG BÁO THAY ĐỔI ĐẦU SỐ TỔNG ĐÀI CHI NHÁNH CÀ MAU",
     time: "08:45 15/04/2025",
-    imageUrl: "image/news_04.png",
+    imageUrl: "assets/image/news_04.png",
   ),
 
   NewsItem(
     title: "THÔNG BÁO ĐIỀU CHỈNH LỘ TRÌNH KẾT NỐI TUYẾN XE BUÝT ĐIỆN TẠI GA BẾN THÀNH - TPHCM TỪ 16/04/2025",
     time: "08:40 15/04/2025",
-    imageUrl: "image/news_06.png",
+    imageUrl: "assets/image/news_06.png",
   ),
 ];
 
@@ -58,7 +58,7 @@ class _NewsDetail01State extends State<NewsDetail01> {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(80),
         child: Container(
-          padding: const EdgeInsets.fromLTRB(32, 16, 32, 16),
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
           color: const Color(0xffFDE5DE),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -77,7 +77,7 @@ class _NewsDetail01State extends State<NewsDetail01> {
                     Text(
                       "NHÀ XE NAM HẢI",
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 15,
                         fontWeight: FontWeight.bold,
                         color: Color(0xff006400),
                         fontFamily: 'Inter',
@@ -87,7 +87,7 @@ class _NewsDetail01State extends State<NewsDetail01> {
                     Text(
                       "Vì những chuyến xe an toàn cho bạn",
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 12,
                         color: Color(0xffFF0000),
                         fontFamily: 'Inter',
                       ),
@@ -107,7 +107,7 @@ class _NewsDetail01State extends State<NewsDetail01> {
       
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -155,7 +155,7 @@ class _NewsDetail01State extends State<NewsDetail01> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: Image.asset(
-                    'image/news_01.png',
+                    'assets/image/news_01.png',
                     width: double.infinity,
                     height: 200,
                     fit: BoxFit.cover,
@@ -266,7 +266,7 @@ class _NewsDetail01State extends State<NewsDetail01> {
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFF5722),
-                  padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 18),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10), 
                   ),
@@ -518,7 +518,7 @@ class _NewsDetail01State extends State<NewsDetail01> {
             ),
           ],
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 18),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -562,7 +562,7 @@ class _NewsDetail01State extends State<NewsDetail01> {
             size: 32,
             color: isSelected ? const Color(0xFFFF5722) : const Color(0xFFD9D9D9),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           Text(title, style: const TextStyle(fontFamily: 'Inter')),
         ],
       ),

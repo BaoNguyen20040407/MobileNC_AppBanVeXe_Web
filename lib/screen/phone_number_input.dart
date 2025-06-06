@@ -13,7 +13,7 @@ class _PhoneNumberInputState extends State<Phone_Number_Input> {
 
   @override
   void dispose() {
-    _phoneController.dispose(); // Giải phóng bộ nhớ khi widget bị huỷ
+    _phoneController.dispose();
     super.dispose();
   }
 
@@ -26,14 +26,14 @@ class _PhoneNumberInputState extends State<Phone_Number_Input> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
-            Navigator.pop(context); // quay về trang trước
+            Navigator.pop(context);
           },
         ),
       ),
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -76,7 +76,7 @@ class _PhoneNumberInputState extends State<Phone_Number_Input> {
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 20.0,
-                    vertical: 18.0,
+                    vertical: 16.0,
                   ),
                 ),
               ),
@@ -95,7 +95,7 @@ class _PhoneNumberInputState extends State<Phone_Number_Input> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     elevation: 4,
-                    minimumSize: const Size(double.infinity, 54),
+                    minimumSize: const Size(double.infinity, 48),
                   ),
                   child: const Text(
                     "Tiếp tục",

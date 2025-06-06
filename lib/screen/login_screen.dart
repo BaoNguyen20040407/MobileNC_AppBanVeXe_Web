@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:giao_dien_1/screen/homepage.dart';
 import 'package:giao_dien_1/screen/phone_number_input.dart';
 import 'confirm_email_screen.dart';
+import 'news.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -19,7 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 58.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 60.0),
           child: ListView(
             children: [
               const SizedBox(height: 32),
@@ -86,7 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 20.0,
-                    vertical: 18.0,
+                    vertical: 16.0,
                   ),
                 ),
               ),
@@ -127,7 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 20.0,
-                    vertical: 18.0,
+                    vertical: 16.0,
                   ),
                 ),
               ),

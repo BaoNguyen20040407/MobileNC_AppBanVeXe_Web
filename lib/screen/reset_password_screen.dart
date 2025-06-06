@@ -28,7 +28,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
+        padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -66,7 +66,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 ),
                 contentPadding: const EdgeInsets.symmetric(
                     horizontal: 20.0,
-                    vertical: 18.0,
+                    vertical: 16.0,
                 ),
               ),
             ),
@@ -102,7 +102,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 ),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 20.0,
-                  vertical: 18.0,
+                  vertical: 16.0,
                 ),
               ),
             ),
@@ -127,7 +127,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   elevation: 4,
-                  minimumSize: const Size(double.infinity, 54), 
+                  minimumSize: const Size(double.infinity, 48), 
                 ),
                 child: const Text(
                   "Lưu mật khẩu",

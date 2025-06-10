@@ -19,6 +19,21 @@ flutter:
   uses-material-design: true
   assets:
     - assets/image/
+    - assets/image/step_1.png
+    - assets/image/step_2.png
+    - assets/image/step_3.png
+    - assets/image/step_4.png
+    - assets/image/step_5.png
+    - assets/image/step_6.png
+    - assets/image/web_step_1.png
+    - assets/image/web_step_2.png
+    - assets/image/web_step_3.png
+    - assets/image/web_step_4.png
+    - assets/image/web_step_5.png
+    - assets/image/web_step_5b.png
+    - assets/image/web_step_6.png
+    - assets/image/instruction_phone.png
+    
 
   fonts:
     - family: Inter
@@ -27,4 +42,3 @@ flutter:
           weight: 100
         - asset: assets/font/inter_18pt_bold.ttf
           weight: 100
-

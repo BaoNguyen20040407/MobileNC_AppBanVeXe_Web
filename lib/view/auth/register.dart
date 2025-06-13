@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:giao_dien_1/screen/login_screen.dart';
+import 'package:giao_dien_1/view/auth/login_screen.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});

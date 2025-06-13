@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:giao_dien_1/screen/register.dart';
+import 'package:giao_dien_1/view/auth/register.dart';
 
 class Welcome extends StatelessWidget {
   const Welcome({super.key});

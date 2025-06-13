@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:giao_dien_1/screen/welcome.dart';
+import 'package:giao_dien_1/view/auth/welcome.dart';
 
 class Phone_Number_Input extends StatefulWidget {
   const Phone_Number_Input({super.key});

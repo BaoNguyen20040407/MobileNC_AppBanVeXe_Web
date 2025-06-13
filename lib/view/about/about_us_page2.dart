@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:giao_dien_1/screen/about_us_page3.dart';
-import 'homepage.dart';
-import 'news.dart';
+import 'package:giao_dien_1/view/about/about_us_page3.dart';
+import '../main/homepage.dart';
+import '../news/news.dart';
+import 'package:giao_dien_1/widget/appbar.dart';
+import 'package:giao_dien_1/widget/footer.dart';
+import 'package:giao_dien_1/config/default.dart';
 
 class AboutUsPage2 extends StatelessWidget {
   const AboutUsPage2({super.key});
@@ -9,56 +12,12 @@ class AboutUsPage2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(80),
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-          color: const Color(0xffFDE5DE),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Image.asset(
-                "assets/image/namhailogo.png",
-                height: 32,
-                width: 60,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Text(
-                      "NHÀ XE NAM HẢI",
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xff006400),
-                        fontFamily: 'Inter',
-                      ),
-                    ),
-                    SizedBox(height: 2),
-                    Text(
-                      "Vì những chuyến xe an toàn cho bạn",
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Color(0xffFF0000),
-                        fontFamily: 'Inter',
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Image.asset(
-                "assets/image/personicon.png",
-                height: 32,
-                width: 32,
-              ),
-            ],
-          ),
-        ),
-      ),
+      backgroundColor: AppColors.white,
+
+      //AppBar
+      appBar: AppBar(),
+
+      //Body
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
         child: Column(
@@ -68,7 +27,7 @@ class AboutUsPage2 extends StatelessWidget {
               child: Text(
                 "TẦM NHÌN VÀ SỨ MỆNH",
                 style: TextStyle(
-                  color: Color(0xffFF5722),
+                  color: AppColors.mainOrange,
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'Inter',
@@ -80,7 +39,7 @@ class AboutUsPage2 extends StatelessWidget {
               child: Text(
                 "Vì 1 Việt Nam vươn mình",
                 style: TextStyle(
-                  color: Colors.black,
+                  color: AppColors.black,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'Inter',
@@ -91,7 +50,7 @@ class AboutUsPage2 extends StatelessWidget {
             Text.rich(
               TextSpan(
                 style: const TextStyle(
-                    color: Colors.black, fontSize: 16, height: 2.0, fontFamily: 'Inter'),
+                    color: AppColors.black, fontSize: 16, height: 2.0, fontFamily: 'Inter'),
                 children: [
                   const TextSpan(
                     text:
@@ -106,7 +65,7 @@ class AboutUsPage2 extends StatelessWidget {
                   const TextSpan(
                       text: "Nam Hải ",
                       style: TextStyle(
-                          color: Color(0xffFF5722), fontWeight: FontWeight.bold)),
+                          color: AppColors.mainOrange, fontWeight: FontWeight.bold)),
                   const TextSpan(
                       text:
                           "luôn phát triển để tạo nên một Việt Nam vững mạnh về kinh tế - xã hội."),
@@ -132,7 +91,7 @@ class AboutUsPage2 extends StatelessWidget {
               child: Text(
                 "GIÁ TRỊ CỐT LÕI",
                 style: TextStyle(
-                  color: Color(0xffFF5722),
+                  color: AppColors.mainOrange,
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'Inter',
@@ -144,7 +103,7 @@ class AboutUsPage2 extends StatelessWidget {
               child: Text(
                 "Giá trị cốt lõi - Nam Hải",
                 style: TextStyle(
-                  color: Colors.black,
+                  color: AppColors.mainOrange,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'Inter',
@@ -155,26 +114,26 @@ class AboutUsPage2 extends StatelessWidget {
             const Text.rich(
               TextSpan(
                 style: TextStyle(
-                    color: Colors.black, fontSize: 16, height: 2, fontFamily: 'Inter'),
+                    color: AppColors.black, fontSize: 16, height: 2, fontFamily: 'Inter'),
                 children: [
                   TextSpan(
                       text: "NAM:",
                       style: TextStyle(
-                          color: Color(0xffFF5722), fontWeight: FontWeight.bold)),
+                          color: AppColors.mainOrange, fontWeight: FontWeight.bold)),
                   TextSpan(
                       text:
                           " Tượng trưng cho sự ấm áp, bao dung, hướng tới tương lai.\n"),
                   TextSpan(
                       text: "HẢI:",
                       style: TextStyle(
-                          color: Color(0xffFF5722), fontWeight: FontWeight.bold)),
+                          color: AppColors.mainOrange, fontWeight: FontWeight.bold)),
                   TextSpan(
                       text:
                           " Tượng trưng cho sự bao la, rộng lớn và sâu sắc, nối kết các đại lục.\n"),
                   TextSpan(
                       text: "NAM HẢI:",
                       style: TextStyle(
-                          color: Color(0xffFF5722), fontWeight: FontWeight.bold)),
+                          color: AppColors.mainOrange, fontWeight: FontWeight.bold)),
                   TextSpan(
                       text:
                           " Những chuyến xe nối kết mọi nơi bằng sự ấm áp, bao dung.\n"),
@@ -199,7 +158,7 @@ class AboutUsPage2 extends StatelessWidget {
               child: Text(
                 "TRIẾT LÝ",
                 style: TextStyle(
-                  color: Color(0xffFF5722),
+                  color: AppColors.mainOrange,
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'Inter',
@@ -211,7 +170,7 @@ class AboutUsPage2 extends StatelessWidget {
               child: Text(
                 "Hành trình an toàn",
                 style: TextStyle(
-                  color: Colors.black,
+                  color: AppColors.black,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'Inter',
@@ -225,7 +184,7 @@ class AboutUsPage2 extends StatelessWidget {
               " Với tinh thần phục vụ chuyên nghiệp và sự đồng hành bền bỉ, Nam Hải không chỉ là phương tiện di chuyển mà còn là người bạn đồng hành tin cậy trên mỗi chặng đường,"
               " mang đến cho khách hàng những trải nghiệm tốt nhất, chất lượng nhất, sự an toàn chỉnh chu trong từng khâu phục vụ khách hàng, góp phần nâng cao nền kinh tế nước nhà.",
               style: TextStyle(
-                color: Colors.black,
+                color: AppColors.black,
                 fontSize: 16,
                 height: 2,
                 fontFamily: 'Inter',
@@ -255,19 +214,19 @@ class AboutUsPage2 extends StatelessWidget {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFFF5722),
+                  backgroundColor: AppColors.mainOrange,
                   padding: const EdgeInsets.symmetric(
                       horizontal: 24, vertical: 10),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                   elevation: 5,
-                  shadowColor: Color(0xFFFF5722),
+                  shadowColor: AppColors.mainOrange,
                 ),
                 child: const Text(
                   "Xem tiếp",
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppColors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 17,
                     fontFamily: 'Inter',
@@ -280,78 +239,7 @@ class AboutUsPage2 extends StatelessWidget {
         ),
       ),
       //Footer
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.15),
-              offset: const Offset(0, -3),
-              blurRadius: 6,
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _bottomNavItem(
-              context,
-              "Trang chủ",
-              Icons.home,
-              HomePage(),
-            ),
-            _bottomNavItem(
-              context,
-              "Lịch trình",
-              Icons.event_note,
-              HomePage(),
-            ),
-            _bottomNavItem(
-              context,
-              "Tra cứu vé",
-              Icons.confirmation_number,
-              HomePage(),
-            ),
-            _bottomNavItem(
-              context,
-              "Tin tức",
-              Icons.article,
-              News(),
-            ),
-          ],
-        ),
-      ),
-
-    );
-  }
-
-  Widget _bottomNavItem(
-    BuildContext context,
-    String title,
-    IconData icon,
-    Widget destinationScreen,
-    ) 
-  {
-  return TextButton(
-    onPressed: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => destinationScreen),
-      );
-    },
-    style: ButtonStyle(
-      overlayColor: MaterialStateProperty.all(Colors.transparent),
-      foregroundColor: MaterialStateProperty.all(Colors.black),
-    ),
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 32, color: const Color(0xFFD9D9D9)),
-        const SizedBox(height: 4),
-        Text(title, style: const TextStyle(fontFamily: 'Inter')),
-        ],
-      ),
+      bottomNavigationBar: FooterNavigation(),
     );
   }
 }

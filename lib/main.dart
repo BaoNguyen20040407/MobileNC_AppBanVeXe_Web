@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:giao_dien_1/screen/splash_screen.dart';
+import 'package:giao_dien_1/view/auth/splash_screen.dart';
 
 void main() {
   runApp(const MyApp());

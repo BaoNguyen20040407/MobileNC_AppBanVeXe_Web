@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:giao_dien_1/screen/about_us_page2.dart';
-import 'package:giao_dien_1/screen/news.dart';
-import 'homepage.dart';
+import 'package:giao_dien_1/view/about/about_us_page2.dart';
+import 'package:giao_dien_1/view/news/news.dart';
+import '../main/homepage.dart';
+import 'package:giao_dien_1/widget/appbar.dart';
+import 'package:giao_dien_1/widget/footer.dart';
+import 'package:giao_dien_1/config/default.dart';
 
 class AboutUs extends StatelessWidget {
   const AboutUs({super.key});
@@ -9,58 +12,12 @@ class AboutUs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      // ✅ AppBar tuỳ chỉnh theo thiết kế
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(80),
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-          color: const Color(0xffFDE5DE),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Image.asset(
-                "assets/image/namhailogo.png",
-                height: 32,
-                width: 60,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Text(
-                      "NHÀ XE NAM HẢI",
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xff006400),
-                        fontFamily: 'Inter',
-                      ),
-                    ),
-                    SizedBox(height: 2),
-                    Text(
-                      "Vì những chuyến xe an toàn cho bạn",
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Color(0xffFF0000),
-                        fontFamily: 'Inter',
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Image.asset(
-                "assets/image/personicon.png",
-                height: 32,
-                width: 32,
-              ),
-            ],
-          ),
-        ),
-      ),
+      backgroundColor: AppColors.white,
 
+      //AppBar
+      appBar: const CustomAppBar(),
+
+      //Body
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
@@ -71,7 +28,7 @@ class AboutUs extends StatelessWidget {
                 child: Text(
                   "NHÀ XE NAM HẢI",
                   style: TextStyle(
-                      color: Color(0xFFFF5722),
+                      color: AppColors.mainOrange,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       fontFamily: 'Inter'),
@@ -82,7 +39,7 @@ class AboutUs extends StatelessWidget {
                 child: Text(
                   "Vì những chuyến xe an toàn cho bạn",
                   style: TextStyle(
-                      color: Colors.black,
+                      color: AppColors.black,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       fontFamily: 'Inter'),
@@ -106,7 +63,7 @@ class AboutUs extends StatelessWidget {
                   ],
                 ),
                 textAlign: TextAlign.justify,
-                style: TextStyle(color: Colors.black, height: 2.0),
+                style: TextStyle(color: AppColors.black, height: 2.0),
               ),
               const SizedBox(height: 16),
               const Text(
@@ -116,7 +73,7 @@ class AboutUs extends StatelessWidget {
                 " Công ty có nhiều giải thưởng danh giá như “Thương hiệu số 1 Việt Nam”, "
                 "“Top 10 dịch vụ hoàn hảo vì quyền lợi người tiêu dùng năm 2024”, "
                 "“Top 5 thương hiệu - sản phẩm uy tín cho các doanh nghiệp tại Việt Nam năm 2024”…",
-                style: TextStyle(color: Colors.black, fontSize: 16, height: 2.0, fontFamily: 'Inter'),
+                style: TextStyle(color: AppColors.black, fontSize: 16, height: 2.0, fontFamily: 'Inter'),
                 textAlign: TextAlign.justify,
               ),
               const SizedBox(height: 32),
@@ -124,7 +81,7 @@ class AboutUs extends StatelessWidget {
                 child: Text(
                   "LOGO NHẬN DIỆN",
                   style: TextStyle(
-                      color: Color(0xffFF5722),
+                      color: AppColors.mainOrange,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       fontFamily: 'Inter'),
@@ -151,18 +108,18 @@ class AboutUs extends StatelessWidget {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF5722),
+                  backgroundColor: AppColors.mainOrange,
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10), 
                   ),
                   elevation: 5, 
-                  shadowColor: Color(0xFFFF5722),
+                  shadowColor: AppColors.mainOrange,
                 ),
                 child: const Text(
                   "Xem tiếp",
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppColors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 17,
                     fontFamily: 'Inter'
@@ -178,77 +135,7 @@ class AboutUs extends StatelessWidget {
       ),
 
       //Footer
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.15), 
-              offset: const Offset(0, -3), 
-              blurRadius: 6,
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _bottomNavItem(
-              context,
-              "Trang chủ",
-              Icons.home,
-              HomePage(),
-            ),
-            _bottomNavItem(
-              context,
-              "Lịch trình",
-              Icons.event_note,
-              HomePage(),
-            ),
-            _bottomNavItem(
-              context,
-              "Tra cứu vé",
-              Icons.confirmation_number,
-              HomePage(),
-            ),
-            _bottomNavItem(
-              context,
-              "Tin tức",
-              Icons.article,
-              News(),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _bottomNavItem(
-    BuildContext context,
-    String title,
-    IconData icon,
-    Widget destinationScreen,
-    ) 
-  {
-  return TextButton(
-    onPressed: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => destinationScreen),
-      );
-    },
-    style: ButtonStyle(
-      overlayColor: MaterialStateProperty.all(Colors.transparent),
-      foregroundColor: MaterialStateProperty.all(Colors.black),
-    ),
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 32, color: const Color(0xFFD9D9D9)),
-        const SizedBox(height: 4),
-        Text(title, style: const TextStyle(fontFamily: 'Inter')),
-        ],
-      ),
+      bottomNavigationBar: const FooterNavigation(),
     );
   }
 }

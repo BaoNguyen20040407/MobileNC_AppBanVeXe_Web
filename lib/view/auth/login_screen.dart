@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:giao_dien_1/screen/homepage.dart';
-import 'package:giao_dien_1/screen/phone_number_input.dart';
+import 'package:giao_dien_1/view/main/homepage.dart';
+import 'package:giao_dien_1/view/auth/phone_number_input.dart';
 import 'confirm_email_screen.dart';
-import 'news.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

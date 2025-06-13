@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:giao_dien_1/screen/guide_s1.dart';
-import 'package:giao_dien_1/screen/news.dart';
-import 'package:giao_dien_1/screen/news_detail_02.dart';
-import 'about_us.dart';
+import 'package:giao_dien_1/view/guide/guide_s1.dart';
+import 'package:giao_dien_1/view/news/news.dart';
+import 'package:giao_dien_1/view/news/news_detail_02.dart';
+import '../about/about_us.dart';
+import 'package:giao_dien_1/config/default.dart';
+import 'package:giao_dien_1/widget/appbar.dart';
+import 'package:giao_dien_1/widget/footer.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -10,35 +13,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final Color green = Color(0xFF006400);
+  final Color green = AppColors.greenDark;
   int _selectedIndex = 0;
   DateTime? _selectedDate;              // biến lưu ngày chọn
   final TextEditingController _dobController = TextEditingController();
-
-  Widget _bottomNavItem(String title, IconData icon, int index, VoidCallback onTap) {
-    final isSelected = _selectedIndex == index;
-    
-    return TextButton(
-      onPressed: () {
-        setState(() {
-          _selectedIndex = index;
-        });
-        onTap();
-      },
-      style: ButtonStyle(
-        overlayColor: MaterialStateProperty.all(Colors.transparent),
-        foregroundColor: MaterialStateProperty.all(Colors.black),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 32, color: isSelected ? Color(0xFFFF5722) : Color(0xFFD9D9D9)),
-          const SizedBox(height: 4),
-          Text(title, style: const TextStyle(fontFamily: 'Inter')),
-        ],
-      ),
-    );
-  }
 
   String formatDate(DateTime date) {
   String day = date.day.toString().padLeft(2, '0');
@@ -58,13 +36,13 @@ class _HomePageState extends State<HomePage> {
       return Theme(
         data: Theme.of(context).copyWith(
           colorScheme: ColorScheme.light(
-            primary: Color(0xFFFF5722),
-            onPrimary: Colors.white,
-            onSurface: Colors.black,
+            primary: AppColors.mainOrange,
+            onPrimary: AppColors.white,
+            onSurface: AppColors.black,
           ),
           textButtonTheme: TextButtonThemeData(
             style: TextButton.styleFrom(
-              foregroundColor: Color(0xFFFF5722),
+              foregroundColor: AppColors.mainOrange,
             ),
           ),
         ),
@@ -83,47 +61,11 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(80),
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-          color: const Color(0xffFDE5DE),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Image.asset("assets/image/namhailogo.png", height: 32, width: 60),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Text("NHÀ XE NAM HẢI",
-                      style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xff006400),
-                          fontFamily: 'Inter'),
-                    ),
-                    SizedBox(height: 2),
-                    Text("Vì những chuyến xe an toàn cho bạn",
-                      style: TextStyle(
-                          fontSize: 12,
-                          color: Color(0xffFF0000),
-                          fontFamily: 'Inter'),
-                    ),
-                  ],
-                ),
-              ),
-              Image.asset("assets/image/personicon.png", height: 32, width: 32),
-            ],
-          ),
-        ),
-      ),
+      appBar: CustomAppBar(),
 
       body: SingleChildScrollView(
         child: Container(
-          color: Colors.white,
+          color: AppColors.white,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
           child: Column(
             children: [
@@ -143,18 +85,18 @@ class _HomePageState extends State<HomePage> {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFFF5722),
+                    backgroundColor: AppColors.mainOrange,
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                     elevation: 5,
-                    shadowColor: Color(0xFFFF5722).withOpacity(0.6),
+                    shadowColor: AppColors.mainOrange.withOpacity(0.6),
                   ),
                   child: const Text(
                     "Về chúng tôi",
                     style: TextStyle(
-                      color: Colors.white,
+                      color: AppColors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 17,
                       fontFamily: 'Inter',
@@ -168,35 +110,7 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
 
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Color(0xFFD9D9D9),
-              offset: Offset(0, -5),
-              blurRadius: 4,
-            ),
-          ],
-        ),
-        padding: EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _bottomNavItem("Trang chủ", Icons.home, 0, () {
-            }),
-            _bottomNavItem("Lịch trình", Icons.event_note, 1, () {
-              //Navigator.push(context, MaterialPageRoute(builder: (context) => LichTrinhPage()));
-            }),
-            _bottomNavItem("Tra cứu vé", Icons.confirmation_number, 2, () {
-              //Navigator.push(context, MaterialPageRoute(builder: (context) => TraCuuVePage()));
-            }),
-            _bottomNavItem("Tin tức", Icons.article, 3, () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => News()));
-            }),
-          ],
-        ),
-      ),
+      bottomNavigationBar: FooterNavigation(),
     );
   }
 }
@@ -224,7 +138,7 @@ class _RouteSearchCardState extends State<RouteSearchCard> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        border: Border.all(color: Color(0xffFF5722), width: 8),
+        border: Border.all(color: AppColors.mainOrange, width: 8),
         borderRadius: BorderRadius.circular(10),
         color: Colors.white,
       ),
@@ -245,8 +159,8 @@ class _RouteSearchCardState extends State<RouteSearchCard> {
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   alignment: Alignment.centerRight,
                   splashFactory: NoSplash.splashFactory,
-                  overlayColor: MaterialStateProperty.all(Colors.transparent),
-                  foregroundColor: MaterialStateProperty.all(Color(0xFFFF5722)),
+                  overlayColor: MaterialStateProperty.all(AppColors.whitetransparent),
+                  foregroundColor: MaterialStateProperty.all(AppColors.mainOrange),
                 ),
                 child: Text(
                   'Hướng dẫn đặt vé',
@@ -254,7 +168,7 @@ class _RouteSearchCardState extends State<RouteSearchCard> {
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                     fontFamily: 'Inter',
-                    color: Color(0xFFFF5722),
+                    color: AppColors.mainOrange,
                   ),
                 ),
               ),
@@ -264,34 +178,34 @@ class _RouteSearchCardState extends State<RouteSearchCard> {
               decoration: InputDecoration(
                 prefixIcon: Icon(
                   Icons.place,
-                  color: Color(0xFFFF5722),
+                  color: AppColors.mainOrange,
                 ),
                 hintText: 'Nhập điểm đi',
                 hintStyle: TextStyle(
-                  color: Colors.grey[600],
+                  color: AppColors.grey600,
                   fontWeight: FontWeight.w500,
                   fontFamily: 'Inter',
                   fontSize: 14,
                 ),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: AppColors.white,
                 border: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey.shade400, width: 1),
+                  borderSide: BorderSide(color: AppColors.grey400, width: 1),
                 ),
                 enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey.shade400, width: 1),
+                  borderSide: BorderSide(color: AppColors.grey400, width: 1),
                 ),
                 focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFFFF5722), width: 2),
+                  borderSide: BorderSide(color: AppColors.mainOrange, width: 2),
                 ),
-                hoverColor: Colors.transparent, 
-                focusColor: Colors.transparent,
+                hoverColor: AppColors.whitetransparent, 
+                focusColor: AppColors.whitetransparent,
                 contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
               ),
               mouseCursor: SystemMouseCursors.text,
-              cursorColor: Color(0xFFFF5722),
+              cursorColor: AppColors.mainOrange,
               style: TextStyle(
-                color: Colors.black87,
+                color: AppColors.black87,
                 fontSize: 16,
               ),
             ),
@@ -300,34 +214,34 @@ class _RouteSearchCardState extends State<RouteSearchCard> {
               decoration: InputDecoration(
                 prefixIcon: Icon(
                   Icons.place,
-                  color: Color(0xFFFF5722),
+                  color: AppColors.mainOrange,
                 ),
                 hintText: 'Nhập điểm đến',
                 hintStyle: TextStyle(
-                  color: Colors.grey[600],
+                  color: AppColors.grey600,
                   fontWeight: FontWeight.w500,
                   fontFamily: 'Inter',
                   fontSize: 14,
                 ),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: AppColors.white,
                 border: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey.shade400, width: 1),
+                  borderSide: BorderSide(color: AppColors.grey400, width: 1),
                 ),
                 enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey.shade400, width: 1),
+                  borderSide: BorderSide(color: AppColors.grey400, width: 1),
                 ),
                 focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFFFF5722), width: 2),
+                  borderSide: BorderSide(color: AppColors.mainOrange, width: 2),
                 ),
                 hoverColor: Colors.transparent, 
                 focusColor: Colors.transparent, 
                 contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
               ),
               mouseCursor: SystemMouseCursors.text, 
-              cursorColor: Color(0xFFFF5722),
+              cursorColor: AppColors.mainOrange,
               style: TextStyle(
-                color: Colors.black87,
+                color: AppColors.black87,
                 fontSize: 16,
               ),
             ),
@@ -339,11 +253,11 @@ class _RouteSearchCardState extends State<RouteSearchCard> {
               decoration: InputDecoration(
                 prefixIcon: Icon(
                   Icons.calendar_today,
-                  color: Color(0xFFFF5722),
+                  color: AppColors.mainOrange,
                 ),
                 hintText: 'dd/mm/yyyy',
                 hintStyle: TextStyle(
-                  color: Colors.grey[600],
+                  color: AppColors.grey600,
                   fontWeight: FontWeight.w500,
                   fontFamily: 'Inter',
                   fontSize: 14,
@@ -351,22 +265,22 @@ class _RouteSearchCardState extends State<RouteSearchCard> {
                 filled: true,
                 fillColor: Colors.white,
                 border: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey.shade400, width: 1),
+                  borderSide: BorderSide(color: AppColors.grey400, width: 1),
                 ),
                 enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey.shade400, width: 1),
+                  borderSide: BorderSide(color: AppColors.grey400, width: 1),
                 ),
                 focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFFFF5722), width: 2), // Màu cam
+                  borderSide: BorderSide(color: AppColors.mainOrange, width: 2), // Màu cam
                 ),
-                hoverColor: Colors.transparent,
-                focusColor: Colors.transparent,
+                hoverColor: AppColors.whitetransparent,
+                focusColor: AppColors.whitetransparent,
                 contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
               ),
               mouseCursor: SystemMouseCursors.text,
-              cursorColor: Color(0xFFFF5722),
+              cursorColor: AppColors.mainOrange,
               style: TextStyle(
-                color: Colors.black87,
+                color: AppColors.black87,
                 fontSize: 16,
               ),
             ),
@@ -375,34 +289,34 @@ class _RouteSearchCardState extends State<RouteSearchCard> {
               decoration: InputDecoration(
                 prefixIcon: Icon(
                   Icons.confirmation_num,
-                  color: Color(0xFFFF5722),
+                  color: AppColors.mainOrange,
                 ),
                 hintText: 'Số vé',
                 hintStyle: TextStyle(
-                  color: Colors.grey[600],
+                  color: AppColors.grey600,
                   fontWeight: FontWeight.w500,
                   fontFamily: 'Inter',
                   fontSize: 14,
                 ),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: AppColors.white,
                 border: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey.shade400, width: 1),
+                  borderSide: BorderSide(color: AppColors.grey400, width: 1),
                 ),
                 enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey.shade400, width: 1),
+                  borderSide: BorderSide(color: AppColors.grey400, width: 1),
                 ),
                 focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFFFF5722), width: 2),
+                  borderSide: BorderSide(color: AppColors.mainOrange, width: 2),
                 ),
-                hoverColor: Colors.transparent,
-                focusColor: Colors.transparent, 
+                hoverColor: AppColors.whitetransparent,
+                focusColor: AppColors.whitetransparent, 
                 contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
               ),
               mouseCursor: SystemMouseCursors.text, 
-              cursorColor: Color(0xFFFF5722),
+              cursorColor: AppColors.mainOrange,
               style: TextStyle(
-                color: Colors.black87,
+                color: AppColors.black87,
                 fontSize: 16,
               ),
             ),
@@ -418,7 +332,7 @@ class _RouteSearchCardState extends State<RouteSearchCard> {
                       Radio<bool>(
                         value: true,
                         groupValue: _isOneWay,
-                        activeColor: Color(0xFFFF5722),
+                        activeColor: AppColors.mainOrange,
                         onChanged: (bool? value) {
                           setState(() {
                             _isOneWay = value!;
@@ -441,7 +355,7 @@ class _RouteSearchCardState extends State<RouteSearchCard> {
                       Radio<bool>(
                         value: false,
                         groupValue: _isOneWay,
-                        activeColor: Color(0xFFFF5722),
+                        activeColor: AppColors.mainOrange,
                         onChanged: (bool? value) {
                           setState(() {
                             _isOneWay = value!;
@@ -467,18 +381,18 @@ class _RouteSearchCardState extends State<RouteSearchCard> {
                 onPressed: () {
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFFF5722),
+                  backgroundColor: AppColors.mainOrange,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  shadowColor: Color(0xFFFF5722)
+                  shadowColor: AppColors.mainOrange
                 ),
                 child: const Text(
                   "Tìm chuyến xe",
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppColors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
                     fontFamily: 'Inter',
@@ -533,11 +447,11 @@ class _PromotionSectionState extends State<PromotionSection> {
                 height: 140,
                 margin: EdgeInsets.symmetric(horizontal: 0),
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: AppColors.grey300,
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
+                      color: AppColors.black.withOpacity(0.15),
                       offset: Offset(0, 4),
                       blurRadius: 4,
                       spreadRadius: 1,
@@ -581,7 +495,7 @@ class _PromotionSectionState extends State<PromotionSection> {
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF006400),
+              color: AppColors.greenDark,
               fontFamily: 'Inter',
             ),
           ),
@@ -615,7 +529,7 @@ class _PromotionSectionState extends State<PromotionSection> {
                   child: Icon(
                     _currentPage == index ? Icons.circle : Icons.circle_outlined,
                     size: 16,
-                    color: _currentPage == index ? Color(0xffFF5722) : Colors.grey,
+                    color: _currentPage == index ? AppColors.mainOrange : AppColors.greyLight,
                   ),
                 ),
               );
@@ -681,7 +595,7 @@ class PopularRoutesSection extends StatelessWidget {
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF006400),
+              color: AppColors.greenDark,
               fontFamily: 'Inter',
             ),
           ),
@@ -707,7 +621,7 @@ class PopularRoutesSection extends StatelessWidget {
           return Container(
             margin: EdgeInsets.symmetric(horizontal: 0, vertical: 16),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.shade300),
+              border: Border.all(color: AppColors.greyShade300),
               borderRadius: BorderRadius.circular(12),
               color: Colors.white,
             ),
@@ -732,7 +646,7 @@ class PopularRoutesSection extends StatelessWidget {
                     padding: EdgeInsets.all(8),
                     alignment: Alignment.topLeft,
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.3),
+                      color: AppColors.black.withOpacity(0.3),
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(10),
                         bottomLeft: Radius.circular(10),
@@ -746,7 +660,7 @@ class PopularRoutesSection extends StatelessWidget {
                         Text(
                           'Tuyến xe từ',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppColors.white,
                             fontSize: 14,
                             fontFamily: 'Inter',
                           ),
@@ -755,7 +669,7 @@ class PopularRoutesSection extends StatelessWidget {
                         Text(
                           from,
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppColors.white,
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
                             fontFamily: 'Inter',
@@ -775,7 +689,7 @@ class PopularRoutesSection extends StatelessWidget {
                       itemCount: destinations.length,
                       separatorBuilder: (context, index) {
                         return Divider(
-                          color: Colors.grey.shade300,
+                          color: AppColors.greyShade300,
                           thickness: 1,
                           height: 1,
                           indent: 0,
@@ -796,7 +710,7 @@ class PopularRoutesSection extends StatelessWidget {
                                   Text(
                                     route['to']!,
                                     style: TextStyle(
-                                      color: Color(0xFF006400),
+                                      color: AppColors.greenDark,
                                       fontWeight: FontWeight.w600,
                                       fontFamily: 'Inter',
                                       fontSize: 14, 
@@ -805,7 +719,7 @@ class PopularRoutesSection extends StatelessWidget {
                                   Text(
                                     route['price']!,
                                     style: TextStyle(
-                                      color: Color(0xffFF5722),
+                                      color: AppColors.mainOrange,
                                       fontWeight: FontWeight.bold,
                                       fontFamily: 'Inter',
                                       fontSize: 14, 
@@ -817,7 +731,7 @@ class PopularRoutesSection extends StatelessWidget {
                               Text(
                                 '${route['distance']} - ${route['duration']} - ${route['date']}',
                                 style: TextStyle(
-                                  color: Colors.black,
+                                  color: AppColors.black,
                                   fontSize: 14,
                                   fontFamily: 'Inter',
                                 ),
@@ -853,7 +767,7 @@ class TrustInfoSection extends StatelessWidget {
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF006400),
+              color: AppColors.greenDark,
               fontFamily: 'Inter',
             ),
             textAlign: TextAlign.center,
@@ -863,7 +777,7 @@ class TrustInfoSection extends StatelessWidget {
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF006400),
+              color: AppColors.greenDark,
               fontFamily: 'Inter',
             ),
             textAlign: TextAlign.center,

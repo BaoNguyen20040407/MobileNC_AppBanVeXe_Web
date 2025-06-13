@@ -15,7 +15,7 @@ class AboutUsPage2 extends StatelessWidget {
       backgroundColor: AppColors.white,
 
       //AppBar
-      appBar: AppBar(),
+      appBar: CustomAppBar(),
 
       //Body
       body: SingleChildScrollView(

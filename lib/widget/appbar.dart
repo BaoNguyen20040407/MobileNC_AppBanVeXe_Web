@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/config/default.dart';
+import 'package:giao_dien_1/view/profile/profile_screen.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final double height;
@@ -19,14 +20,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+      padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
       color: AppColors.softOrange,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Image.asset(
             "assets/image/namhailogo.png",
-            height: 32,
+            height: 60,
             width: 60,
           ),
           const SizedBox(width: 8),
@@ -58,7 +59,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
           if (showProfileIcon)
             GestureDetector(
-              onTap: onProfileTap,
+              onTap: () {
+                Navigator.push(
+                  context, 
+                  MaterialPageRoute(builder: (context) => ProfileScreen()));
+              },
               child: Image.asset(
                 "assets/image/personicon.png",
                 height: 32,

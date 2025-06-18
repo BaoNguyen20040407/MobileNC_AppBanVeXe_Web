@@ -29,17 +29,7 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset("assets/image/namhailogo.png", height: 150),
-            const SizedBox(height: 16),
-            const Text(
-              "NHÀ XE NAM HẢI",
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF006400), fontFamily: 'Inter'),
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              "Vì những chuyến xe an toàn cho bạn",
-              style: TextStyle(color: Color(0xFFFF0000), fontSize: 18, fontFamily: 'Inter'),
-            ),
+            Image.asset("assets/image/logovexekhach_1.png", height: 600),
           ],
         ),
       ),

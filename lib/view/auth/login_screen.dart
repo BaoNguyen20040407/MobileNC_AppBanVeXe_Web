@@ -19,36 +19,10 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 60.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
           child: ListView(
             children: [
-              const SizedBox(height: 32),
-              Image.asset("assets/image/namhailogo.png", height: 120),
-              const SizedBox(height: 16),
-
-              const Center(
-                child: Text(
-                  "NHÀ XE NAM HẢI",
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF006400),
-                    fontFamily: 'Inter',
-                  ),
-                ),
-              ),
-              const SizedBox(height: 4),
-
-              const Center(
-                child: Text(
-                  "Vì những chuyến xe an toàn cho bạn",
-                  style: TextStyle(
-                    color: Color(0xFFFF0000),
-                    fontSize: 14,
-                    fontFamily: 'Inter',
-                  ),
-                ),
-              ),
+              Image.asset("assets/image/logovexekhach_1.png", height: 250),
               const SizedBox(height: 32),
 
               const Center(

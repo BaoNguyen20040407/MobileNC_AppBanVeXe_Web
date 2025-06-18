@@ -34,57 +34,11 @@ class _NewsDetail02State extends State<NewsDetail02> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'VIETTRAVEL TUNG KHUYẾN MÃI TẾT 2025: TẾT ĐI CHƠI XA - NHÀ TA THÊM GẦN',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 19,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Ngày đăng: 12:30 25/01/2025',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 16,
-                  color: Colors.black,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Thực hiện: Gia Bảo, Đăng Khoa',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 16,
-                  color: Colors.black,
-                ),
-              ),
-              const SizedBox(height: 32),
-              Container(
-                width: double.infinity,
-                height: 200,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
-                      offset: Offset(0, 4),
-                      blurRadius: 4,
-                      spreadRadius: 1,
-                    ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Image.asset(
-                    'assets/image/promote_05.png',
-                    width: double.infinity,
-                    height: 200,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
+              const NewsHeader(
+                title: 'VIETTRAVEL TUNG KHUYẾN MÃI TẾT 2025: TẾT ĐI CHƠI XA - NHÀ TA THÊM GẦN', 
+                date: 'Ngày đăng: 12:30 25/01/2025', 
+                authors: 'Thực hiện: Gia Bảo, Đăng Khoa', 
+                imagePath: 'assets/image/promote_05.png'),
               const SizedBox(height: 32),
 
               Text.rich(

@@ -92,10 +92,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     if (userNameInput == saveUsername && passwordInput == savePassword)
                     {
-                      Navigator.push(
+                      Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (_) => HomePage()),
-                    );
+                        MaterialPageRoute(
+                          builder: (_) => HomePage(),
+                          settings: const RouteSettings(name: '/home'),
+                        ),
+                      );
                     }
                     else {
                       setState(() {

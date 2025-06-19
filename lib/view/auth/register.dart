@@ -284,7 +284,7 @@ class _RegisterState extends State<Register> {
               // UserName
               CustomInputField(
                 controller: _usernameController,
-                labelText: "Username",
+                labelText: "Tên đăng nhập",
                 prefixIcon: Icons.person,
                 errorText: _usernameError,
                 keyboardType: TextInputType.text,
@@ -303,7 +303,7 @@ class _RegisterState extends State<Register> {
               // Mật khẩu
               CustomInputField(
                 controller: _passwordController,
-                labelText: "Password",
+                labelText: "Mật khẩu",
                 prefixIcon: Icons.lock,
                 obscureText: _obscurePassword,
                 showToggleVisibility: true,

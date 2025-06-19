@@ -3,6 +3,7 @@ import 'package:giao_dien_1/view/main/homepage.dart';
 import 'package:giao_dien_1/view/auth/phone_number_input.dart';
 import 'confirm_email_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:giao_dien_1/widget/input_field.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -44,76 +45,31 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 32),
 
-              // UserName TextField
-              TextField(
+              //Tên đăng nhập
+              CustomInputField(
                 controller: _usernameController,
-                decoration: InputDecoration(
-                  labelText: "Tên đăng nhập",
-                  errorText: _usernameError,
-                  prefixIcon: Padding(
-                    padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-                    child: Icon(Icons.person),
-                  ),
-                  enabledBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFFF5722)),
-                  ),
-                  focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFFF5722), width: 2.0),
-                  ),
-                    hintStyle: TextStyle(
-                    color: Colors.grey.withOpacity(0.5),
-                  ),
-                  floatingLabelStyle: const TextStyle(
-                    color: Colors.black,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 20.0,
-                    vertical: 16.0,
-                  ),
-                ),
+                labelText: "Tên đăng nhập",
+                prefixIcon: Icons.person,
+                errorText: _usernameError,
+                keyboardType: TextInputType.text,
+                showToggleVisibility: false,
               ),
-
               const SizedBox(height: 16),
 
               // Password TextField có nút ẩn/hiện mật khẩu
-              TextField(
+              CustomInputField(
                 controller: _passwordController,
+                labelText: "Mật khẩu",
+                prefixIcon: Icons.lock,
+                errorText: _passwordError,
                 obscureText: _obscurePassword,
-                decoration: InputDecoration(
-                  labelText: "Mật khẩu",
-                  errorText: _passwordError,
-                  prefixIcon: Padding(
-                    padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-                    child: Icon(Icons.lock),
-                  ),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                      color: Colors.black,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _obscurePassword = !_obscurePassword;
-                      });
-                    },
-                  ),
-                  enabledBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFFF5722)),
-                  ),
-                  focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFFF5722), width: 2.0),
-                  ),
-                  hintStyle: TextStyle(
-                    color: Colors.grey.withOpacity(0.5),
-                  ),
-                  floatingLabelStyle: const TextStyle(
-                    color: Colors.black,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 20.0,
-                    vertical: 16.0,
-                  ),
-                ),
+                keyboardType: TextInputType.visiblePassword,
+                showToggleVisibility: true,
+                onToggleObscureText: () {
+                  setState(() {
+                    _obscurePassword = !_obscurePassword;
+                  });
+                },
               ),
 
               const SizedBox(height: 32),
@@ -133,6 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       _usernameError = null;
                       _passwordError = null;
                     });
+
                     if (userNameInput == saveUsername && passwordInput == savePassword)
                     {
                       Navigator.push(
@@ -196,7 +153,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
-
 
               const SizedBox(height: 32),
               Center(

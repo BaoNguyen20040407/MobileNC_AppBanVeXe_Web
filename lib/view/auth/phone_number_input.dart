@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/view/auth/welcome.dart';
+import 'package:giao_dien_1/widget/orange_button_1.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:giao_dien_1/widget/input_field.dart';
 
 class Phone_Number_Input extends StatefulWidget {
   const Phone_Number_Input({super.key});
@@ -70,8 +72,12 @@ class _PhoneNumberInputState extends State<Phone_Number_Input> {
                 ),
               ),
               const SizedBox(height: 32),
-              TextField(
+              CustomInputField(
                 controller: _phoneController,
+                labelText: "Số điện thoại",
+                hintText: "VD: 0987654321",
+                prefixIcon: Icons.phone,
+                errorText: _phoneError,
                 keyboardType: TextInputType.phone,
                 onChanged: (value) {
                   final phonePattern = RegExp(r'^0\d{9}$');
@@ -82,76 +88,21 @@ class _PhoneNumberInputState extends State<Phone_Number_Input> {
                   }
                   setState(() {}); // Cập nhật UI
                 },
-                decoration: InputDecoration(
-                  labelText: "Số điện thoại",
-                  errorText: _phoneError,
-                  errorStyle: const TextStyle(
-                    color: Colors.red,
-                    fontSize: 12,
-                  ),
-                  errorMaxLines: 2,
-                  prefixIcon: const Padding(
-                    padding: EdgeInsets.only(left: 16.0, right: 16.0),
-                    child: Icon(Icons.phone),
-                  ),
-                  enabledBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFFF5722)),
-                  ),
-                  focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFFF5722), width: 2.0),
-                  ),
-                  errorBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFFF5722)),
-                  ),
-                  focusedErrorBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFFF5722), width: 2.0),
-                  ),
-                  hintText: 'VD: 0987654321',
-                  hintStyle: TextStyle(
-                    color: Colors.grey.withOpacity(0.5),
-                  ),
-                  floatingLabelStyle: const TextStyle(
-                    color: Colors.black,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 20.0,
-                    vertical: 16.0,
-                  ),
-                ),
               ),
 
               const SizedBox(height: 32),
-              SizedBox(
-                child: ElevatedButton(
-                  onPressed: () async {
-                    _handleContinue();
-                      if (_phoneError == null) {
-                        await _savePhoneNumber(_phoneController.text.trim());
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const Welcome()),
-                        );
-                      }
-                    },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFF5722),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    elevation: 4,
-                    minimumSize: const Size(double.infinity, 48),
-                  ),
-                  child: const Text(
-                    "Tiếp tục",
-                    style: TextStyle(
-                      fontSize: 17,
-                      color: Colors.white,
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
+              OrangeButton1(
+                text: "Tiếp tục", 
+                onPressed: () async{
+                  _handleContinue();
+                  if (_phoneError == null) {
+                    await _savePhoneNumber(_phoneController.text.trim());
+                    Navigator.push(
+                      context, 
+                      MaterialPageRoute(builder: (context) => const Welcome())
+                    );
+                  }
+                }),
               const SizedBox(height: 32),
               RichText(
                 textAlign: TextAlign.justify,

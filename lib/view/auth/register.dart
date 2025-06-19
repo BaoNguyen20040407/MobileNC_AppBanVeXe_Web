@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/view/auth/login_screen.dart';
+import 'package:giao_dien_1/widget/orange_button_1.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:giao_dien_1/widget/input_field.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -152,9 +154,9 @@ class _RegisterState extends State<Register> {
         child: Padding(
           padding:
               const EdgeInsets.symmetric(horizontal: 24.0, vertical: 10.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
               
               //Đăng ký tài khoản
               const Text(
@@ -180,50 +182,20 @@ class _RegisterState extends State<Register> {
               const SizedBox(height: 32),
 
               // Họ tên
-              TextField(
+              CustomInputField(
                 controller: _nameController,
+                labelText: "Họ tên",
+                prefixIcon: Icons.person,
+                errorText: _nameError,
+                keyboardType: TextInputType.text,
                 onChanged: (value) {
                   if (value.trim().isEmpty) {
                     _nameError = 'Vui lòng nhập họ tên';
                   } else {
                     _nameError = null;
                   }
-                  setState(() {}); // Cập nhật UI
+                  setState(() {}); // Cập nhật lại UI
                 },
-                decoration: InputDecoration(
-                  labelText: "Họ tên",
-                  errorText: _nameError,
-                  errorStyle: const TextStyle(
-                    color: Colors.red,
-                    fontSize: 12,
-                  ),
-                  prefixIcon: const Padding(
-                    padding: EdgeInsets.only(left: 16.0, right: 16.0),
-                    child: Icon(Icons.person),
-                  ),
-                  enabledBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFFF5722)),
-                  ),
-                  focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFFF5722), width: 2.0),
-                  ),
-                  errorBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFFF5722)),
-                  ),
-                  focusedErrorBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFFF5722), width: 2.0),
-                  ),
-                  hintStyle: TextStyle(
-                    color: Colors.grey.withOpacity(0.5),
-                  ),
-                  floatingLabelStyle: const TextStyle(
-                    color: Colors.black,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 20.0,
-                    vertical: 16.0,
-                  ),
-                ),
               ),
               const SizedBox(height: 16),
 
@@ -233,12 +205,13 @@ class _RegisterState extends State<Register> {
                 readOnly: true,
                 onTap: () => _selectDate(context),
                 decoration: InputDecoration(
-                  labelText: "Ngày sinh",
+                  labelText: "Ngày sinh", labelStyle: TextStyle(fontFamily: 'Inter'),
                   hintText: "dd/mm/yyyy",
                   errorText: _dobError,
                   errorStyle: const TextStyle(
                     color: Colors.red,
                     fontSize: 12,
+                    fontFamily: 'Inter',
                   ),
                   prefixIcon: const Padding(
                     padding: EdgeInsets.only(left: 16.0, right: 16.0),
@@ -271,58 +244,31 @@ class _RegisterState extends State<Register> {
               const SizedBox(height: 16),
 
               // Nơi ở
-              TextField(
+              CustomInputField(
                 controller: _addressController,
+                labelText: "Nơi ở",
+                hintText: "Số nhà, tên đường, phường, tỉnh/ thành",
+                prefixIcon: Icons.location_on,
+                errorText: _addressError,
                 onChanged: (value) {
                   if (value.trim().isEmpty) {
                     _addressError = 'Vui lòng nhập nơi ở';
                   } else {
                     _addressError = null;
                   }
-                  setState(() {}); // Cập nhật UI
+                  setState(() {});
                 },
-                decoration: InputDecoration(
-                  labelText: "Nơi ở",
-                  hintText: "Số nhà, tên đường, phường, tỉnh/ thành",
-                  errorText: _addressError,
-                  errorStyle: const TextStyle(
-                    color: Colors.red,
-                    fontSize: 12,
-                  ),
-                  prefixIcon: const Padding(
-                    padding: EdgeInsets.only(left: 16.0, right: 16.0),
-                    child: Icon(Icons.location_on),
-                  ),
-                  enabledBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFFF5722)),
-                  ),
-                  focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFFF5722), width: 2.0),
-                  ),
-                  errorBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFFF5722)),
-                  ),
-                  focusedErrorBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFFF5722), width: 2.0),
-                  ),
-                  hintStyle: TextStyle(
-                    color: Colors.grey.withOpacity(0.5),
-                  ),
-                  floatingLabelStyle: const TextStyle(
-                    color: Colors.black,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 20.0,
-                    vertical: 16.0,
-                  ),
-                ),
               ),
               const SizedBox(height: 16),
 
               // Email
-              TextField(
+              CustomInputField(
                 controller: _emailController,
+                labelText: "Email",
+                prefixIcon: Icons.email,
+                errorText: _emailError,
                 keyboardType: TextInputType.emailAddress,
+                hintText: "example@gmail.com",
                 onChanged: (value) {
                   final emailPattern = RegExp(r'^[a-zA-Z0-9._%+-]+@gmail\.com$');
                   if (value.isEmpty || emailPattern.hasMatch(value)) {
@@ -330,52 +276,18 @@ class _RegisterState extends State<Register> {
                   } else {
                     _emailError = 'Email phải có định dạng hợp lệ và kết thúc bằng @gmail.com';
                   }
-                  setState(() {}); // Cập nhật UI
+                  setState(() {});
                 },
-                decoration: InputDecoration(
-                  labelText: "Email",
-                  errorText: _emailError,
-                  errorStyle: const TextStyle(
-                    color: Colors.red,
-                    fontSize: 12,
-                  ),
-                  errorMaxLines: 2,
-                  prefixIcon: const Padding(
-                    padding: EdgeInsets.only(left: 16.0, right: 16.0),
-                    child: Icon(Icons.email),
-                  ),
-                  enabledBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFFF5722)),
-                  ),
-                  focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFFF5722), width: 2.0),
-                  ),
-                  // Giữ viền cam khi có lỗi
-                  errorBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFFF5722)),
-                  ),
-                  focusedErrorBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFFF5722), width: 2.0),
-                  ),
-                  hintStyle: TextStyle(
-                    color: Colors.grey.withOpacity(0.5),
-                  ),
-                  floatingLabelStyle: const TextStyle(
-                    color: Colors.black,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 20.0,
-                    vertical: 16.0,
-                  ),
-                ),
               ),
               const SizedBox(height: 16),
 
               // UserName
-              TextField(
+              CustomInputField(
                 controller: _usernameController,
+                labelText: "Username",
+                prefixIcon: Icons.person,
+                errorText: _usernameError,
                 keyboardType: TextInputType.text,
-                textCapitalization: TextCapitalization.none,
                 onChanged: (value) {
                   final usernamePattern = RegExp(r'^[a-zA-Z0-9]{8,}$');
                   if (usernamePattern.hasMatch(value)) {
@@ -383,52 +295,25 @@ class _RegisterState extends State<Register> {
                   } else {
                     _usernameError = 'Username phải ít nhất 8 ký tự, không chứa ký tự đặc biệt';
                   }
-                  setState(() {});  // Đảm bảo cập nhật UI
+                  setState(() {});
                 },
-                decoration: InputDecoration(
-                  labelText: "Username",
-                  errorText: _usernameError,
-                  errorStyle: const TextStyle(
-                    color: Colors.red,
-                    fontSize: 12,
-                  ),
-                  errorMaxLines: 2,
-                  prefixIcon: const Padding(
-                    padding: EdgeInsets.only(left: 16.0, right: 16.0),
-                    child: Icon(Icons.person),
-                  ),
-                  enabledBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFFF5722)),
-                  ),
-                  focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFFF5722), width: 2.0),
-                  ),
-                  // Giữ viền cam khi có lỗi (thay vì viền đỏ mặc định)
-                  errorBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFFF5722)),
-                  ),
-                  focusedErrorBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFFFF5722), width: 2.0),
-                  ),
-                  hintStyle: TextStyle(
-                    color: Colors.grey.withOpacity(0.5),
-                  ),
-                  floatingLabelStyle: const TextStyle(
-                    color: Colors.black,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 20.0,
-                    vertical: 16.0,
-                  ),
-                ),
               ),
               const SizedBox(height: 16),
 
               // Mật khẩu
-              TextField(
+              CustomInputField(
                 controller: _passwordController,
-                obscureText: _obscurePassword1,
+                labelText: "Password",
+                prefixIcon: Icons.lock,
+                obscureText: _obscurePassword,
+                showToggleVisibility: true,
+                onToggleObscureText: () {
+                  setState(() {
+                    _obscurePassword = !_obscurePassword;
+                  });
+                },
                 keyboardType: TextInputType.visiblePassword,
+                errorText: _passwordError,
                 onChanged: (value) {
                   if (value.length >= 8) {
                     _passwordError = null;
@@ -437,104 +322,28 @@ class _RegisterState extends State<Register> {
                   }
                   setState(() {});
                 },
-                decoration: InputDecoration(
-                  labelText: "Password",
-                  errorText: _passwordError,
-                  errorStyle: const TextStyle(
-                    color: Colors.red,
-                    fontSize: 12,
-                  ),
-                  prefixIcon: const Padding(
-                    padding: EdgeInsets.only(left: 16.0, right: 16.0),
-                    child: Icon(Icons.lock),
-                  ),
-                  prefixIconConstraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: const BorderSide(color: Color(0xFFFF5722)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: const BorderSide(color: Color(0xFFFF5722), width: 2.0),
-                  ),
-                  errorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: const BorderSide(color: Color(0xFFFF5722)),
-                  ),
-                  focusedErrorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: const BorderSide(color: Color(0xFFFF5722), width: 2.0),
-                  ),
-                  hintStyle: const TextStyle(color: Colors.grey),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 20.0,
-                    vertical: 16.0,
-                  ),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                      color: Colors.black,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _obscurePassword = !_obscurePassword;
-                      });
-                    },
-                  ),
-                ),
               ),
               const SizedBox(height: 16),
 
               //Url Hình ảnh
-              TextField(
-                controller: _imageUrlController,
-                keyboardType: TextInputType.url,
-                onChanged: (value) {
-                  final urlPattern = RegExp(
-                    r'^(https?:\/\/.*\.(?:png|jpg|jpeg|gif))$', caseSensitive: false);
-                  if (value.isEmpty || urlPattern.hasMatch(value)) {
-                    _imageUrlError = null;
-                  } else {
-                    _imageUrlError = 'Vui lòng nhập URL ảnh hợp lệ (.jpg, .png, .jpeg, .gif)';
-                  }
-                  setState(() {});
-                },
-                decoration: InputDecoration(
-                  labelText: "URL hình ảnh",
-                  hintText: "Nhập URL hình ảnh (.jpg, .png, .jpeg, .gif)",
-                  errorText: _imageUrlError,
-                  prefixIcon: const Padding(
-                    padding: EdgeInsets.only(left: 16.0, right: 16.0),
-                    child: Icon(Icons.image),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: const BorderSide(color: Color(0xFFFF5722)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: const BorderSide(color: Color(0xFFFF5722), width: 2.0),
-                  ),
-                  errorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: const BorderSide(color: Colors.red),
-                  ),
-                  focusedErrorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: const BorderSide(color: Colors.red, width: 2.0),
-                  ),
-                  hintStyle: TextStyle(
-                    color: Colors.grey.withOpacity(0.5),
-                  ),
-                  floatingLabelStyle: const TextStyle(
-                    color: Colors.black,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 20.0,
-                    vertical: 16.0,
-                  ),
-                ),
-              ),
+              CustomInputField(
+              controller: _imageUrlController,
+              labelText: "URL hình ảnh",
+              hintText: "Nhập URL hình ảnh (.jpg, .png, .jpeg, .gif)",
+              prefixIcon: Icons.image,
+              keyboardType: TextInputType.url,
+              errorText: _imageUrlError,
+              onChanged: (value) {
+                final urlPattern = RegExp(
+                  r'^(https?:\/\/.*\.(?:png|jpg|jpeg|gif))$', caseSensitive: false);
+                if (value.isEmpty || urlPattern.hasMatch(value)) {
+                  _imageUrlError = null;
+                } else {
+                  _imageUrlError = 'Vui lòng nhập URL ảnh hợp lệ (.jpg, .png, .jpeg, .gif)';
+                }
+                setState(() {});
+              },
+            ),
               const SizedBox(height: 32),
 
               // Hướng dẫn
@@ -570,27 +379,9 @@ class _RegisterState extends State<Register> {
               SizedBox(height: 16),
 
               //Nút Đăng ký tài khoản
-              SizedBox(
-                child: ElevatedButton(
-                  onPressed: handleContinue,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFF5722),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    elevation: 4,
-                    minimumSize: const Size(double.infinity, 48),
-                  ),
-                  child: const Text(
-                    "Đăng ký tài khoản",
-                    style: TextStyle(
-                      fontSize: 17,
-                      color: Colors.white,
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+              OrangeButton1(
+                text: 'Đăng ký tài khoản', 
+                onPressed: handleContinue
               ),
               const SizedBox(height: 32),
             ],

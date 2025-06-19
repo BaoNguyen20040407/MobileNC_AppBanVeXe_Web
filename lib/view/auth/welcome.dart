@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/view/auth/register.dart';
+import 'package:giao_dien_1/widget/orange_button_1.dart';
 
 class Welcome extends StatelessWidget {
   const Welcome({super.key});
@@ -100,33 +101,14 @@ class Welcome extends StatelessWidget {
               ),
               SizedBox(height: 16),
 
-              SizedBox(
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
+              OrangeButton1(
+                text: 'Tiếp tục', 
+                onPressed: (){
+                  Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const Register()),
+                    MaterialPageRoute(builder: (context) => const Register())
                   );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFF5722),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    elevation: 4,
-                    minimumSize: const Size(double.infinity, 48),
-                  ),
-                  child: const Text(
-                    "Tiếp tục",
-                    style: TextStyle(
-                      fontSize: 17,
-                      color: Colors.white,
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
+                })
             ],
           ),
         ),

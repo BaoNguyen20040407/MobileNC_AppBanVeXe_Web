@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:giao_dien_1/view/guide/guide_s1.dart';
 import 'package:giao_dien_1/view/news/news.dart';
 import 'package:giao_dien_1/view/news/news_detail_02.dart';
 import '../about/about_us.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/widget/appbar.dart';
 import 'package:giao_dien_1/widget/footer.dart';
+import 'package:giao_dien_1/view/guide/instruction_main.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -151,7 +151,11 @@ class _RouteSearchCardState extends State<RouteSearchCard> {
               alignment: Alignment.centerRight,
               child: TextButton(
                 onPressed: () {
-
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => HuongDanApp()),
+                  );
                 },
                 style: ButtonStyle(
                   padding: MaterialStateProperty.all(EdgeInsets.zero),

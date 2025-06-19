@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/view/auth/login_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -10,8 +11,18 @@ class Register extends StatefulWidget {
 
 class _RegisterState extends State<Register> {
   DateTime? _selectedDate;
+  bool _obscurePassword = true; 
+  //Kiểm tra họ tên
+  final TextEditingController _nameController = TextEditingController();
+  String? _nameError; 
+
+  //Kiểm tra ngày sinh
   final TextEditingController _dobController = TextEditingController();
-  bool _obscurePassword = true;
+  String? _dobError; 
+
+  //Kiểm tra nơi ở
+  final TextEditingController _addressController = TextEditingController();
+  String? _addressError; 
 
   //Kiểm tra email
   final TextEditingController _emailController = TextEditingController();
@@ -35,6 +46,51 @@ class _RegisterState extends State<Register> {
     _dobController.dispose();
     super.dispose();
   }
+
+  Future<void> _saveUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('full_name', _nameController.text.trim());
+    await prefs.setString('dob', _dobController.text.trim());
+    await prefs.setString('address', _addressController.text.trim());
+    await prefs.setString('email', _emailController.text.trim());
+    await prefs.setString('username', _usernameController.text.trim());
+    await prefs.setString('password', _passwordController.text); // KHÔNG nên lưu password thật
+    await prefs.setString('image_url', _imageUrlController.text.trim());
+  }
+
+  void handleContinue() async {
+  final isNameValid = _nameError == null && _nameController.text.trim().isNotEmpty;
+  final isEmailValid = _emailError == null && _emailController.text.isNotEmpty;
+  final isAddressVailid = _addressError == null && _addressController.text.isNotEmpty;
+  final isUsernameValid = _usernameError == null && _usernameController.text.isNotEmpty;
+  final isPasswordValid = _passwordError == null && _passwordController.text.isNotEmpty;
+  final isDobFilled = _dobController.text.isNotEmpty;
+  final isImageUrlValid = _imageUrlError == null && _imageUrlController.text.isNotEmpty;
+
+  if (isNameValid &&
+      isEmailValid &&
+      isAddressVailid &&
+      isUsernameValid &&
+      isPasswordValid &&
+      isDobFilled &&
+      isImageUrlValid) {
+        await _saveUserData();
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+    );
+  } else {
+    setState(() {
+      if (_nameController.text.isEmpty) _nameError ??= 'Vui lòng nhập họ tên';
+      if (_emailController.text.isEmpty) _emailError ??= 'Vui lòng nhập email';
+      if (_addressController.text.isEmpty) _addressError ??= 'Vui lòng nhập nơi ở';
+      if (_usernameController.text.isEmpty) _usernameError ??= 'Vui lòng nhập username';
+      if (_passwordController.text.isEmpty) _passwordError ??= 'Vui lòng nhập mật khẩu';
+      if (_imageUrlController.text.isEmpty) _imageUrlError ??= 'Vui lòng nhập URL hình ảnh';
+      if (_dobController.text.isEmpty) _dobError ??= 'Vui lòng chọn ngày sinh';
+    });
+  } 
+}
 
   String formatDate(DateTime date) {
     String day = date.day.toString().padLeft(2, '0');
@@ -71,7 +127,8 @@ class _RegisterState extends State<Register> {
   if (picked != null) {
     setState(() {
       _selectedDate = picked;
-      _dobController.text = formatDate(picked);  
+      _dobController.text = formatDate(picked);
+      _dobError = null;   
     });
   }
 }
@@ -124,10 +181,24 @@ class _RegisterState extends State<Register> {
 
               // Họ tên
               TextField(
+                controller: _nameController,
+                onChanged: (value) {
+                  if (value.trim().isEmpty) {
+                    _nameError = 'Vui lòng nhập họ tên';
+                  } else {
+                    _nameError = null;
+                  }
+                  setState(() {}); // Cập nhật UI
+                },
                 decoration: InputDecoration(
                   labelText: "Họ tên",
-                  prefixIcon: Padding(
-                    padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+                  errorText: _nameError,
+                  errorStyle: const TextStyle(
+                    color: Colors.red,
+                    fontSize: 12,
+                  ),
+                  prefixIcon: const Padding(
+                    padding: EdgeInsets.only(left: 16.0, right: 16.0),
                     child: Icon(Icons.person),
                   ),
                   enabledBorder: const OutlineInputBorder(
@@ -136,7 +207,13 @@ class _RegisterState extends State<Register> {
                   focusedBorder: const OutlineInputBorder(
                     borderSide: BorderSide(color: Color(0xFFFF5722), width: 2.0),
                   ),
-                    hintStyle: TextStyle(
+                  errorBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFFFF5722)),
+                  ),
+                  focusedErrorBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFFFF5722), width: 2.0),
+                  ),
+                  hintStyle: TextStyle(
                     color: Colors.grey.withOpacity(0.5),
                   ),
                   floatingLabelStyle: const TextStyle(
@@ -158,14 +235,25 @@ class _RegisterState extends State<Register> {
                 decoration: InputDecoration(
                   labelText: "Ngày sinh",
                   hintText: "dd/mm/yyyy",
-                  prefixIcon: Padding(
-                    padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+                  errorText: _dobError,
+                  errorStyle: const TextStyle(
+                    color: Colors.red,
+                    fontSize: 12,
+                  ),
+                  prefixIcon: const Padding(
+                    padding: EdgeInsets.only(left: 16.0, right: 16.0),
                     child: Icon(Icons.calendar_today),
                   ),
                   enabledBorder: const OutlineInputBorder(
                     borderSide: BorderSide(color: Color(0xFFFF5722)),
                   ),
                   focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFFFF5722), width: 2.0),
+                  ),
+                  errorBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFFFF5722)),
+                  ),
+                  focusedErrorBorder: const OutlineInputBorder(
                     borderSide: BorderSide(color: Color(0xFFFF5722), width: 2.0),
                   ),
                   hintStyle: TextStyle(
@@ -182,13 +270,27 @@ class _RegisterState extends State<Register> {
               ),
               const SizedBox(height: 16),
 
-              // Địa chỉ
+              // Nơi ở
               TextField(
+                controller: _addressController,
+                onChanged: (value) {
+                  if (value.trim().isEmpty) {
+                    _addressError = 'Vui lòng nhập nơi ở';
+                  } else {
+                    _addressError = null;
+                  }
+                  setState(() {}); // Cập nhật UI
+                },
                 decoration: InputDecoration(
                   labelText: "Nơi ở",
                   hintText: "Số nhà, tên đường, phường, tỉnh/ thành",
-                  prefixIcon: Padding(
-                    padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+                  errorText: _addressError,
+                  errorStyle: const TextStyle(
+                    color: Colors.red,
+                    fontSize: 12,
+                  ),
+                  prefixIcon: const Padding(
+                    padding: EdgeInsets.only(left: 16.0, right: 16.0),
                     child: Icon(Icons.location_on),
                   ),
                   enabledBorder: const OutlineInputBorder(
@@ -197,7 +299,13 @@ class _RegisterState extends State<Register> {
                   focusedBorder: const OutlineInputBorder(
                     borderSide: BorderSide(color: Color(0xFFFF5722), width: 2.0),
                   ),
-                    hintStyle: TextStyle(
+                  errorBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFFFF5722)),
+                  ),
+                  focusedErrorBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFFFF5722), width: 2.0),
+                  ),
+                  hintStyle: TextStyle(
                     color: Colors.grey.withOpacity(0.5),
                   ),
                   floatingLabelStyle: const TextStyle(
@@ -464,12 +572,7 @@ class _RegisterState extends State<Register> {
               //Nút Đăng ký tài khoản
               SizedBox(
                 child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const LoginScreen()),
-                  );
-                  },
+                  onPressed: handleContinue,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF5722),
                     shape: RoundedRectangleBorder(

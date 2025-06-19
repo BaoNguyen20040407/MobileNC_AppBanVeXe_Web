@@ -145,18 +145,18 @@ class _NewsDetail01State extends State<NewsDetail01> {
                   Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF5722),
+                  backgroundColor: AppColors.mainOrange,
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10), 
                   ),
                   elevation: 5, 
-                  shadowColor: Color(0xFFFF5722),
+                  shadowColor: AppColors.mainOrange,
                 ),
                 child: const Text(
                   "Trở về trang trước",
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppColors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 17,
                     fontFamily: 'Inter'

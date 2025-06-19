@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:giao_dien_1/view/main/homepage.dart';
 import 'package:giao_dien_1/view/auth/phone_number_input.dart';
 import 'confirm_email_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,6 +13,11 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true; 
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  String? _usernameError;
+  String? _passwordError; 
 
   @override
   Widget build(BuildContext context) {
@@ -40,8 +46,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
               // UserName TextField
               TextField(
+                controller: _usernameController,
                 decoration: InputDecoration(
-                  labelText: "UserName",
+                  labelText: "Tên đăng nhập",
+                  errorText: _usernameError,
                   prefixIcon: Padding(
                     padding: const EdgeInsets.only(left: 16.0, right: 16.0),
                     child: Icon(Icons.person),
@@ -69,9 +77,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
               // Password TextField có nút ẩn/hiện mật khẩu
               TextField(
+                controller: _passwordController,
                 obscureText: _obscurePassword,
                 decoration: InputDecoration(
-                  labelText: "Password",
+                  labelText: "Mật khẩu",
+                  errorText: _passwordError,
                   prefixIcon: Padding(
                     padding: const EdgeInsets.only(left: 16.0, right: 16.0),
                     child: Icon(Icons.lock),
@@ -111,11 +121,37 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(
                 height: 48,
                 child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => HomePage()),
-                  );
+                  onPressed: () async {
+                    final userNameInput = _usernameController.text.trim();
+                    final passwordInput = _passwordController.text.trim();
+
+                    final pref = await SharedPreferences.getInstance();
+                    final saveUsername = pref.getString('username');
+                    final savePassword = pref.getString('password');
+
+                    setState(() {
+                      _usernameError = null;
+                      _passwordError = null;
+                    });
+                    if (userNameInput == saveUsername && passwordInput == savePassword)
+                    {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => HomePage()),
+                    );
+                    }
+                    else {
+                      setState(() {
+                        if (userNameInput != saveUsername) 
+                        {
+                          _usernameError = 'Tên đăng nhập không đúng';
+                        }
+                        if (passwordInput != savePassword)
+                        {
+                          _passwordError = 'Mật khẩu không đúng';
+                        }
+                      });
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF5722),

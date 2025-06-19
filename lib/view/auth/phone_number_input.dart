@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/view/auth/welcome.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Phone_Number_Input extends StatefulWidget {
   const Phone_Number_Input({super.key});
@@ -10,11 +11,28 @@ class Phone_Number_Input extends StatefulWidget {
 
 class _PhoneNumberInputState extends State<Phone_Number_Input> {
   final TextEditingController _phoneController = TextEditingController();
+  String? _phoneError; 
 
   @override
   void dispose() {
     _phoneController.dispose();
     super.dispose();
+  }
+
+  Future<void> _savePhoneNumber(String phone) async {
+    final pref = await SharedPreferences.getInstance();
+    await pref.setString('phone_number', phone);
+  }
+
+  void _handleContinue() {
+    final phone = _phoneController.text.trim();
+    final phonePattern = RegExp(r'^0\d{9}$');
+    if (!phonePattern.hasMatch(phone)) {
+      setState(() {
+        _phoneError = 'Số điện thoại phải có đúng 10 chữ số và bắt đầu bằng số 0';
+      });
+      return;
+    }
   }
 
   @override
@@ -55,8 +73,23 @@ class _PhoneNumberInputState extends State<Phone_Number_Input> {
               TextField(
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
+                onChanged: (value) {
+                  final phonePattern = RegExp(r'^0\d{9}$');
+                  if (value.isEmpty || phonePattern.hasMatch(value)) {
+                    _phoneError = null;
+                  } else {
+                    _phoneError = 'Số điện thoại phải có đúng 10 chữ số và bắt đầu bằng số 0';
+                  }
+                  setState(() {}); // Cập nhật UI
+                },
                 decoration: InputDecoration(
                   labelText: "Số điện thoại",
+                  errorText: _phoneError,
+                  errorStyle: const TextStyle(
+                    color: Colors.red,
+                    fontSize: 12,
+                  ),
+                  errorMaxLines: 2,
                   prefixIcon: const Padding(
                     padding: EdgeInsets.only(left: 16.0, right: 16.0),
                     child: Icon(Icons.phone),
@@ -65,6 +98,12 @@ class _PhoneNumberInputState extends State<Phone_Number_Input> {
                     borderSide: BorderSide(color: Color(0xFFFF5722)),
                   ),
                   focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFFFF5722), width: 2.0),
+                  ),
+                  errorBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFFFF5722)),
+                  ),
+                  focusedErrorBorder: const OutlineInputBorder(
                     borderSide: BorderSide(color: Color(0xFFFF5722), width: 2.0),
                   ),
                   hintText: 'VD: 0987654321',
@@ -80,15 +119,20 @@ class _PhoneNumberInputState extends State<Phone_Number_Input> {
                   ),
                 ),
               ),
+
               const SizedBox(height: 32),
               SizedBox(
                 child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const Welcome()),
-                    );
-                  },
+                  onPressed: () async {
+                    _handleContinue();
+                      if (_phoneError == null) {
+                        await _savePhoneNumber(_phoneController.text.trim());
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const Welcome()),
+                        );
+                      }
+                    },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF5722),
                     shape: RoundedRectangleBorder(

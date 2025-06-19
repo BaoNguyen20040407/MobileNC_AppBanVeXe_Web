@@ -13,7 +13,7 @@ class FooterNavigation extends StatelessWidget {
     if (current == '/home') return 0;
 
     // Default
-    return 0;
+    return -1;
   }
 
   void _navigateTo(int index, BuildContext context) {

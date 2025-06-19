@@ -10,7 +10,7 @@ class Welcome extends StatelessWidget {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 135.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 50.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -18,8 +18,8 @@ class Welcome extends StatelessWidget {
               Center(
                 child: Image.asset(
                   'assets/image/logovexekhach_1.png',
-                  width: 205,
-                  height: 152,
+                  width: 250,
+                  height: 250,
                 ),
               ),
               SizedBox(height: 16),

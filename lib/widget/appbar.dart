@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/view/profile/profile_screen.dart';
 
-class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   final double height;
   final bool showProfileIcon;
   final VoidCallback? onProfileTap;
@@ -16,6 +17,29 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => Size.fromHeight(height);
+
+  @override
+  State<CustomAppBar> createState() => _CustomAppBarState();
+}
+
+class _CustomAppBarState extends State<CustomAppBar> {
+  String? _imageUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadImageUrl();
+  }
+
+  Future<void> _loadImageUrl() async {
+    final pref = await SharedPreferences.getInstance();
+    final url = pref.getString('image_url');
+    if (mounted) {
+      setState(() {
+        _imageUrl = url;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,17 +81,35 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               ],
             ),
           ),
-          if (showProfileIcon)
+          if (widget.showProfileIcon)
             GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context, 
-                  MaterialPageRoute(builder: (context) => ProfileScreen()));
-              },
-              child: Image.asset(
-                "assets/image/personicon.png",
-                height: 32,
-                width: 32,
+              onTap: widget.onProfileTap ??
+                  () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => ProfileScreen()),
+                    );
+                  },
+              child: ClipOval(
+                child: _imageUrl != null && _imageUrl!.isNotEmpty
+                    ? Image.network(
+                        _imageUrl!,
+                        height: 40,
+                        width: 40,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset(
+                            "assets/image/personicon.png",
+                            height: 32,
+                            width: 32,
+                          );
+                        },
+                      )
+                    : Image.asset(
+                        "assets/image/personicon.png",
+                        height: 32,
+                        width: 32,
+                      ),
               ),
             ),
         ],

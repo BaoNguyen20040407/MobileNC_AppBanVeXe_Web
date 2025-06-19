@@ -87,7 +87,10 @@ class _CustomAppBarState extends State<CustomAppBar> {
                   () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => ProfileScreen()),
+                      MaterialPageRoute(
+                        builder: (_) => const ProfileScreen(),
+                        settings: const RouteSettings(name: '/profile'),
+                      ),
                     );
                   },
               child: ClipOval(

@@ -43,10 +43,26 @@ class _RegisterState extends State<Register> {
   final TextEditingController _imageUrlController = TextEditingController();
   String? _imageUrlError;
 
+  //Lưu số điện thoại
+  String _phone = '';
+
+  Future<void> _loadPhoneNumber() async {
+    final pref = await SharedPreferences.getInstance();
+    setState(() {
+      _phone = pref.getString('phone_number') ?? '';
+    });
+  }
+
   @override
   void dispose() {
     _dobController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPhoneNumber();
   }
 
   Future<void> _saveUserData() async {
@@ -56,8 +72,9 @@ class _RegisterState extends State<Register> {
     await prefs.setString('address', _addressController.text.trim());
     await prefs.setString('email', _emailController.text.trim());
     await prefs.setString('username', _usernameController.text.trim());
-    await prefs.setString('password', _passwordController.text); // KHÔNG nên lưu password thật
+    await prefs.setString('password', _passwordController.text); 
     await prefs.setString('image_url', _imageUrlController.text.trim());
+    await prefs.setString('phone', _phone);
   }
 
   void handleContinue() async {

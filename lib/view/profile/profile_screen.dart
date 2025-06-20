@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/view/auth/login_screen.dart';
 import 'package:giao_dien_1/view/auth/confirm_email_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -11,6 +12,25 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  String _url = '';
+  String _userName = '';
+  String _phone = '';
+
+  Future<void> _loadUserData() async {
+    final pref = await SharedPreferences.getInstance();
+    setState(() {
+      _url = pref.getString('image_url') ?? '';
+      _userName = pref.getString('username') ?? 'Người dùng';
+      _phone = pref.getString('phone') ?? 'Chưa có số';
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,7 +42,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               color: Color(0xFFF5A562),
               borderRadius: BorderRadius.vertical(bottom: Radius.circular(0)),
             ),
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
             child: Column(
               children: [
                 Row(
@@ -33,15 +53,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                const CircleAvatar(
+                const SizedBox(height: 4),
+                CircleAvatar(
                   radius: 32,
-                  backgroundImage: AssetImage('assets/image/personicon.png'),
+                  backgroundImage: _url.isNotEmpty
+                      ? NetworkImage(_url)
+                      : const AssetImage('assets/image/personicon.png') as ImageProvider,
                 ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Bao Nguyen',
-                  style: TextStyle(
+                const SizedBox(height: 8),
+                Text(
+                  _userName,
+                  style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
                     color: AppColors.white,
@@ -51,17 +73,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Image(
+                  children: [
+                    const Image(
                       image: AssetImage('assets/image/vietnam_flag.png'),
                       width: 25,
                       height: 17,
                       fit: BoxFit.cover,
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Text(
-                      '0765178079',
-                      style: TextStyle(
+                      _phone,
+                      style: const TextStyle(
                         color: AppColors.white,
                         fontFamily: 'Inter',
                         fontSize: 14,
@@ -108,7 +130,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     );
                   },
                 ),
-                
                 _buildMenuItem(
                   Icons.notifications_none,
                   "Thông báo",
@@ -130,11 +151,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   "Đăng xuất",
                   iconColor: Colors.red,
                   trailing: null,
-                  onTap: () {
+                  onTap: () async {
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.clear();
+
                     Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => LoginScreen(),
+                        builder: (_) => const LoginScreen(),
                         settings: const RouteSettings(name: '/login'),
                       ),
                       (route) => false,

@@ -23,19 +23,24 @@ class _PhoneNumberInputState extends State<Phone_Number_Input> {
 
   Future<void> _savePhoneNumber(String phone) async {
     final pref = await SharedPreferences.getInstance();
-    await pref.setString('phone_number', phone);
+    await pref.setString('phone', phone); // đổi thành 'phone'
   }
 
-  void _handleContinue() {
-    final phone = _phoneController.text.trim();
-    final phonePattern = RegExp(r'^0\d{9}$');
-    if (!phonePattern.hasMatch(phone)) {
-      setState(() {
-        _phoneError = 'Số điện thoại phải có đúng 10 chữ số và bắt đầu bằng số 0';
-      });
-      return;
-    }
+  bool _handleContinue() {
+  final phone = _phoneController.text.trim();
+  final phonePattern = RegExp(r'^0\d{9}$');
+  if (!phonePattern.hasMatch(phone)) {
+    setState(() {
+      _phoneError = 'Số điện thoại phải có đúng 10 chữ số và bắt đầu bằng số 0';
+    });
+    return false;
   }
+  setState(() {
+    _phoneError = null;
+  });
+  return true;
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +101,8 @@ class _PhoneNumberInputState extends State<Phone_Number_Input> {
                 onPressed: () async{
                   _handleContinue();
                   if (_phoneError == null) {
-                    await _savePhoneNumber(_phoneController.text.trim());
+                    final phone = _phoneController.text.trim();
+                    await _savePhoneNumber(phone);
                     Navigator.push(
                       context, 
                       MaterialPageRoute(builder: (context) => const Welcome())

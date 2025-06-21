@@ -46,12 +46,17 @@ class _RegisterState extends State<Register> {
   //Lưu số điện thoại
   String _phone = '';
 
-  Future<void> _loadPhoneNumber() async {
-    final pref = await SharedPreferences.getInstance();
+Future<void> _loadPhoneNumber() async {
+  final prefs = await SharedPreferences.getInstance();
+  final savedPhone = prefs.getString('phone');
+
+  if (mounted) {
     setState(() {
-      _phone = pref.getString('phone_number') ?? '';
+      _phone = savedPhone ?? '';
     });
   }
+}
+
 
   @override
   void dispose() {

@@ -9,8 +9,8 @@ class AppColors {
   static const Color white = Colors.white;
   static const Color greyLight = Color(0xffD9D9D9);
   static const Color whitetransparent = Colors.transparent;
-  static Color grey600 = Colors.grey[600]!;
-  static Color grey400 = Colors.grey.shade400;
+  static const Color grey600 = Color(0xFF757575);
+  static const Color grey400 = Color(0xFFBDBDBD);
   static const Color black87 = Colors.black87;
   static Color grey300 = Colors.grey[300]!;
   static Color greyShade300 = Colors.grey.shade300;

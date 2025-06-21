@@ -43,7 +43,7 @@ class _HomePageState extends State<HomePage> {
     context: context,
     initialDate: _selectedDate ?? DateTime(2000, 1, 1),
     firstDate: DateTime(1900),
-    lastDate: DateTime.now(),
+    lastDate: DateTime(2100),
     helpText: 'Chọn ngày',
      builder: (context, child) {
       return Theme(

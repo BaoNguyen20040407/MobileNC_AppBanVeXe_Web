@@ -17,13 +17,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _phone = '';
 
   Future<void> _loadUserData() async {
-    final pref = await SharedPreferences.getInstance();
-    setState(() {
-      _url = pref.getString('image_url') ?? '';
-      _userName = pref.getString('username') ?? 'Người dùng';
-      _phone = pref.getString('phone') ?? 'Chưa có số';
-    });
-  }
+  final pref = await SharedPreferences.getInstance();
+
+  final url = pref.getString('image_url') ?? '';
+  final username = pref.getString('username') ?? 'Người dùng';
+  final phone = pref.getString('phone') ?? 'Chưa có số';
+
+  setState(() {
+    _url = url;
+    _userName = username;
+    _phone = phone;
+  });
+}
+
 
   @override
   void initState() {

@@ -2,85 +2,57 @@ import 'package:flutter/material.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/widget/appbar.dart';
 import 'package:giao_dien_1/widget/footer.dart';
+import 'dart:convert';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:giao_dien_1/model/trip.dart';
 
-class BusRoute {
-  final String route;
-  final String type;
-  final int distance;
-  final String duration;
-  final String image;
 
-  BusRoute({
-    required this.route,
-    required this.type,
-    required this.distance,
-    required this.duration,
-    required this.image,
-  });
-}
 
 class ScheduleScreen extends StatefulWidget {
   ScheduleScreen({super.key});
 
   @override
   State<ScheduleScreen> createState() => _ScheduleScreenState();
+
+  
 }
 
 class _ScheduleScreenState extends State<ScheduleScreen> {
-  final List<BusRoute> allRoutes = [
-    BusRoute(
-      route: 'Hà Nội - TP. Hồ Chí Minh',
-      type: 'Giường',
-      distance: 639,
-      duration: '11 giờ 30 phút',
-      image: 'assets/image/bus1.jpg',
-    ),
-    BusRoute(
-      route: 'Hà Nội - TP. Hồ Chí Minh',
-      type: 'Ghế ngồi',
-      distance: 639,
-      duration: '12 giờ 00 phút',
-      image: 'assets/image/bus2.jpg',
-    ),
-    BusRoute(
-      route: 'Hà Nội - TP. Hồ Chí Minh',
-      type: 'Giường',
-      distance: 639,
-      duration: '11 giờ 30 phút',
-      image: 'assets/image/bus1.jpg',
-    ),
-    BusRoute(
-      route: 'Hà Nội - TP. Hồ Chí Minh',
-      type: 'Ghế ngồi',
-      distance: 630,
-      duration: '12 giờ 35 phút',
-      image: 'assets/image/bus2.jpg',
-    ),
-  ];
+  List<Trip> allTrips = [];
 
-  List<BusRoute> filteredRoutes = [];
+@override
+void initState() {
+  super.initState();
+  _loadTrips();
+}
+
+Future<void> _loadTrips() async {
+  final String response = await rootBundle.loadString('assets/data/trips.json');
+  final List<dynamic> data = json.decode(response);
+  setState(() {
+    allTrips = data.map((json) => Trip.fromJson(json)).toList();
+    filteredTrips = allTrips;
+  });
+}
+
+  List<Trip> filteredTrips = [];
   final TextEditingController startController = TextEditingController();
   final TextEditingController endController = TextEditingController();
   bool hasSearched = false;
 
-  void _searchRoutes() {
-    String start = startController.text.toLowerCase().trim();
-    String end = endController.text.toLowerCase().trim();
+ void _searchRoutes() {
+  String start = startController.text.toLowerCase().trim();
+  String end = endController.text.toLowerCase().trim();
 
-    setState(() {
-      hasSearched = true;
-      filteredRoutes = allRoutes.where((route) {
-        final routeLower = route.route.toLowerCase();
-        return routeLower.contains(start) && routeLower.contains(end);
-      }).toList();
-    });
-  }
+  setState(() {
+    hasSearched = true;
+    filteredTrips = allTrips.where((trip) {
+      return trip.diemDi.toLowerCase().contains(start) &&
+             trip.diemDen.toLowerCase().contains(end);
+    }).toList();
+  });
+}
 
-  @override
-  void initState() {
-    super.initState();
-    filteredRoutes = allRoutes;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -214,13 +186,13 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       // Kết quả tìm kiếm
       if (!hasSearched)
         _buildPlaceholder()
-      else if (filteredRoutes.isEmpty)
+      else if (filteredTrips.isEmpty)
         _buildPlaceholder(message: 'Không tìm thấy chuyến xe phù hợp.')
       else
         Column(
           children: [
             Text(
-              'Có ${filteredRoutes.length} kết quả được tìm thấy',
+              'Có ${filteredTrips.length} kết quả được tìm thấy',
               style: TextStyle(
                 fontWeight: FontWeight.w500,
                 fontSize: 16,
@@ -231,9 +203,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             ListView.builder(
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
-              itemCount: filteredRoutes.length,
+              itemCount: filteredTrips.length,
               itemBuilder: (context, index) {
-                final route = filteredRoutes[index];
+                final route = filteredTrips[index];
                 return Container(
                   margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                   padding: const EdgeInsets.all(12),
@@ -260,15 +232,15 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                           children: [
                             Text('Tuyến xe:', style: TextStyle(color: AppColors.mainOrange)),
                             Text(
-                              route.route,
+                              '${route.diemDi} - ${route.diemDen}',
                               style: TextStyle(
                                 color: AppColors.mainOrange,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            Text('Loại xe: ${route.type}'),
-                            Text('Quãng đường: ${route.distance}km'),
-                            Text('Thời gian hành trình: ${route.duration}'),
+                            Text('Loại xe: ${route.loaiGhe}'),
+                            Text('Giá vé: ${route.giaVe}vnđ'),
+                            Text('Thời gian hành trình: ${route.gioBatDau} - ${route.gioKetThuc}'),
                             const SizedBox(height: 6),
                             Align(
                               alignment: Alignment.centerRight,

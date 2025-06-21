@@ -241,6 +241,8 @@ class TripCard extends StatelessWidget {
                   ),
                 ],
 
+                const SizedBox(height: 8),
+
                 Container(
                   margin: const EdgeInsets.only(top: 16),
                   width: double.infinity,
@@ -248,7 +250,7 @@ class TripCard extends StatelessWidget {
                   color: AppColors.black,
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
 
                 // Giá vé và nút chọn
                 Row(

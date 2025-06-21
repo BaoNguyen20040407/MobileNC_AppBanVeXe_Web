@@ -45,11 +45,11 @@ class HuongDanApp extends StatelessWidget {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.mainOrange,
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      elevation: 5,
+                      elevation: 2,
                       shadowColor: AppColors.mainOrange,
                     ),
                     child: const Text(
@@ -74,11 +74,11 @@ class HuongDanApp extends StatelessWidget {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.mainOrange,
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      elevation: 5,
+                      elevation: 2,
                       shadowColor: AppColors.mainOrange,
                     ),
                     child: const Text(

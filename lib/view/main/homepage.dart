@@ -1,4 +1,9 @@
+import 'dart:async';
+import 'dart:convert'; 
+import 'dart:io';              
+import 'package:flutter/services.dart'; 
 import 'package:flutter/material.dart';
+import 'package:giao_dien_1/model/trip.dart';
 import 'package:giao_dien_1/view/news/news.dart';
 import 'package:giao_dien_1/view/news/news_detail_02.dart';
 import '../about/about_us.dart';
@@ -6,6 +11,8 @@ import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/widget/appbar.dart';
 import 'package:giao_dien_1/widget/footer.dart';
 import 'package:giao_dien_1/view/guide/instruction_main.dart';
+import 'package:giao_dien_1/widget/tripcard.dart';
+import 'package:giao_dien_1/widget/trip_route_label.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -13,10 +20,16 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  //Tìm danh sách chuyến xe theo địa điểm đã nhập
+  bool _showSearchResults = false; 
+  List <Trip> _filteredTrips = [];
   final Color green = AppColors.greenDark;
   int _selectedIndex = 0;
   DateTime? _selectedDate;              // biến lưu ngày chọn
   final TextEditingController _dobController = TextEditingController();
+  final _diemDiController = TextEditingController();
+  final _diemDenController = TextEditingController();
+  final _soVeController = TextEditingController();
 
   String formatDate(DateTime date) {
   String day = date.day.toString().padLeft(2, '0');
@@ -58,6 +71,12 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
+ Future<List<Trip>> loadTripsFromJson() async {
+    final String response = await rootBundle.loadString('assets/data/trips.json');
+    final List<dynamic> data = json.decode(response);
+    return data.map((e) => Trip.fromJson(e)).toList();
+  }  // 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -69,42 +88,120 @@ class _HomePageState extends State<HomePage> {
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
           child: Column(
             children: [
-              RouteSearchCard(dobController: _dobController, selectDateCallback: _selectDate,),
-              SizedBox(height: 16),
-              PromotionSection(),
-              SizedBox(height: 16),
-              PopularRoutesSection(),
-              SizedBox(height: 16),
-              TrustInfoSection(),
-              Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const AboutUs()),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.mainOrange,
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    elevation: 5,
-                    shadowColor: AppColors.mainOrange.withOpacity(0.6),
+              // Luôn luôn hiện bộ lọc
+              RouteSearchCard(
+                diemDiController: _diemDiController,
+                diemDenController: _diemDenController,
+                soVeController: _soVeController,
+                dobController: _dobController,
+                selectDateCallback: _selectDate,
+                onSearch: (diemDi, diemDen, ngayDi, soVe) async {
+                  final trips = await loadTripsFromJson();
+
+                  final ketQua = trips.where((trip) =>
+                    trip.diemDi.trim().toLowerCase() == diemDi.trim().toLowerCase() &&
+                    trip.diemDen.trim().toLowerCase() == diemDen.trim().toLowerCase() &&
+                    trip.ngayDi.trim() == ngayDi.trim() &&
+                    trip.soChoConLai >= soVe
+                  ).toList();
+
+                  print('==> Tổng số chuyến phù hợp: ${ketQua.length}');
+
+                  setState(() {
+                    _filteredTrips = ketQua;
+                    _showSearchResults = true;
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Khi ĐÃ tìm
+              if (_showSearchResults) ...[
+                if (_filteredTrips.isNotEmpty) ...[
+                  SizedBox(height: 16),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: TripRouteLabel(trip: _filteredTrips.first),
                   ),
-                  child: const Text(
-                    "Về chúng tôi",
-                    style: TextStyle(
-                      color: AppColors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 17,
-                      fontFamily: 'Inter',
+                  SizedBox(height: 16),
+                  Column(
+                  children: _filteredTrips
+                      .asMap()
+                      .entries
+                      .map((entry) {
+                        final index = entry.key;
+                        final trip = entry.value;
+
+                        return Column(
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                // TODO: xử lý chọn chuyến
+                              },
+                              child: TripCard(trip: trip),
+                            ),
+                            if (index != _filteredTrips.length - 1)
+                              const SizedBox(height: 16), // Thêm khoảng cách nếu không phải phần tử cuối
+                          ],
+                        );
+                      })
+                      .toList(),
+                ),
+
+                ] else ...[
+                  const SizedBox(height: 32),
+                  const Center(
+                    child: Text(
+                      'Không tìm thấy chuyến xe phù hợp',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.black,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 128),
+                ]
+              ]
+
+              // Khi CHƯA tìm
+              else ...[
+                PromotionSection(),
+                const SizedBox(height: 16),
+                PopularRoutesSection(),
+                const SizedBox(height: 16),
+                TrustInfoSection(),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const AboutUs()),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.mainOrange,
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      elevation: 5,
+                      shadowColor: AppColors.mainOrange.withOpacity(0.6),
+                    ),
+                    child: const Text(
+                      "Về chúng tôi",
+                      style: TextStyle(
+                        color: AppColors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 17,
+                        fontFamily: 'Inter',
+                      ),
                     ),
                   ),
                 ),
-              ),
-              SizedBox(height: 30),
+                const SizedBox(height: 30),
+              ],
             ],
           ),
         ),
@@ -117,13 +214,21 @@ class _HomePageState extends State<HomePage> {
 
 
 class RouteSearchCard extends StatefulWidget {
+  final TextEditingController diemDiController;
+  final TextEditingController diemDenController;
+  final TextEditingController soVeController;
   final TextEditingController dobController;
   final Future<void> Function(BuildContext) selectDateCallback;
+  final void Function(String diemDi, String diemDen, String ngayDi, int soVe) onSearch;
 
-  const RouteSearchCard({
+  RouteSearchCard({
     Key? key,
+    required this.diemDiController,
+    required this.diemDenController,
+    required this.soVeController,
     required this.dobController,
     required this.selectDateCallback,
+    required this.onSearch,
   }) : super(key: key);
 
   @override
@@ -132,7 +237,7 @@ class RouteSearchCard extends StatefulWidget {
 
 class _RouteSearchCardState extends State<RouteSearchCard> {
   bool _isOneWay = true;
-  
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -179,6 +284,7 @@ class _RouteSearchCardState extends State<RouteSearchCard> {
             ),
 
             TextField(
+              controller: widget.diemDiController,
               decoration: InputDecoration(
                 prefixIcon: Icon(
                   Icons.place,
@@ -215,6 +321,7 @@ class _RouteSearchCardState extends State<RouteSearchCard> {
             ),
 
             TextField(
+              controller: widget.diemDenController,
               decoration: InputDecoration(
                 prefixIcon: Icon(
                   Icons.place,
@@ -290,6 +397,7 @@ class _RouteSearchCardState extends State<RouteSearchCard> {
             ),
 
             TextField(
+              controller: widget.soVeController,
               decoration: InputDecoration(
                 prefixIcon: Icon(
                   Icons.confirmation_num,
@@ -383,6 +491,12 @@ class _RouteSearchCardState extends State<RouteSearchCard> {
             Center(
               child: ElevatedButton(
                 onPressed: () {
+                  widget.onSearch(
+                    widget.diemDiController.text.trim(),
+                    widget.diemDenController.text.trim(),
+                    widget.dobController.text.trim(),
+                    int.tryParse(widget.soVeController.text.trim()) ?? 1,
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.mainOrange,
@@ -420,6 +534,7 @@ class PromotionSection extends StatefulWidget {
 class _PromotionSectionState extends State<PromotionSection> {
   int _currentPage = 0;
   late PageController _pageController;
+  Timer? _autoPageTimer; 
 
   final List<List<String>> placeholderImages = [
   ['assets/image/promote_01.png', 'assets/image/promote_02.png'],
@@ -431,10 +546,21 @@ class _PromotionSectionState extends State<PromotionSection> {
   void initState() {
     super.initState();
     _pageController = PageController();
+     _autoPageTimer = Timer.periodic(Duration(seconds: 5), (Timer timer) {
+      if (_pageController.hasClients) {
+        int nextPage = (_currentPage + 1) % placeholderImages.length;
+        _pageController.animateToPage(
+          nextPage,
+          duration: Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
   }
 
   @override
   void dispose() {
+    _autoPageTimer?.cancel();
     _pageController.dispose();
     super.dispose();
   }

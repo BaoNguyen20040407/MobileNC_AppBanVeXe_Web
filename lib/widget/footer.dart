@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:giao_dien_1/view/main/homepage.dart';
 import 'package:giao_dien_1/view/news/news.dart';
 import 'package:giao_dien_1/config/default.dart';
+import 'package:giao_dien_1/view/schedule/schedule_screen.dart';
+import 'package:giao_dien_1/view/ticket_lookup/ticket_lookup_screen.dart';
 
 class FooterNavigation extends StatelessWidget {
   const FooterNavigation({super.key});
@@ -10,6 +12,8 @@ class FooterNavigation extends StatelessWidget {
     final current = ModalRoute.of(context)?.settings.name;
 
     if (current == '/news') return 3;
+    if (current == '/ticket') return 2;
+    if (current == '/schedule') return 1;
     if (current == '/home') return 0;
 
     // Default
@@ -24,6 +28,14 @@ class FooterNavigation extends StatelessWidget {
       case 0:
         nextPage = HomePage();
         routeName = '/home';
+        break;
+      case 1:
+        nextPage = ScheduleScreen();
+        routeName = '/schedule';
+        break;
+      case 2:
+        nextPage = TicketLookupScreen();
+        routeName = '/ticket';
         break;
       case 3:
         nextPage = const News();

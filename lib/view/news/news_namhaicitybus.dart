@@ -34,7 +34,7 @@ class _NewsState extends State<NewsNamhaicitybus> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SectionTitle(title: 'NAMHAI Bus Lines'),
+              SectionTitle(title: 'NAMHAI City Bus'),
               const SizedBox(height: 32),
 
               NewsCard(
@@ -192,7 +192,7 @@ class _NewsState extends State<NewsNamhaicitybus> {
                       Navigator.pop(context);
                     },
                   ),
-                  const SizedBox(width: 260),
+                  const SizedBox(width: 142),
                   SeeMoreButton(
                     onPressed: () {
                       // Điều hướng đến trang khác

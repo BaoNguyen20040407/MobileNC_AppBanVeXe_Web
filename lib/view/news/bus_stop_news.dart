@@ -234,7 +234,7 @@ class _NewsState extends State<BusStopNews> {
                       Navigator.pop(context);
                     },
                   ),
-                  const SizedBox(width: 260),
+                  const SizedBox(width: 142),
                   SeeMoreButton(
                     onPressed: () {
                       // Điều hướng đến trang khác

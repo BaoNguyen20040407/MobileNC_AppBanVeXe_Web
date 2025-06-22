@@ -191,7 +191,7 @@ class _NewsState extends State<PromotionNews> {
                       Navigator.pop(context);
                     },
                   ),
-                  const SizedBox(width: 260),
+                  const SizedBox(width: 142),
                   SeeMoreButton(
                     onPressed: () {
                       // Điều hướng đến trang khác

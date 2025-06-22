@@ -288,12 +288,12 @@ Future<void> _loadTrips() async {
         const Text(
           'XE TRUNG CHUYỂN',
           style: TextStyle(
-              fontWeight: FontWeight.bold, color: Colors.red, fontSize: 16),
+              fontWeight: FontWeight.bold, color: Colors.red, fontSize: 20, fontFamily: 'Inter'),
         ),
         const Text(
           'ĐÓN TRẢ TẬN NƠI',
           style: TextStyle(
-              fontWeight: FontWeight.bold, color: Colors.red, fontSize: 16),
+              fontWeight: FontWeight.bold, color: Colors.red, fontSize: 20, fontFamily: 'Inter'),
         ),
         if (message != null) ...[
           const SizedBox(height: 8),

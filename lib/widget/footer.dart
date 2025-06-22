@@ -11,7 +11,13 @@ class FooterNavigation extends StatelessWidget {
   int _getCurrentIndex(BuildContext context) {
     final current = ModalRoute.of(context)?.settings.name;
 
-    if (current == '/news') return 3;
+    if (current == '/news' || 
+        current == '/award_news' || 
+        current == '/bus_stop_news' || 
+        current == '/promotion_news' || 
+        current == '/nam_hai_city_bus' || 
+        current == '/nam_hai_bus_lines') 
+        return 3;
     if (current == '/ticket') return 2;
     if (current == '/schedule') return 1;
     if (current == '/home') return 0;

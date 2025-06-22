@@ -9,6 +9,11 @@ import 'package:giao_dien_1/data/news_data.dart';
 import 'package:giao_dien_1/widget/news_item.dart';
 import 'package:giao_dien_1/widget/see_more_button.dart';
 import 'package:giao_dien_1/widget/news_card.dart';
+import 'package:giao_dien_1/view/news/award_news.dart';
+import 'package:giao_dien_1/view/news/bus_stop_news.dart';
+import 'package:giao_dien_1/view/news/news_namhaibusline.dart';
+import 'package:giao_dien_1/view/news/news_namhaicitybus.dart';
+import 'package:giao_dien_1/view/news/promotion_news.dart';
 
 class News extends StatefulWidget {
   const News({super.key});
@@ -144,9 +149,16 @@ class _NewsState extends State<News> {
               
               SeeMoreButton(
                 onPressed: () {
-
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const NewsNamhaibusline(),
+                      settings: const RouteSettings(name: '/nam_hai_bus_lines'),
+                    ),
+                  );
                 },
               ),
+
 
               const SizedBox(height: 64),
 
@@ -200,7 +212,13 @@ class _NewsState extends State<News> {
               
               SeeMoreButton(
                 onPressed: () {
-
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const NewsNamhaicitybus(),
+                      settings: const RouteSettings(name: '/nam_hai_city_bus'),
+                    ),
+                  );
                 },
               ),
               const SizedBox(height: 64),
@@ -255,7 +273,13 @@ class _NewsState extends State<News> {
               
               SeeMoreButton(
                 onPressed: () {
-
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const PromotionNews(),
+                      settings: const RouteSettings(name: '/promotion_news'),
+                    ),
+                  );
                 },
               ),
               const SizedBox(height: 64),
@@ -310,7 +334,13 @@ class _NewsState extends State<News> {
               
               SeeMoreButton(
                 onPressed: () {
-
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const AwardNews(),
+                      settings: const RouteSettings(name: '/award_news'),
+                    ),
+                  );
                 },
               ),
               const SizedBox(height: 64),
@@ -365,7 +395,13 @@ class _NewsState extends State<News> {
               
               SeeMoreButton(
                 onPressed: () {
-
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const BusStopNews(),
+                      settings: const RouteSettings(name: '/bus_stop_news'),
+                    ),
+                  );
                 },
               ),
               const SizedBox(height: 30),

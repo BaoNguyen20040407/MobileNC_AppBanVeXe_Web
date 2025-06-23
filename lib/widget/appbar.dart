@@ -44,7 +44,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
       color: AppColors.softOrange,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,

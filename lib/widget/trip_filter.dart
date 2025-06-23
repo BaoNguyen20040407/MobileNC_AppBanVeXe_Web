@@ -63,7 +63,7 @@ class _TripFilterWidgetState extends State<TripFilterWidget> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 72,
+            width: 50,
             margin: const EdgeInsets.only(top: 8),
             child: Text(
               label,
@@ -126,7 +126,6 @@ class _TripFilterWidgetState extends State<TripFilterWidget> {
                   ),
                 ),
               ),
-              const Spacer(),
               Row(
                 children: [
                   if (isExpanded)
@@ -155,7 +154,7 @@ class _TripFilterWidgetState extends State<TripFilterWidget> {
               "18:00 - 24:00"
             ], selectedTimeRanges),
             _buildInlineSection("Loại xe", ["Ghế", "Giường", "Limousine"], selectedTypes),
-            _buildInlineSection("Hàng ghế", ["Hàng đầu", "Hàng giữa", "Hàng cuối"], selectedSeats),
+            _buildInlineSection("Ghế", ["Hàng đầu", "Hàng giữa", "Hàng cuối"], selectedSeats),
             _buildInlineSection("Tầng", ["Tầng trên", "Tầng dưới"], selectedFloors),
           ],
         ],

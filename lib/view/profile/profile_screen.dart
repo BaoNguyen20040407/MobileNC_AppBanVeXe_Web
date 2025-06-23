@@ -3,6 +3,7 @@ import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/view/auth/login_screen.dart';
 import 'package:giao_dien_1/view/auth/confirm_email_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:giao_dien_1/view/profile/user_info.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -48,7 +49,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               color: Color(0xFFF5A562),
               borderRadius: BorderRadius.vertical(bottom: Radius.circular(0)),
             ),
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
             child: Column(
               children: [
                 Row(
@@ -60,11 +61,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
                 const SizedBox(height: 4),
-                CircleAvatar(
-                  radius: 32,
-                  backgroundImage: _url.isNotEmpty
-                      ? NetworkImage(_url)
-                      : const AssetImage('assets/image/personicon.png') as ImageProvider,
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const UserInfo(),
+                        settings: const RouteSettings(name: '/info'),
+                      ),
+                    );
+                  },
+                  child: CircleAvatar(
+                    radius: 32,
+                    backgroundImage: _url.isNotEmpty
+                        ? NetworkImage(_url)
+                        : const AssetImage('assets/image/personicon.png') as ImageProvider,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(

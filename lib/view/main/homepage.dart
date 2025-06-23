@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:giao_dien_1/model/trip.dart';
 import 'package:giao_dien_1/view/news/news.dart';
 import 'package:giao_dien_1/view/news/news_detail_02.dart';
+import 'package:giao_dien_1/widget/trip_filter.dart';
 import '../about/about_us.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/widget/appbar.dart';
@@ -23,6 +24,8 @@ class _HomePageState extends State<HomePage> {
   //Tìm danh sách chuyến xe theo địa điểm đã nhập
   bool _showSearchResults = false; 
   List <Trip> _filteredTrips = [];
+  List<Trip> _visibleTrips = [];
+  Map<String, dynamic> _currentFilters = {};
   final Color green = AppColors.greenDark;
   int _selectedIndex = 0;
   DateTime? _selectedDate;              // biến lưu ngày chọn
@@ -37,6 +40,55 @@ class _HomePageState extends State<HomePage> {
   String year = date.year.toString();
   return '$day/$month/$year';
   }
+
+  void _applyFilters(Map<String, dynamic> filters) {
+  setState(() {
+    _currentFilters = filters;
+
+    _visibleTrips = _filteredTrips.where((trip) {
+      // 1. Giờ đi
+      final gio = int.tryParse(trip.gioBatDau.split(':').first) ?? 0;
+      String range = '';
+      if (gio < 6) {
+        range = '00:00 - 06:00';
+      } else if (gio < 12) {
+        range = '06:00 - 12:00';
+      } else if (gio < 18) {
+        range = '12:00 - 18:00';
+      } else {
+        range = '18:00 - 24:00';
+      }
+
+      bool matchTime = filters['timeRanges'] == null || filters['timeRanges'].isEmpty
+        || filters['timeRanges'].contains(range);
+
+      // 2. Loại xe
+      bool matchType = filters['types'] == null || filters['types'].isEmpty
+        || filters['types'].contains(trip.loaiChuyen);
+
+      // 3. Hàng ghế
+      String hang = '';
+      final ghe = trip.loaiGhe.toLowerCase();
+      if (ghe.contains('đầu')) hang = 'Hàng đầu';
+      else if (ghe.contains('giữa') || ghe.contains('trung')) hang = 'Hàng giữa';
+      else if (ghe.contains('cuối') || ghe.contains('sau')) hang = 'Hàng cuối';
+
+      bool matchSeat = filters['seats'] == null || filters['seats'].isEmpty
+        || filters['seats'].contains(hang);
+
+      // 4. Tầng
+      String tang = '';
+      if (ghe.contains('trên')) tang = 'Tầng trên';
+      else if (ghe.contains('dưới')) tang = 'Tầng dưới';
+
+      bool matchFloor = filters['floors'] == null || filters['floors'].isEmpty
+        || filters['floors'].contains(tang);
+
+      return matchTime && matchType && matchSeat && matchFloor;
+    }).toList();
+  });
+}
+
 
   Future<void> _selectDate(BuildContext context) async {
   final DateTime? picked = await showDatePicker(
@@ -75,7 +127,7 @@ class _HomePageState extends State<HomePage> {
     final String response = await rootBundle.loadString('assets/data/trips.json');
     final List<dynamic> data = json.decode(response);
     return data.map((e) => Trip.fromJson(e)).toList();
-  }  // 
+  } 
 
   @override
   Widget build(BuildContext context) {
@@ -111,6 +163,8 @@ class _HomePageState extends State<HomePage> {
                     _filteredTrips = ketQua;
                     _showSearchResults = true;
                   });
+
+                  _applyFilters(_currentFilters);
                 },
               ),
               const SizedBox(height: 16),
@@ -118,14 +172,18 @@ class _HomePageState extends State<HomePage> {
               // Khi ĐÃ tìm
               if (_showSearchResults) ...[
                 if (_filteredTrips.isNotEmpty) ...[
+                  TripFilterWidget(
+                    onFilterChanged: _applyFilters,
+                    ),
                   SizedBox(height: 16),
+
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: TripRouteLabel(trip: _filteredTrips.first),
                   ),
                   SizedBox(height: 16),
                   Column(
-                  children: _filteredTrips
+                  children: _visibleTrips
                       .asMap()
                       .entries
                       .map((entry) {

@@ -219,7 +219,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     return const Padding(
       padding: EdgeInsets.symmetric(horizontal: 24),
       child: Text(
-        'Không tìm thấy chuyến xe phù hợp.',
+        'Không tìm thấy lịch trình phù hợp.',
         style: TextStyle(
           fontSize: 16,
           color: Colors.black87,

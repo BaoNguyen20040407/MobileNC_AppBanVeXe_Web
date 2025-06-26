@@ -48,7 +48,7 @@ class _EditUserInfoState extends State<EditUserInfo> {
       _introController.text = prefs.getString('intro') ?? '';
       _gender = _genderOptions.contains(prefs.getString('gender')) ? prefs.getString('gender') : null;
       _job = _jobOptions.contains(prefs.getString('job')) ? prefs.getString('job') : null;
-      _avatarUrl = prefs.getString('avatar_url') ?? '';
+      _avatarUrl = prefs.getString('image_url') ?? '';
     });
   }
 
@@ -325,7 +325,7 @@ class _EditUserInfoState extends State<EditUserInfo> {
           prefixIcon: prefixIcon != null
               ? Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Icon(prefixIcon),
+                  child: Icon(prefixIcon, color: AppColors.black),
                 )
               : null,
           prefixIconConstraints: const BoxConstraints(minWidth: 48, minHeight: 48),

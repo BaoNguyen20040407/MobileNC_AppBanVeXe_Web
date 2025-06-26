@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:giao_dien_1/widget/appbar_profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:giao_dien_1/config/default.dart';
+import 'package:giao_dien_1/view/profile/edit_user_info.dart';
 
 class UserInfo extends StatefulWidget {
   const UserInfo({super.key});
@@ -136,6 +137,12 @@ class _UserInfoState extends State<UserInfo> {
                 ),
                 onPressed: () {
                   // TODO: chuyển tới trang sửa thông tin
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const EditUserInfo()),
+                    ).then((_) {
+                    _loadUserInfo(); // reload dữ liệu mới sau khi chỉnh sửa
+                  });
                 },
                 child: const Text(
                   'Sửa thông tin tài khoản',

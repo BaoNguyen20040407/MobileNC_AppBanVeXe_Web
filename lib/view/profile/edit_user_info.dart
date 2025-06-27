@@ -3,6 +3,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/view/profile/edit_success.dart';
 import 'package:giao_dien_1/widget/appbar_profile.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'dart:convert';
+import 'dart:typed_data';
 
 class EditUserInfo extends StatefulWidget {
   const EditUserInfo({super.key});
@@ -26,6 +30,7 @@ class _EditUserInfoState extends State<EditUserInfo> {
   String? _gender;
   String? _job;
   String _avatarUrl = '';
+  Uint8List? _avatarBytes;
 
   final List<String> _genderOptions = ['Nam', 'Nữ', 'Khác'];
   final List<String> _jobOptions = ['Sinh viên', 'Giáo viên', 'Khác'];
@@ -48,7 +53,10 @@ class _EditUserInfoState extends State<EditUserInfo> {
       _introController.text = prefs.getString('intro') ?? '';
       _gender = _genderOptions.contains(prefs.getString('gender')) ? prefs.getString('gender') : null;
       _job = _jobOptions.contains(prefs.getString('job')) ? prefs.getString('job') : null;
-      _avatarUrl = prefs.getString('image_url') ?? '';
+      final base64Image = prefs.getString('image_base64'); 
+        if (base64Image != null && base64Image.isNotEmpty) {
+          _avatarBytes = base64Decode(base64Image);          
+        }
     });
   }
 
@@ -72,6 +80,22 @@ class _EditUserInfoState extends State<EditUserInfo> {
       });
     }
   }
+
+  Future<void> _pickAvatarImage() async {
+  final picker = ImagePicker();
+  final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      final bytes = await pickedFile.readAsBytes(); 
+      final base64Image = base64Encode(bytes);  
+
+      await prefs.setString('image_base64', base64Image); 
+
+      setState(() {
+        _avatarBytes = bytes;
+      });
+    }
+}
+
 
   Future<void> _selectDate(BuildContext context) async {
     DateTime? picked = await showDatePicker(
@@ -109,7 +133,7 @@ class _EditUserInfoState extends State<EditUserInfo> {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: const Color(0xFFFFF3E0),
-      appBar: const AppBarProfile(title: 'SỬA THÔNG TIN TÀI KHOẢN'),
+      appBar: AppBarProfile(title: 'SỬA THÔNG TIN TÀI KHOẢN'),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
         child: Form(
@@ -121,14 +145,15 @@ class _EditUserInfoState extends State<EditUserInfo> {
                 children: [
                   CircleAvatar(
                     radius: 48,
-                    backgroundImage: _avatarUrl.isNotEmpty
-                        ? NetworkImage(_avatarUrl)
-                        : const AssetImage('assets/image/personicon.png') as ImageProvider,
+                    backgroundImage: _avatarBytes != null
+  ? MemoryImage(_avatarBytes!)
+  : const AssetImage('assets/image/personicon.png') as ImageProvider,
                   ),
                   Positioned(
                     bottom: 0,
                     right: 0,
                     child: GestureDetector(
+                      onTap: _pickAvatarImage,
                       child: Container(
                         decoration: BoxDecoration(
                           color: Colors.white,

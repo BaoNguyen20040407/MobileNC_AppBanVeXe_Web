@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:giao_dien_1/widget/appbar_profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:giao_dien_1/config/default.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SupportAndFeedback extends StatefulWidget {
   const SupportAndFeedback({super.key});
@@ -15,7 +16,7 @@ class _HotrogopyState extends State<SupportAndFeedback> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFFF3E0),
-      appBar: const AppBarProfile(title: 'HỖ TRỢ/GÓP Ý '),
+      appBar: AppBarProfile(title: 'HỖ TRỢ/GÓP Ý '),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
@@ -145,36 +146,67 @@ class _HotrogopyState extends State<SupportAndFeedback> {
                     ),
                     const SizedBox(height: 16),
                     Row(
-                      children: [
-                        const Text(
-                          'KẾT NỐI VỚI CHÚNG TÔI',
-                          style: TextStyle(
-                            color: AppColors.greenDark,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Inter',
-                            fontSize: 14,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Image.network(
-                          "https://img.icons8.com/?size=100&id=118497&format=png&color=000000", // Facebook
-                          width: 32,
-                          height: 32,
-                        ),
-                        const SizedBox(width: 12),
-                        Image.network(
-                          "https://img.icons8.com/?size=100&id=Xy10Jcu1L2Su&format=png&color=000000", // Instagram
-                          width: 32,
-                          height: 32,
-                        ),
-                        const SizedBox(width: 12),
-                        Image.network(
-                          "https://img.icons8.com/?size=100&id=0m71tmRjlxEe&format=png&color=000000", // Zalo
-                          width: 32,
-                          height: 32,
-                        ),
-                      ],
-                    )
+  crossAxisAlignment: CrossAxisAlignment.center,
+  children: [
+    const Text(
+      'KẾT NỐI VỚI CHÚNG TÔI',
+      style: TextStyle(
+        color: AppColors.greenDark,
+        fontWeight: FontWeight.bold,
+        fontFamily: 'Inter',
+        fontSize: 14,
+      ),
+    ),
+    const SizedBox(width: 16),
+
+    // Facebook
+    GestureDetector(
+      onTap: () async {
+        final url = Uri.parse('https://www.facebook.com/thaybaothaybao0407');
+        if (await canLaunchUrl(url)) {
+          await launchUrl(url, mode: LaunchMode.externalApplication);
+        }
+      },
+      child: Image.network(
+        "https://img.icons8.com/?size=100&id=118497&format=png&color=000000",
+        width: 32,
+        height: 32,
+      ),
+    ),
+    const SizedBox(width: 12),
+
+    // Instagram
+    GestureDetector(
+      onTap: () async {
+        final url = Uri.parse('https://www.instagram.com/');
+        if (await canLaunchUrl(url)) {
+          await launchUrl(url, mode: LaunchMode.externalApplication);
+        }
+      },
+      child: Image.network(
+        "https://img.icons8.com/?size=100&id=Xy10Jcu1L2Su&format=png&color=000000",
+        width: 32,
+        height: 32,
+      ),
+    ),
+    const SizedBox(width: 12),
+
+    // Zalo
+    GestureDetector(
+      onTap: () async {
+        final url = Uri.parse('https://zalo.me/0765178079'); // thay bằng số thật
+        if (await canLaunchUrl(url)) {
+          await launchUrl(url, mode: LaunchMode.externalApplication);
+        }
+      },
+      child: Image.network(
+        "https://img.icons8.com/?size=100&id=0m71tmRjlxEe&format=png&color=000000",
+        width: 32,
+        height: 32,
+      ),
+    ),
+  ],
+)
                   ],
                 ),
               ),

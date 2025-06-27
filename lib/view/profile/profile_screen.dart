@@ -6,6 +6,9 @@ import 'package:giao_dien_1/view/support_and_feedback/support_and_feedback.dart'
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:giao_dien_1/view/profile/user_info.dart';
 import 'package:giao_dien_1/view/ticket_history/ticket_history.dart';
+import 'dart:io';
+import 'dart:convert';
+import 'dart:typed_data';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -18,27 +21,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _url = '';
   String _userName = '';
   String _phone = '';
-
-  Future<void> _loadUserData() async {
-  final pref = await SharedPreferences.getInstance();
-
-  final url = pref.getString('image_url') ?? '';
-  final username = pref.getString('username') ?? 'Người dùng';
-  final phone = pref.getString('phone') ?? 'Chưa có số';
-
-  setState(() {
-    _url = url;
-    _userName = username;
-    _phone = phone;
-  });
-}
-
+  Uint8List? _avatarBytes;
 
   @override
   void initState() {
     super.initState();
     _loadUserData();
   }
+
+  Future<void> _loadUserData() async {
+    final pref = await SharedPreferences.getInstance();
+
+    final url = pref.getString('image_url') ?? '';
+    final base64 = pref.getString('image_base64');
+    final username = pref.getString('username') ?? 'Người dùng';
+    final phone = pref.getString('phone') ?? 'Chưa có số';
+
+    setState(() {
+      _url = url;
+      _userName = username;
+      _phone = phone;
+      _avatarBytes = (base64 != null && base64.isNotEmpty)
+          ? base64Decode(base64)
+          : null;
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -75,8 +83,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   },
                   child: CircleAvatar(
                     radius: 32,
-                    backgroundImage: _url.isNotEmpty
-                        ? NetworkImage(_url)
+                      backgroundImage: _avatarBytes != null
+                        ? MemoryImage(_avatarBytes!)
                         : const AssetImage('assets/image/personicon.png') as ImageProvider,
                   ),
                 ),
@@ -128,11 +136,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => TicketHistoryPage(),
-                        settings: const RouteSettings(name: '/ticket_history'),
+                        builder: (_) => const UserInfo(),
+                        settings: const RouteSettings(name: '/info'),
                       ),
-                    );
-                  }
+                    ).then((_) {
+                      _loadUserData(); // Load lại avatar và thông tin
+                    });
+                  },
                 ),
                 _buildMenuItem(
                   Icons.location_on_outlined,

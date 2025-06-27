@@ -1,16 +1,27 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AppBarProfile extends StatelessWidget implements PreferredSizeWidget {
   final String title;
-  final String? avatarUrl;
   final VoidCallback? onBack;
 
   const AppBarProfile({
     super.key,
     required this.title,
-    this.avatarUrl,
     this.onBack,
   });
+
+  Future<Uint8List?> _loadAvatar() async {
+    final prefs = await SharedPreferences.getInstance();
+    final base64 = prefs.getString('image_base64');
+    if (base64 != null && base64.isNotEmpty) {
+      return base64Decode(base64);
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,25 +52,34 @@ class AppBarProfile extends StatelessWidget implements PreferredSizeWidget {
             ),
           ),
 
-          // Avatar → tự điều hướng về Profile
-          GestureDetector(
-            onTap: () {
-              Future.delayed(const Duration(milliseconds: 50), () {
-                if (context.mounted) {
-                  Navigator.pushNamedAndRemoveUntil(
-                    context,
-                    '/profile',
-                    (route) => false,
-                  );
-                }
-              });
+          // Avatar
+          FutureBuilder<Uint8List?>(
+            future: _loadAvatar(),
+            builder: (context, snapshot) {
+              final imageProvider = (snapshot.connectionState == ConnectionState.done &&
+                      snapshot.hasData &&
+                      snapshot.data != null)
+                  ? MemoryImage(snapshot.data!)
+                  : const AssetImage('assets/image/personicon.png') as ImageProvider;
+
+              return GestureDetector(
+                onTap: () {
+                  Future.delayed(const Duration(milliseconds: 50), () {
+                    if (context.mounted) {
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        '/profile',
+                        (route) => false,
+                      );
+                    }
+                  });
+                },
+                child: CircleAvatar(
+                  radius: 16,
+                  backgroundImage: imageProvider,
+                ),
+              );
             },
-            child: CircleAvatar(
-              radius: 16,
-              backgroundImage: avatarUrl != null && avatarUrl!.isNotEmpty
-                  ? NetworkImage(avatarUrl!)
-                  : const AssetImage('assets/image/personicon.png') as ImageProvider,
-            ),
           ),
         ],
       ),

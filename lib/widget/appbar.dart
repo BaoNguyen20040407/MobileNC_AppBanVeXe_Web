@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/view/profile/profile_screen.dart';
+import 'dart:convert';
+import 'dart:typed_data';
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   final double height;
@@ -24,6 +26,7 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
 
 class _CustomAppBarState extends State<CustomAppBar> {
   String? _imageUrl;
+  Uint8List? _avatarBytes;
 
   @override
   void initState() {
@@ -32,14 +35,18 @@ class _CustomAppBarState extends State<CustomAppBar> {
   }
 
   Future<void> _loadImageUrl() async {
-    final pref = await SharedPreferences.getInstance();
-    final url = pref.getString('image_url');
-    if (mounted) {
-      setState(() {
-        _imageUrl = url;
-      });
+  final prefs = await SharedPreferences.getInstance();
+  final url = prefs.getString('image_url');
+  final base64 = prefs.getString('image_base64');
+
+  setState(() {
+    _imageUrl = url;
+    if (base64 != null && base64.isNotEmpty) {
+      _avatarBytes = base64Decode(base64);
     }
-  }
+  });
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -94,29 +101,43 @@ class _CustomAppBarState extends State<CustomAppBar> {
                     );
                   },
               child: ClipOval(
-                child: _imageUrl != null && _imageUrl!.isNotEmpty
-                    ? Image.network(
-                        _imageUrl!,
-                        height: 40,
-                        width: 40,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Image.asset(
-                            "assets/image/personicon.png",
-                            height: 32,
-                            width: 32,
-                          );
-                        },
-                      )
-                    : Image.asset(
-                        "assets/image/personicon.png",
-                        height: 32,
-                        width: 32,
-                      ),
+                child: _buildAvatar(),
               ),
             ),
         ],
       ),
     );
   }
+
+  Widget _buildAvatar() {
+  final placeholder = Image.asset(
+    "assets/image/personicon.png",
+    height: 40,
+    width: 40,
+    fit: BoxFit.cover,
+  );
+
+  if (_avatarBytes != null) {
+    return Image.memory(
+      _avatarBytes!,
+      height: 40,
+      width: 40,
+      fit: BoxFit.cover,
+    );
+  }
+
+  if (_imageUrl != null &&
+      _imageUrl!.isNotEmpty &&
+      (_imageUrl!.startsWith("http") || _imageUrl!.startsWith("https"))) {
+    return Image.network(
+      _imageUrl!,
+      height: 40,
+      width: 40,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) => placeholder,
+    );
+  }
+
+  return placeholder;
+}
 }

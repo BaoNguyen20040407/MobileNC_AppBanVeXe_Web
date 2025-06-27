@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:giao_dien_1/widget/appbar_profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TicketHistoryPage extends StatefulWidget {
@@ -30,109 +31,74 @@ class _TicketHistoryPageState extends State<TicketHistoryPage> {
   }
 
   void navigateTo(String value) {
-    // Implement your navigation logic here based on `value`
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Navigated to: $value')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Navigated to: $value')),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFFFF5E9), // Xoá nền tím
+      appBar: AppBarProfile(title: 'LỊCH SỬ ĐẶT VÉ'),
       body: Column(
         children: [
-          Stack(
-            children: [
-              Container(
-                height: 150,
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/image/history_appbar.png'),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: AppBar(
-                  backgroundColor: Colors.transparent,
-                  elevation: 0,
-                  leading: IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  centerTitle: true,
-                  title: const Text(
-                    'LỊCH SỬ ĐẶT VÉ',
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                  ),
-                  actions: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: CircleAvatar(
-                        backgroundColor: Colors.white,
-                        child: Icon(Icons.person, color: Colors.orange),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+          const SizedBox(height: 32), // Cách AppBar 32px
           Expanded(
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              color: const Color(0xFFFFF5E9),
-              child: Column(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      children: [
-                        _HistoryItem(
-                          icon: Icons.calendar_today,
-                          label: 'Hôm nay',
-                          onTap: () => navigateTo('today'),
-                        ),
-                        _HistoryItem(
-                          icon: Icons.calendar_view_week,
-                          label: '7 ngày trước',
-                          iconLabel: '7',
-                          onTap: () => navigateTo('7_day_ago'),
-                        ),
-                        _HistoryItem(
-                          icon: Icons.calendar_month,
-                          label: '30 ngày trước',
-                          iconLabel: '30',
-                          onTap: () => navigateTo('30_day_ago'),
-                        ),
-                        _HistoryItem(
-                          icon: Icons.fact_check,
-                          label: 'Tất cả',
-                          isChecked: showAll,
-                          onCheckChanged: (val) {
-                            setState(() => showAll = val ?? false);
-                            _saveShowAll(val ?? false);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: Center(
-                      child: Image.asset(
-                        'assets/image/bridge.png',
-                        height: 180,
-                        fit: BoxFit.contain,
+            child: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
+                  child: Column(
+                    children: [
+                      _HistoryItem(
+                        icon: Icons.calendar_today,
+                        label: 'Hôm nay',
+                        onTap: () => navigateTo('today'),
+                      ),
+                      const Divider(height: 1),
+                      _HistoryItem(
+                        icon: Icons.calendar_view_week,
+                        label: '7 ngày trước',
+                        iconLabel: '7',
+                        onTap: () => navigateTo('7_day_ago'),
+                      ),
+                      const Divider(height: 1),
+                      _HistoryItem(
+                        icon: Icons.calendar_month,
+                        label: '30 ngày trước',
+                        iconLabel: '30',
+                        onTap: () => navigateTo('30_day_ago'),
+                      ),
+                      const Divider(height: 1),
+                      _HistoryItem(
+                        icon: Icons.fact_check,
+                        label: 'Tất cả',
+                        onTap: () => navigateTo('all'), // không còn onCheckChanged
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Center(
+                  child: Image.asset(
+                    'assets/image/bridge.png',
+                    height: 300,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -163,26 +129,45 @@ class _HistoryItem extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: ListTile(
-        leading: iconLabel != null
-            ? Container(
-                width: 30,
-                height: 30,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  iconLabel!,
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                ),
-              )
-            : Icon(icon),
-        title: Text(label),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        leading: Container(
+          width: 36,
+          height: 36,
+          alignment: Alignment.center,
+          child: iconLabel != null
+              ? Container(
+                  width: 20,
+                  height: 20,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    iconLabel!,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 9,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                )
+              : Icon(icon, color: Colors.black, size: 20),
+        ),
+        title: Text(
+          label,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            fontFamily: 'Inter',
+          ),
+        ),
         trailing: onCheckChanged != null
             ? Checkbox(
                 value: isChecked,
                 onChanged: onCheckChanged,
+                activeColor: Colors.orange,
               )
             : null,
       ),

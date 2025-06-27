@@ -4,6 +4,7 @@ import 'package:giao_dien_1/view/auth/login_screen.dart';
 import 'package:giao_dien_1/view/auth/confirm_email_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:giao_dien_1/view/profile/user_info.dart';
+import 'package:giao_dien_1/view/ticket_history/ticket_history.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -123,8 +124,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   "Lịch sử đặt vé",
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
-                    // TODO: Navigation
-                  },
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => TicketHistoryPage(),
+                      ),
+                    );
+                  }
                 ),
                 _buildMenuItem(
                   Icons.location_on_outlined,

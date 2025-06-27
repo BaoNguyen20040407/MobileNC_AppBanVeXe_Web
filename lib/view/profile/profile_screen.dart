@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/view/auth/login_screen.dart';
 import 'package:giao_dien_1/view/auth/confirm_email_screen.dart';
+import 'package:giao_dien_1/view/support_and_feedback/support_and_feedback.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:giao_dien_1/view/profile/user_info.dart';
 import 'package:giao_dien_1/view/ticket_history/ticket_history.dart';
@@ -128,6 +129,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (_) => TicketHistoryPage(),
+                        settings: const RouteSettings(name: '/ticket_history'),
                       ),
                     );
                   }
@@ -167,7 +169,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   "Hỗ trợ/ góp ý",
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
-                    // TODO: Open support screen
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => SupportAndFeedback(),
+                        settings: const RouteSettings(name: '/support_and_feedback'),
+                      ),
+                    );
                   },
                 ),
                 _buildMenuItem(

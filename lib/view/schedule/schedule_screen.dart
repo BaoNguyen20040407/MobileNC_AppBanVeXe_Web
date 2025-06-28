@@ -44,13 +44,13 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     setState(() {
       hasSearched = true;
 
-      if (start.isEmpty || end.isEmpty) {
+      if (start.isEmpty && end.isEmpty) {
         filteredTrips = [];
         return;
       }
 
       filteredTrips = allTrips.where((trip) {
-        return trip.diemDi.toLowerCase().contains(start) &&
+        return trip.diemDi.toLowerCase().contains(start) ||
                trip.diemDen.toLowerCase().contains(end);
       }).toList();
     });

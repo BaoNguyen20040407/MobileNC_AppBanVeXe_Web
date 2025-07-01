@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class AppBarProfile extends StatelessWidget implements PreferredSizeWidget {
+class AppBarProfile extends StatefulWidget implements PreferredSizeWidget {
   final String title;
   final VoidCallback? onBack;
 
@@ -14,19 +14,52 @@ class AppBarProfile extends StatelessWidget implements PreferredSizeWidget {
     this.onBack,
   });
 
-  Future<Uint8List?> _loadAvatar() async {
+  @override
+  State<AppBarProfile> createState() => _AppBarProfileState();
+
+  @override
+  Size get preferredSize => const Size.fromHeight(80);
+}
+
+class _AppBarProfileState extends State<AppBarProfile> {
+  Uint8List? _avatar;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAvatar();
+  }
+
+  Future<void> _loadAvatar() async {
     final prefs = await SharedPreferences.getInstance();
     final base64 = prefs.getString('image_base64');
     if (base64 != null && base64.isNotEmpty) {
-      return base64Decode(base64);
+      try {
+        setState(() {
+          _avatar = base64Decode(base64);
+        });
+      } catch (_) {
+        setState(() {
+          _avatar = null;
+        });
+      }
+    } else {
+      setState(() {
+        _avatar = null;
+      });
     }
-    return null;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loadAvatar(); // Reload mỗi lần màn hình quay lại
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: preferredSize.height,
+      height: widget.preferredSize.height,
       padding: const EdgeInsets.only(top: 16, left: 24, right: 24),
       decoration: const BoxDecoration(
         color: Color(0xFFF5A562),
@@ -37,13 +70,13 @@ class AppBarProfile extends StatelessWidget implements PreferredSizeWidget {
         children: [
           // Nút quay lại
           GestureDetector(
-            onTap: onBack ?? () => Navigator.pop(context),
+            onTap: widget.onBack ?? () => Navigator.pop(context),
             child: const Icon(Icons.arrow_back_ios, color: Colors.white),
           ),
 
           // Tiêu đề
           Text(
-            title,
+            widget.title,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 17,
@@ -53,39 +86,20 @@ class AppBarProfile extends StatelessWidget implements PreferredSizeWidget {
           ),
 
           // Avatar
-          FutureBuilder<Uint8List?>(
-            future: _loadAvatar(),
-            builder: (context, snapshot) {
-              final imageProvider = (snapshot.connectionState == ConnectionState.done &&
-                      snapshot.hasData &&
-                      snapshot.data != null)
-                  ? MemoryImage(snapshot.data!)
-                  : const AssetImage('assets/image/personicon.png') as ImageProvider;
-
-              return GestureDetector(
-                onTap: () {
-                  Future.delayed(const Duration(milliseconds: 50), () {
-                    if (context.mounted) {
-                      Navigator.pushNamedAndRemoveUntil(
-                        context,
-                        '/profile',
-                        (route) => false,
-                      );
-                    }
-                  });
-                },
-                child: CircleAvatar(
-                  radius: 16,
-                  backgroundImage: imageProvider,
-                ),
-              );
+          GestureDetector(
+            onTap: () async {
+              await Navigator.pushNamed(context, '/profile');
+              _loadAvatar(); // Tải lại avatar sau khi quay lại
             },
+            child: CircleAvatar(
+              radius: 16,
+              backgroundImage: _avatar != null
+                  ? MemoryImage(_avatar!)
+                  : const AssetImage('assets/image/personicon.png') as ImageProvider,
+            ),
           ),
         ],
       ),
     );
   }
-
-  @override
-  Size get preferredSize => const Size.fromHeight(80);
 }

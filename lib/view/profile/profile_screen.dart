@@ -136,12 +136,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const UserInfo(),
-                        settings: const RouteSettings(name: '/info'),
+                        builder: (_) => TicketHistoryPage(),
+                        settings: const RouteSettings(name: '/ticket_history'),
                       ),
-                    ).then((_) {
-                      _loadUserData(); // Load lại avatar và thông tin
-                    });
+                    );
                   },
                 ),
                 _buildMenuItem(

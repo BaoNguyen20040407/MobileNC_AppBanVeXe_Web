@@ -90,16 +90,16 @@ class _CustomAppBarState extends State<CustomAppBar> {
           ),
           if (widget.showProfileIcon)
             GestureDetector(
-              onTap: widget.onProfileTap ??
-                  () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const ProfileScreen(),
-                        settings: const RouteSettings(name: '/profile'),
-                      ),
-                    );
-                  },
+              onTap: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const ProfileScreen(),
+                    settings: const RouteSettings(name: '/profile'),
+                  ),
+                );
+                _loadImageUrl(); // Load lại avatar sau khi quay về
+              },
               child: ClipOval(
                 child: _buildAvatar(),
               ),

@@ -8,10 +8,10 @@ class SupportAndFeedback extends StatefulWidget {
   const SupportAndFeedback({super.key});
 
   @override
-  State<SupportAndFeedback> createState() => _HotrogopyState();
+  State<SupportAndFeedback> createState() => _SupportAndFeedbackState();
 }
 
-class _HotrogopyState extends State<SupportAndFeedback> {
+class _SupportAndFeedbackState extends State<SupportAndFeedback> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -146,67 +146,67 @@ class _HotrogopyState extends State<SupportAndFeedback> {
                     ),
                     const SizedBox(height: 16),
                     Row(
-  crossAxisAlignment: CrossAxisAlignment.center,
-  children: [
-    const Text(
-      'KẾT NỐI VỚI CHÚNG TÔI',
-      style: TextStyle(
-        color: AppColors.greenDark,
-        fontWeight: FontWeight.bold,
-        fontFamily: 'Inter',
-        fontSize: 14,
-      ),
-    ),
-    const SizedBox(width: 16),
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'KẾT NỐI VỚI CHÚNG TÔI',
+                          style: TextStyle(
+                            color: AppColors.greenDark,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Inter',
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
 
-    // Facebook
-    GestureDetector(
-      onTap: () async {
-        final url = Uri.parse('https://www.facebook.com/thaybaothaybao0407');
-        if (await canLaunchUrl(url)) {
-          await launchUrl(url, mode: LaunchMode.externalApplication);
-        }
-      },
-      child: Image.network(
-        "https://img.icons8.com/?size=100&id=118497&format=png&color=000000",
-        width: 32,
-        height: 32,
-      ),
-    ),
-    const SizedBox(width: 12),
+                        // Facebook
+                        GestureDetector(
+                          onTap: () async {
+                            final url = Uri.parse('https://www.facebook.com/thaybaothaybao0407');
+                            if (await canLaunchUrl(url)) {
+                              await launchUrl(url, mode: LaunchMode.externalApplication);
+                            }
+                          },
+                          child: Image.network(
+                            "https://img.icons8.com/?size=100&id=118497&format=png&color=000000",
+                            width: 32,
+                            height: 32,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
 
-    // Instagram
-    GestureDetector(
-      onTap: () async {
-        final url = Uri.parse('https://www.instagram.com/');
-        if (await canLaunchUrl(url)) {
-          await launchUrl(url, mode: LaunchMode.externalApplication);
-        }
-      },
-      child: Image.network(
-        "https://img.icons8.com/?size=100&id=Xy10Jcu1L2Su&format=png&color=000000",
-        width: 32,
-        height: 32,
-      ),
-    ),
-    const SizedBox(width: 12),
+                        // Instagram
+                        GestureDetector(
+                          onTap: () async {
+                            final url = Uri.parse('https://www.instagram.com/');
+                            if (await canLaunchUrl(url)) {
+                              await launchUrl(url, mode: LaunchMode.externalApplication);
+                            }
+                          },
+                          child: Image.network(
+                            "https://img.icons8.com/?size=100&id=Xy10Jcu1L2Su&format=png&color=000000",
+                            width: 32,
+                            height: 32,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
 
-    // Zalo
-    GestureDetector(
-      onTap: () async {
-        final url = Uri.parse('https://zalo.me/0765178079'); // thay bằng số thật
-        if (await canLaunchUrl(url)) {
-          await launchUrl(url, mode: LaunchMode.externalApplication);
-        }
-      },
-      child: Image.network(
-        "https://img.icons8.com/?size=100&id=0m71tmRjlxEe&format=png&color=000000",
-        width: 32,
-        height: 32,
-      ),
-    ),
-  ],
-)
+                        // Zalo
+                        GestureDetector(
+                          onTap: () async {
+                            final url = Uri.parse('https://zalo.me/0765178079'); // thay bằng số thật
+                            if (await canLaunchUrl(url)) {
+                              await launchUrl(url, mode: LaunchMode.externalApplication);
+                            }
+                          },
+                          child: Image.network(
+                            "https://img.icons8.com/?size=100&id=0m71tmRjlxEe&format=png&color=000000",
+                            width: 32,
+                            height: 32,
+                          ),
+                        ),
+                      ],
+                    )
                   ],
                 ),
               ),

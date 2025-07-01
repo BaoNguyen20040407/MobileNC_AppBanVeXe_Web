@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/widget/appbar_profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -39,7 +40,7 @@ class _TicketHistoryPageState extends State<TicketHistoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF5E9), // Xoá nền tím
+      backgroundColor: AppColors.softOrangeBackground,
       appBar: AppBarProfile(title: 'LỊCH SỬ ĐẶT VÉ'),
       body: Column(
         children: [

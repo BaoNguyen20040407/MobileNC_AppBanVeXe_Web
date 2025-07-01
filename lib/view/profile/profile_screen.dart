@@ -9,6 +9,7 @@ import 'package:giao_dien_1/view/ticket_history/ticket_history.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:giao_dien_1/view/notification/notifications_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -51,7 +52,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF3E0),
+      backgroundColor: AppColors.softOrangeBackground,
       body: Column(
         children: [
           Container(
@@ -169,7 +170,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   "Thông báo",
                   trailing: null,
                   onTap: () {
-                    // TODO: Show notifications
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => NotificationsScreen(),
+                        settings: const RouteSettings(name: '/notification'),
+                      ),
+                    );
                   },
                 ),
                 _buildMenuItem(

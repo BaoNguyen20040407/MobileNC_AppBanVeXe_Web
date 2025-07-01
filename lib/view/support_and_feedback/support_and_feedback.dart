@@ -15,7 +15,7 @@ class _SupportAndFeedbackState extends State<SupportAndFeedback> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF3E0),
+      backgroundColor: AppColors.softOrangeBackground,
       appBar: AppBarProfile(title: 'HỖ TRỢ/GÓP Ý '),
       body: SingleChildScrollView(
         child: Padding(

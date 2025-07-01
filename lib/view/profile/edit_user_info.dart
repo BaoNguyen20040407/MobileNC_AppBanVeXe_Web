@@ -132,7 +132,7 @@ class _EditUserInfoState extends State<EditUserInfo> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      backgroundColor: const Color(0xFFFFF3E0),
+      backgroundColor: AppColors.softOrangeBackground,
       appBar: AppBarProfile(title: 'SỬA THÔNG TIN TÀI KHOẢN'),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),

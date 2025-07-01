@@ -341,80 +341,122 @@ class _RouteSearchCardState extends State<RouteSearchCard> {
               ),
             ),
 
-            TextField(
-              controller: widget.diemDiController,
-              decoration: InputDecoration(
-                prefixIcon: Icon(
-                  Icons.place,
-                  color: AppColors.mainOrange,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Cột chứa 2 TextField
+                Expanded(
+                  flex: 8,
+                  child: Column(
+                    children: [
+                      TextField(
+                        controller: widget.diemDiController,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.place, color: AppColors.mainOrange),
+                          hintText: 'Nhập điểm đi',
+                          hoverColor: Colors.transparent,
+                          focusColor: Colors.transparent,
+                          hintStyle: TextStyle(
+                            color: AppColors.grey600,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: 'Inter',
+                            fontSize: 14,
+                          ),
+                          filled: true,
+                          fillColor: AppColors.white,
+                          border: UnderlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.grey400, width: 1),
+                          ),
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.grey400, width: 1),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.mainOrange, width: 2),
+                          ),
+                          contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                        ),
+                        mouseCursor: SystemMouseCursors.text,
+                        cursorColor: AppColors.mainOrange,
+                        style: TextStyle(
+                          color: AppColors.black87,
+                          fontSize: 16,
+                        ),
+                      ),
+                      TextField(
+                        controller: widget.diemDenController,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.place, color: AppColors.mainOrange),
+                          hintText: 'Nhập điểm đến',
+                          hoverColor: Colors.transparent,
+                          focusColor: Colors.transparent,
+                          hintStyle: TextStyle(
+                            color: AppColors.grey600,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: 'Inter',
+                            fontSize: 14,
+                          ),
+                          filled: true,
+                          fillColor: AppColors.white,
+                          border: UnderlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.grey400, width: 1),
+                          ),
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.grey400, width: 1),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.mainOrange, width: 2),
+                          ),
+                          contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                        ),
+                        mouseCursor: SystemMouseCursors.text,
+                        cursorColor: AppColors.mainOrange,
+                        style: TextStyle(
+                          color: AppColors.black87,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                hintText: 'Nhập điểm đi',
-                hintStyle: TextStyle(
-                  color: AppColors.grey600,
-                  fontWeight: FontWeight.w500,
-                  fontFamily: 'Inter',
-                  fontSize: 14,
-                ),
-                filled: true,
-                fillColor: AppColors.white,
-                border: UnderlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.grey400, width: 1),
-                ),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.grey400, width: 1),
-                ),
-                focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.mainOrange, width: 2),
-                ),
-                hoverColor: AppColors.whitetransparent, 
-                focusColor: AppColors.whitetransparent,
-                contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-              ),
-              mouseCursor: SystemMouseCursors.text,
-              cursorColor: AppColors.mainOrange,
-              style: TextStyle(
-                color: AppColors.black87,
-                fontSize: 16,
-              ),
-            ),
 
-            TextField(
-              controller: widget.diemDenController,
-              decoration: InputDecoration(
-                prefixIcon: Icon(
-                  Icons.place,
-                  color: AppColors.mainOrange,
-                ),
-                hintText: 'Nhập điểm đến',
-                hintStyle: TextStyle(
-                  color: AppColors.grey600,
-                  fontWeight: FontWeight.w500,
-                  fontFamily: 'Inter',
-                  fontSize: 14,
-                ),
-                filled: true,
-                fillColor: AppColors.white,
-                border: UnderlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.grey400, width: 1),
-                ),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.grey400, width: 1),
-                ),
-                focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.mainOrange, width: 2),
-                ),
-                hoverColor: Colors.transparent, 
-                focusColor: Colors.transparent, 
-                contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-              ),
-              mouseCursor: SystemMouseCursors.text, 
-              cursorColor: AppColors.mainOrange,
-              style: TextStyle(
-                color: AppColors.black87,
-                fontSize: 16,
-              ),
-            ),
+                // Khoảng cách giữa 2 cột
+                const SizedBox(width: 16),
 
+                // Cột chứa nút đảo
+                Column(
+                  children: [
+                    const SizedBox(height: 24), 
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.mainOrange,
+                        borderRadius: BorderRadius.circular(8), 
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.mainOrange.withOpacity(0.3),
+                            blurRadius: 2,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.swap_vert, color: Colors.white),
+                        onPressed: () {
+                          final temp = widget.diemDiController.text;
+                          widget.diemDiController.text = widget.diemDenController.text;
+                          widget.diemDenController.text = temp;
+                        },
+                        tooltip: 'Đổi điểm đi / điểm đến',
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        hoverColor: Colors.transparent,
+                        padding: const EdgeInsets.all(10), 
+                        constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            ),
             TextField(
               controller: widget.dobController,
               readOnly: true,

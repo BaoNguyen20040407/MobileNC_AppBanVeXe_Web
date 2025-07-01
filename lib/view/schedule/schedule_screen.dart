@@ -118,17 +118,63 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          TextField(
-            controller: startController,
-            decoration: _inputDecoration('Nhập điểm đi'),
-            cursorColor: AppColors.mainOrange,
-            style: const TextStyle(fontSize: 16, color: AppColors.black87),
-          ),
-          TextField(
-            controller: endController,
-            decoration: _inputDecoration('Nhập điểm đến'),
-            cursorColor: AppColors.mainOrange,
-            style: const TextStyle(fontSize: 16, color: AppColors.black87),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Cột chứa 2 ô nhập liệu
+              Expanded(
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: startController,
+                      decoration: _inputDecoration('Nhập điểm đi'),
+                      cursorColor: AppColors.mainOrange,
+                      style: const TextStyle(fontSize: 16, color: AppColors.black87),
+                    ),
+                    TextField(
+                      controller: endController,
+                      decoration: _inputDecoration('Nhập điểm đến'),
+                      cursorColor: AppColors.mainOrange,
+                      style: const TextStyle(fontSize: 16, color: AppColors.black87),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(width: 16), // Khoảng cách giữa TextField và nút
+
+              // Nút đổi vị trí
+              Align(
+                alignment: Alignment.center,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.mainOrange,
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.mainOrange.withOpacity(0.15), // 👈 bóng nhẹ
+                        blurRadius: 3,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.swap_vert, color: Colors.white, size: 20),
+                    onPressed: () {
+                      final temp = startController.text;
+                      startController.text = endController.text;
+                      endController.text = temp;
+                    },
+                    tooltip: 'Đổi điểm đi / điểm đến',
+                    splashColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    hoverColor: Colors.transparent,
+                    padding: const EdgeInsets.all(8),
+                    constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 16),
           Center(

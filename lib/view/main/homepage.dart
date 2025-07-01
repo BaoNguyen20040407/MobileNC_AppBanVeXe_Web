@@ -433,7 +433,7 @@ class _RouteSearchCardState extends State<RouteSearchCard> {
                         boxShadow: [
                           BoxShadow(
                             color: AppColors.mainOrange.withOpacity(0.3),
-                            blurRadius: 2,
+                            blurRadius: 1,
                             offset: const Offset(0, 3),
                           ),
                         ],

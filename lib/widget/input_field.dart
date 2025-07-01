@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:giao_dien_1/config/default.dart';
 
 class CustomInputField extends StatelessWidget {
   final TextEditingController controller;
@@ -37,13 +38,14 @@ class CustomInputField extends StatelessWidget {
       obscureText: obscureText,
       keyboardType: keyboardType,
       onChanged: onChanged,
+      cursorColor: AppColors.mainOrange,
       decoration: InputDecoration(
         labelText: labelText,
-        hintText: hintText, // ✅ Thêm dòng này để hiển thị hint
+        hintText: hintText,
         labelStyle: const TextStyle(fontFamily: 'Inter'),
         errorText: errorText,
         errorStyle: const TextStyle(
-          color: Colors.red,
+          color: AppColors.red,
           fontSize: 12,
           fontFamily: 'Inter',
         ),
@@ -57,25 +59,25 @@ class CustomInputField extends StatelessWidget {
             ? IconButton(
                 icon: Icon(
                   obscureText ? Icons.visibility_off : Icons.visibility,
-                  color: Colors.black,
+                  color: AppColors.black,
                 ),
                 onPressed: onToggleObscureText,
               )
             : null,
         enabledBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Color(0xFFFF5722)),
+          borderSide: BorderSide(color: AppColors.mainOrange),
         ),
         focusedBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Color(0xFFFF5722), width: 2.0),
+          borderSide: BorderSide(color: AppColors.mainOrange, width: 2.0),
         ),
         errorBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Color(0xFFFF5722)),
+          borderSide: BorderSide(color: AppColors.mainOrange),
         ),
         focusedErrorBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Color(0xFFFF5722), width: 2.0),
+          borderSide: BorderSide(color: AppColors.mainOrange, width: 2.0),
         ),
-        hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)),
-        floatingLabelStyle: const TextStyle(color: Colors.black),
+        hintStyle: TextStyle(color: AppColors.greyLight),
+        floatingLabelStyle: const TextStyle(color: AppColors.black),
         contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
       ),
     );

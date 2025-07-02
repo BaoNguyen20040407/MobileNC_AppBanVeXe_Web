@@ -55,7 +55,6 @@ class _TicketBookingPageState extends State<TicketBookingPage> {
   return '${formatter.format(amount)} VND';
   }
 
-
   void loadPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -438,11 +437,12 @@ class _TicketBookingPageState extends State<TicketBookingPage> {
                   SizedBox(height: 8),
                   Center(
                     child: Text(
-                      '${totalPrice} VND',
+                      '${formatCurrency(totalPrice)}',
                       style: TextStyle(
-                        color: AppColors.mainOrange,
+                        fontSize: 24,
+                        color: Colors.deepOrange,
                         fontWeight: FontWeight.bold,
-                        fontSize: 17,
+                        fontFamily: 'Inter',
                       ),
                     ),
                   ),
@@ -499,15 +499,24 @@ class _TicketBookingPageState extends State<TicketBookingPage> {
                   child: SizedBox(
                     height: 32,
                     child: ElevatedButton.icon(
-                      onPressed: selectedSeats.isNotEmpty && agreedToTerms ? () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => Payment(),
-                            settings: const RouteSettings(name: '/payment'),
-                          ),
-                        );
-                      } : null,
+                      onPressed: selectedSeats.isNotEmpty && agreedToTerms
+                        ? () async {
+                            final prefs = await SharedPreferences.getInstance();
+
+                            await prefs.setString('pickupPoint', pickupPoint);
+                            await prefs.setString('dropoffPoint', dropoffPoint);
+                            await prefs.setString('startTime', startTime);
+                            await prefs.setString('ngayDi', ngayDi);
+                            await prefs.setStringList('selectedSeats', selectedSeats);
+                            await prefs.setInt('seatPrice', seatPrice);
+                            await prefs.setInt('totalPrice', totalPrice);
+
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const Payment()),
+                            );
+                          }
+                        : null,
                       icon: Icon(Icons.credit_card, size: 18, color: AppColors.white,),
                       label: Text(
                         'Thanh toán',

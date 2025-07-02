@@ -14,6 +14,8 @@ import 'package:giao_dien_1/widget/footer.dart';
 import 'package:giao_dien_1/view/guide/instruction_main.dart';
 import 'package:giao_dien_1/widget/tripcard.dart';
 import 'package:giao_dien_1/widget/trip_route_label.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:giao_dien_1/view/ticket_booking/ticket_booking.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -192,14 +194,27 @@ class _HomePageState extends State<HomePage> {
 
                         return Column(
                           children: [
-                            GestureDetector(
-                              onTap: () {
-                                // TODO: xử lý chọn chuyến
+                            TripCard(
+                              trip: trip,
+                              onTap: () async {
+                                debugPrint("Trip tapped: ${trip.diemDi} - ${trip.diemDen}");
+
+                                final prefs = await SharedPreferences.getInstance();
+                                await prefs.setString('pickupPoint', trip.diemDi);
+                                await prefs.setString('dropoffPoint', trip.diemDen);
+                                await prefs.setString('pickupTime', trip.gioBatDau);
+                                await prefs.setString('startTime', trip.gioBatDau);
+                                await prefs.setString('diemDi', trip.diemDi);
+                                await prefs.setString('diemDen', trip.diemDen);
+                                await prefs.setString('ngayDi', trip.ngayDi);
+                                await prefs.setInt('seatPrice', trip.giaVe);
+
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => TicketBookingPage()),
+                                );
                               },
-                              child: TripCard(trip: trip),
                             ),
-                            if (index != _filteredTrips.length - 1)
-                              const SizedBox(height: 16), // Thêm khoảng cách nếu không phải phần tử cuối
                           ],
                         );
                       })

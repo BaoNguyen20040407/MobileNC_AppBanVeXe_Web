@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/view/auth/splash_screen.dart';
-import 'package:giao_dien_1/view/main/homepage.dart';
 import 'package:giao_dien_1/view/profile/profile_screen.dart';
 import 'package:giao_dien_1/view/ticket_booking/ticket_booking.dart';
 import 'package:giao_dien_1/view/ticket_history/ticket_history.dart';

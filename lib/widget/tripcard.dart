@@ -4,8 +4,9 @@ import '../config/default.dart';
 
 class TripCard extends StatelessWidget {
   final Trip trip;
+  final VoidCallback? onTap;
 
-  const TripCard({Key? key, required this.trip}) : super(key: key);
+  const TripCard({Key? key, required this.trip, this.onTap}) : super(key: key);
 
   String formatCurrency(int amount) {
   String number = amount.toString();
@@ -266,9 +267,7 @@ class TripCard extends StatelessWidget {
                       ),
                     ),
                     ElevatedButton(
-                      onPressed: () {
-                        // Xử lý chọn chuyến
-                      },
+                      onPressed: onTap ?? () {},
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.mainOrange,
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),

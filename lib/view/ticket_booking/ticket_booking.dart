@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:giao_dien_1/config/default.dart';
+import 'package:giao_dien_1/view/payment/payment.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:giao_dien_1/widget/appbar.dart';
 import 'package:giao_dien_1/widget/footer.dart';
+import 'package:intl/intl.dart';
+import 'package:giao_dien_1/view/main/homepage.dart';
 
 void main() => runApp(MaterialApp(home: TicketBookingPage()));
 
@@ -27,6 +31,16 @@ class _TicketBookingPageState extends State<TicketBookingPage> {
   String dropoffPoint = "Bến Xe Nam Hải - Hà Nội";
   String pickupTime = "05:00 16/04/2025";
   String startTime = "06:00 16/04/2025";
+  String diemDi = '';
+  String diemDen = '';
+  String ngayDi = '';
+  String fullname = '';
+  String phoneNumber = '';
+  String email = '';
+
+  DateTime? parsedStartTime;
+  String suggestArriveTime = '';
+
 
   @override
   void initState() {
@@ -36,6 +50,12 @@ class _TicketBookingPageState extends State<TicketBookingPage> {
     loadPreferences();
   }
 
+  String formatCurrency(int amount) {
+  final formatter = NumberFormat("#,###", "vi_VN");
+  return '${formatter.format(amount)} VND';
+  }
+
+
   void loadPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -44,7 +64,41 @@ class _TicketBookingPageState extends State<TicketBookingPage> {
       dropoffPoint = prefs.getString('dropoffPoint') ?? dropoffPoint;
       pickupTime = prefs.getString('pickupTime') ?? pickupTime;
       startTime = prefs.getString('startTime') ?? startTime;
+      diemDi = prefs.getString('diemDi') ?? '';
+      diemDen = prefs.getString('diemDen') ?? '';
+      ngayDi = prefs.getString('ngayDi') ?? '';
+      fullname = prefs.getString('full_name') ?? '';
+      phoneNumber = prefs.getString('phone') ?? '';
+      email = prefs.getString('email') ?? '';
+
+      try {
+      // Format chuẩn: "06:00 16/04/2025" → "2025-04-16 06:00:00"
+      final isoTime = _convertToIsoFormat('$startTime $ngayDi');
+      parsedStartTime = DateTime.parse(isoTime);
+
+      final suggestTime = parsedStartTime!.subtract(const Duration(hours: 1, minutes: 30));
+      suggestArriveTime = '${_formatTime(suggestTime)} ${_formatDate(suggestTime)}';
+    } catch (e) {
+      debugPrint('Lỗi định dạng thời gian: $e');
+      suggestArriveTime = pickupTime;
+    }
     });
+  }
+
+  String _convertToIsoFormat(String original) {
+    // Chuyển "06:00 16/04/2025" => "2025-04-16 06:00:00"
+    final parts = original.split(' ');
+    final time = parts[0];
+    final date = parts[1].split('/');
+    return '${date[2]}-${date[1]}-${date[0]} $time:00';
+  }
+
+  String _formatTime(DateTime dt) {
+    return dt.hour.toString().padLeft(2, '0') + ':' + dt.minute.toString().padLeft(2, '0');
+  }
+
+  String _formatDate(DateTime dt) {
+    return '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}';
   }
 
   void updateTotalPrice() {
@@ -94,7 +148,7 @@ class _TicketBookingPageState extends State<TicketBookingPage> {
       child: Column(
         children: [
           Image.asset(assetPath, width: 28),
-          Text(seatId, style: TextStyle(fontSize: 10)),
+          Text(seatId, style: TextStyle(fontSize: 10, fontFamily: 'Inter', color: AppColors.black)),
         ],
       ),
     );
@@ -124,12 +178,37 @@ class _TicketBookingPageState extends State<TicketBookingPage> {
     List<String> rightSeats = [for (var i = 1; i <= 18; i++) 'B$i'];
 
     return Scaffold(
+      backgroundColor: AppColors.white,
       appBar: CustomAppBar(),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(12),
+        padding: EdgeInsets.fromLTRB(24, 32, 24, 32),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Column(
+              children: [
+                Text(
+                  '${diemDi.toUpperCase()} - ${diemDen.toUpperCase()}',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.mainOrange,
+                    fontFamily: 'Inter',
+                  ),
+                ),
+                SizedBox(height: 2),
+                Text(
+                  ngayDi,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.mainOrange,
+                    fontFamily: 'Inter',
+                  ),
+                ),
+                SizedBox(height: 16),
+              ],
+            ),
             Container(
               padding: EdgeInsets.all(8),
               decoration: BoxDecoration(
@@ -138,11 +217,19 @@ class _TicketBookingPageState extends State<TicketBookingPage> {
               ),
               child: Column(
                 children: [
-                  Text(
-                    'Chọn ghế',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Chọn ghế',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 17,
+                        fontFamily: 'Inter',
+                      ),
+                    ),
                   ),
-                  SizedBox(height: 8),
+
+                  SizedBox(height: 16),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -174,7 +261,7 @@ class _TicketBookingPageState extends State<TicketBookingPage> {
                         children: [
                           Image.asset('/image/chair_sold.png', width: 20),
                           SizedBox(width: 4),
-                          Text('Đã bán'),
+                          Text('Đã bán', style: TextStyle(fontFamily: 'Inter', fontSize: 14),),
                         ],
                       ),
                       Row(
@@ -184,7 +271,7 @@ class _TicketBookingPageState extends State<TicketBookingPage> {
                             width: 20,
                           ),
                           SizedBox(width: 4),
-                          Text('Còn trống'),
+                          Text('Còn trống', style: TextStyle(fontFamily: 'Inter', fontSize: 14),),
                         ],
                       ),
                       Row(
@@ -194,136 +281,147 @@ class _TicketBookingPageState extends State<TicketBookingPage> {
                             width: 20,
                           ),
                           SizedBox(width: 4),
-                          Text('Đang chọn'),
+                          Text('Đang chọn', style: TextStyle(fontFamily: 'Inter', fontSize: 14),),
                         ],
                       ),
                     ],
                   ),
+                  SizedBox(height: 16),
                 ],
               ),
             ),
-            SizedBox(height: 16),
+            SizedBox(height: 32),
             infoCard(
               title: 'Thông tin khách hàng',
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Họ tên: Nguyễn Gia Bảo"),
-                  Text("Số điện thoại: 0765178079"),
-                  Text("Email: baonguyenhuflit@gmail.com"),
+                  RichText(
+                    text: TextSpan(
+                      style: TextStyle(fontFamily: 'Inter', fontSize: 14, color: AppColors.black),
+                      children: [
+                        TextSpan(text: 'Họ tên: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                        TextSpan(text: fullname, style: TextStyle(fontWeight: FontWeight.normal, color: AppColors.black)),
+                      ],
+                    ),
+                  ),
                   SizedBox(height: 8),
+                  RichText(
+                    text: TextSpan(
+                      style: TextStyle(fontFamily: 'Inter', fontSize: 14, color: AppColors.black),
+                      children: [
+                        TextSpan(text: 'Số điện thoại: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                        TextSpan(text: phoneNumber, style: TextStyle(fontWeight: FontWeight.normal, color: AppColors.black)),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  RichText(
+                    text: TextSpan(
+                      style: TextStyle(fontFamily: 'Inter', fontSize: 14, color: AppColors.black),
+                      children: [
+                        TextSpan(text: 'Email: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                        TextSpan(text: email, style: TextStyle(fontWeight: FontWeight.normal, color: AppColors.black)),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 16),
                   Text(
                     "ĐIỀU KHOẢN & LƯU Ý",
                     style: TextStyle(
-                      color: Colors.red,
+                      color: AppColors.mainOrange,
                       fontWeight: FontWeight.bold,
+                      fontFamily: 'Inter',
+                      fontSize: 14, 
                     ),
                   ),
-                  SizedBox(height: 4),
+                  SizedBox(height: 8),
                   Text(
-                    "(*) Quý khách vui lòng có mặt tại bến xuất phát...",
-                    style: TextStyle(fontSize: 12),
+                    "(*): Quý khách vui lòng có mặt tại bến lúc $suggestArriveTime",
+                    style: TextStyle(fontSize: 14, fontFamily: 'Inter'),
                   ),
+                  SizedBox(height: 8),
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Checkbox(
-                        value: agreedToTerms,
-                        onChanged: (val) {
-                          setState(() {
-                            agreedToTerms = val!;
-                          });
-                        },
-                      ),
-                      Expanded(
-                        child: Text(
-                          "Chấp nhận điều khoản đặt vé & chính sách bảo mật thông tin",
+                      Transform.translate(
+                        offset: Offset(-4, 0), // đẩy sang trái 4px
+                        child: Transform.scale(
+                          scale: 0.8, // thu nhỏ checkbox
+                          child: Checkbox(
+                            value: agreedToTerms,
+                            activeColor: AppColors.mainOrange,
+                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+                            onChanged: (val) {
+                              setState(() {
+                                agreedToTerms = val!;
+                              });
+                            },
+                          ),
                         ),
                       ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            "Chấp nhận quy định đặt vé & chính sách bảo mật thông tin",
+                            style: TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 14,
+                              height: 1.4, // tăng độ cao dòng cho đẹp
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16,),
                     ],
                   ),
                 ],
               ),
             ),
-            infoCard(
-              title: 'Thông tin đón trả',
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'ĐIỂM ĐÓN:',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    '$pickupPoint',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF006400),
-                    ),
-                  ),
-                  RichText(
-                    text: TextSpan(
-                      style: TextStyle(color: Colors.black),
-                      children: [
-                        TextSpan(text: '\nQuý khách vui lòng có mặt tại '),
-                        TextSpan(
-                          text: pickupPoint,
-                          style: TextStyle(color: Colors.orange),
-                        ),
-                        TextSpan(text: ' trước '),
-                        TextSpan(
-                          text: pickupTime,
-                          style: TextStyle(color: Colors.orange),
-                        ),
-                        TextSpan(
-                          text:
-                              ' để được trung chuyển hoặc kiểm tra thông tin trước khi lên xe.',
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    'ĐIỂM TRẢ:',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    '$dropoffPoint',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF006400),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            const SizedBox(height: 32,),
             infoCard(
               title: 'Thông tin lượt đi',
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Tuyến xe: $pickupPoint - $dropoffPoint'),
-                  Text('Giờ xuất bến: $startTime'),
-                  Text('Số lượng ghế: ${selectedSeats.length} ghế'),
-                  Text('Số ghế: ${selectedSeats.join(', ')}'),
-                  Text('Điểm trả khách: $dropoffPoint'),
-                  Text('Tổng tiền lượt đi: ${totalPrice} VND'),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildInfoRow('Tuyến xe:', '$pickupPoint - $dropoffPoint'),
+                      SizedBox(height: 8),
+                      _buildInfoRow('Giờ xuất bến:', '$startTime $ngayDi'),
+                      SizedBox(height: 8),
+                      _buildInfoRow('Số lượng ghế:', '${selectedSeats.length} ghế'),
+                      SizedBox(height: 8),
+                      _buildInfoRow('Số ghế:', selectedSeats.join(', '), isSeat: true),
+                      SizedBox(height: 8),
+                      _buildInfoRow('Điểm trả khách:', dropoffPoint),
+                      SizedBox(height: 8),
+                      _buildInfoRow('Tổng tiền lượt đi:', '${formatCurrency(totalPrice)}', isTotal: true),
+                      SizedBox(height: 8),
+                    ],
+                  )
                 ],
               ),
             ),
+            const SizedBox (height: 32,),
             infoCard(
               title: 'Chi tiết giá',
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Giá vé lượt đi: ${seatPrice} VND'),
-                  Text('Phí thanh toán: 0 VND'),
-                  Text(
-                    'Tổng tiền: ${totalPrice} VND',
-                    style: TextStyle(color: Colors.red),
-                  ),
+                  _buildInfoRow('Giá vé lượt đi:', formatCurrency(totalPrice)),
+                  SizedBox(height: 8),
+                  _buildInfoRow('Phí thanh toán:', '0 VND'),
+                  SizedBox(height: 8),
+                  _buildInfoRow('Tổng tiền:', formatCurrency(totalPrice), isTotal: true),
+                  SizedBox(height: 8),
                 ],
               ),
             ),
+            const SizedBox(height: 32,),
             infoCard(
               title: 'Thanh toán',
               child: Column(
@@ -331,56 +429,146 @@ class _TicketBookingPageState extends State<TicketBookingPage> {
                 children: [
                   Text(
                     '(*) Quý khách chỉ có thể thanh toán khi chọn ít nhất 1 chỗ ngồi và đã nhấn nút Chấp nhận điều khoản đặt vé',
-                    style: TextStyle(fontSize: 12),
+                    style: TextStyle(
+                      fontSize: 14, 
+                      fontFamily: 'Inter', 
+                      color: AppColors.black
+                      ),
                   ),
                   SizedBox(height: 8),
                   Center(
                     child: Text(
                       '${totalPrice} VND',
                       style: TextStyle(
-                        color: Colors.red,
+                        color: AppColors.mainOrange,
                         fontWeight: FontWeight.bold,
-                        fontSize: 18,
+                        fontSize: 17,
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 8),
+            SizedBox(height: 32),
             Row(
               children: [
                 Expanded(
                   child: SizedBox(
-                    height: 40,
-                    child: OutlinedButton(onPressed: () {}, child: Text('Hủy')),
+                    height: 32,
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (context) => HomePage()),
+                          (route) => false,
+                        );
+                      },
+                      icon: Icon(
+                        Icons.block,
+                        size: 18,
+                        color: selectedSeats.isNotEmpty && agreedToTerms
+                            ? Colors.black
+                            : AppColors.greyLight,
+                      ),
+                      label: Text(
+                        'Hủy',
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.bold,
+                          color: selectedSeats.isNotEmpty && agreedToTerms
+                              ? Colors.black
+                              : AppColors.greyLight,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        overlayColor: Colors.transparent,
+                        side: BorderSide(
+                          color: selectedSeats.isNotEmpty && agreedToTerms
+                              ? Colors.black
+                              : AppColors.greyLight,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-                SizedBox(width: 8),
+                SizedBox(width: 16),
                 Expanded(
                   child: SizedBox(
-                    height: 40,
-                    child: ElevatedButton(
-                      onPressed:
-                          selectedSeats.isNotEmpty && agreedToTerms
-                              ? () {}
-                              : null,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                        disabledBackgroundColor: Colors.grey,
+                    height: 32,
+                    child: ElevatedButton.icon(
+                      onPressed: selectedSeats.isNotEmpty && agreedToTerms ? () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => Payment(),
+                            settings: const RouteSettings(name: '/payment'),
+                          ),
+                        );
+                      } : null,
+                      icon: Icon(Icons.credit_card, size: 18, color: AppColors.white,),
+                      label: Text(
+                        'Thanh toán',
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
-                      child: Text('Thanh toán'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.mainOrange,
+                        disabledBackgroundColor: AppColors.greyLight,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        elevation: 4,
+                      ),
                     ),
                   ),
                 ),
               ],
-            ),
+            )
           ],
         ),
       ),
       bottomNavigationBar: FooterNavigation(),
     );
   }
+
+  Widget _buildInfoRow(String title, String value, {bool isSeat = false, bool isTotal = false}) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Text(
+        title,
+        style: TextStyle(
+          fontFamily: 'Inter',
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      Flexible(
+        child: Text(
+          value,
+          textAlign: TextAlign.right,
+          style: TextStyle(
+            fontFamily: 'Inter',
+            fontSize: 14,
+            fontWeight: isSeat || isTotal ? FontWeight.bold : FontWeight.normal,
+            color: isSeat
+                ? AppColors.greenDark
+                : isTotal
+                    ? AppColors.mainOrange
+                    : AppColors.black,
+          ),
+        ),
+      ),
+    ],
+  );
+}
 
   Widget buildLegend(Color color, String label) {
     return Row(
@@ -405,7 +593,7 @@ class _TicketBookingPageState extends State<TicketBookingPage> {
         children: [
           Text(
             title,
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17, fontFamily: 'Inter'),
           ),
           SizedBox(height: 8),
           child,

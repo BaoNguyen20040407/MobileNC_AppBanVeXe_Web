@@ -1,0 +1,21 @@
+[
+    {
+      "title": "Thông báo: Vé xe đặt thành công",
+      "sender": "Văn Phòng NX Nam Hải - TP. Hồ Chí Minh",
+      "time": "07:37 01/03/2025",
+      "trip": {
+        "from": "TP. HCM",
+        "to": "Đà Nẵng",
+        "seat": "Giường nằm cao cấp",
+        "code": "MH 654",
+        "departure": "08:00 11/05/2025",
+        "arrival": "04:30 11/05/2025"
+      }
+    },
+    {
+      "title": "Thông báo: Vé xe đặt thành công",
+      "sender": "Văn Phòng NX Nam Hải - TP. Hồ Chí Minh",
+      "time": "07:37 01/03/2025"
+    }
+  ]
+  

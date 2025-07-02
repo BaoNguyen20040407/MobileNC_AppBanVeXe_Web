@@ -1,21 +1,65 @@
-import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'dart:typed_data';
 
-class AppBarProfile extends StatelessWidget implements PreferredSizeWidget {
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class AppBarProfile extends StatefulWidget implements PreferredSizeWidget {
   final String title;
-  final String? avatarUrl;
   final VoidCallback? onBack;
 
   const AppBarProfile({
     super.key,
     required this.title,
-    this.avatarUrl,
     this.onBack,
   });
 
   @override
+  State<AppBarProfile> createState() => _AppBarProfileState();
+
+  @override
+  Size get preferredSize => const Size.fromHeight(80);
+}
+
+class _AppBarProfileState extends State<AppBarProfile> {
+  Uint8List? _avatar;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAvatar();
+  }
+
+  Future<void> _loadAvatar() async {
+    final prefs = await SharedPreferences.getInstance();
+    final base64 = prefs.getString('image_base64');
+    if (base64 != null && base64.isNotEmpty) {
+      try {
+        setState(() {
+          _avatar = base64Decode(base64);
+        });
+      } catch (_) {
+        setState(() {
+          _avatar = null;
+        });
+      }
+    } else {
+      setState(() {
+        _avatar = null;
+      });
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loadAvatar(); // Reload mỗi lần màn hình quay lại
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
-      height: preferredSize.height,
+      height: widget.preferredSize.height,
       padding: const EdgeInsets.only(top: 16, left: 24, right: 24),
       decoration: const BoxDecoration(
         color: Color(0xFFF5A562),
@@ -26,13 +70,13 @@ class AppBarProfile extends StatelessWidget implements PreferredSizeWidget {
         children: [
           // Nút quay lại
           GestureDetector(
-            onTap: onBack ?? () => Navigator.pop(context),
+            onTap: widget.onBack ?? () => Navigator.pop(context),
             child: const Icon(Icons.arrow_back_ios, color: Colors.white),
           ),
 
           // Tiêu đề
           Text(
-            title,
+            widget.title,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 17,
@@ -41,23 +85,16 @@ class AppBarProfile extends StatelessWidget implements PreferredSizeWidget {
             ),
           ),
 
-          // Avatar → tự điều hướng về Profile
+          // Avatar
           GestureDetector(
-            onTap: () {
-              Future.delayed(const Duration(milliseconds: 50), () {
-                if (context.mounted) {
-                  Navigator.pushNamedAndRemoveUntil(
-                    context,
-                    '/profile',
-                    (route) => false,
-                  );
-                }
-              });
+            onTap: () async {
+              await Navigator.pushNamed(context, '/profile');
+              _loadAvatar(); // Tải lại avatar sau khi quay lại
             },
             child: CircleAvatar(
               radius: 16,
-              backgroundImage: avatarUrl != null && avatarUrl!.isNotEmpty
-                  ? NetworkImage(avatarUrl!)
+              backgroundImage: _avatar != null
+                  ? MemoryImage(_avatar!)
                   : const AssetImage('assets/image/personicon.png') as ImageProvider,
             ),
           ),
@@ -65,7 +102,4 @@ class AppBarProfile extends StatelessWidget implements PreferredSizeWidget {
       ),
     );
   }
-
-  @override
-  Size get preferredSize => const Size.fromHeight(80);
 }

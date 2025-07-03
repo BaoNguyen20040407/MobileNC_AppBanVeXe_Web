@@ -271,8 +271,8 @@ class _TicketLookupScreenState extends State<TicketLookupScreen> {
               children: [
                 Image.asset(
                   'assets/image/qrcode.png',
-                  width: 60,
-                  height: 60,
+                  width: 40,
+                  height: 40,
                 ),
                 const SizedBox(height: 4),
                 const Text(
@@ -295,7 +295,7 @@ class _TicketLookupScreenState extends State<TicketLookupScreen> {
                 ),
               ],
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 6),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -304,7 +304,7 @@ class _TicketLookupScreenState extends State<TicketLookupScreen> {
                   const SizedBox(height: 4,),
                   _infoRow('Thời gian', '${ticket.time} ${ticket.date}'),
                   const SizedBox(height: 4,),
-                  _infoRow('Điểm lên xe', 'BX Nam Hải - ${ticket.pickupPoint}'),
+                  _infoRow('Điểm đi', 'BX Nam Hải - ${ticket.pickupPoint}'),
                   const SizedBox(height: 4,),
                   _infoRow('Giá vé', '${formatCurrency(ticket.totalPrice)} VND'),
                   const SizedBox(height: 16,),
@@ -352,12 +352,12 @@ class _TicketLookupScreenState extends State<TicketLookupScreen> {
 
 Widget _infoRow(String label, String value) {
   return Padding(
-    padding: const EdgeInsets.only(bottom: 6),
+    padding: const EdgeInsets.only(bottom: 4),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          width: 140, // cố định độ rộng của label
+        ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 80, maxWidth: 100), // nhỏ hơn trước
           child: Text(
             '$label:',
             style: const TextStyle(
@@ -366,8 +366,11 @@ Widget _infoRow(String label, String value) {
               fontFamily: 'Inter',
               color: Colors.black87,
             ),
+            softWrap: false,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
+        const SizedBox(width: 4), // giảm khoảng cách giữa tiêu đề và nội dung
         Expanded(
           child: Text(
             value,
@@ -376,6 +379,7 @@ Widget _infoRow(String label, String value) {
               fontFamily: 'Inter',
               color: Colors.black,
             ),
+            softWrap: true,
           ),
         ),
       ],

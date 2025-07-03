@@ -45,7 +45,7 @@ class PaymentSuccess extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               const Text(
-                'Quý khách nhấn nút Xem vé xe dưới đây để xem\nthông tin chi tiết',
+                'Quý khách nhấn nút Xem vé xe dưới đây để\nxem thông tin chi tiết',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,

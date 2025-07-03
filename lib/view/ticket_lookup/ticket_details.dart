@@ -155,7 +155,7 @@ class _TicketDetailsState extends State<TicketDetails> {
                 ),
                 const SizedBox(height: 8),
                 infoRow('Họ tên:', _name),
-                infoRow('Số điện thoại:', _phone),
+                infoRow('SĐT:', _phone),
                 infoRow('Email:', _email),
                 const SizedBox(height: 16),
 
@@ -247,6 +247,7 @@ class _TicketDetailsState extends State<TicketDetails> {
                       color: Colors.white,
                       fontFamily: 'Inter',
                       fontWeight: FontWeight.bold,
+                      fontSize: 14,
                     ),
                   ),
                 ),
@@ -278,7 +279,7 @@ class _TicketDetailsState extends State<TicketDetails> {
             ),
           ),
         ),
-        const SizedBox(width: 16), // khoảng cách giữa tiêu đề và nội dung
+        const SizedBox(width: 4), // khoảng cách giữa tiêu đề và nội dung
         Expanded(
           flex: 2,
           child: Align(

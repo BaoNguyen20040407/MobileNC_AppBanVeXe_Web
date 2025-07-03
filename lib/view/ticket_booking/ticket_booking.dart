@@ -56,33 +56,85 @@ class _TicketBookingPageState extends State<TicketBookingPage> {
   }
 
   void loadPreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      seatPrice = prefs.getInt('seatPrice') ?? 120000;
-      pickupPoint = prefs.getString('pickupPoint') ?? pickupPoint;
-      dropoffPoint = prefs.getString('dropoffPoint') ?? dropoffPoint;
-      pickupTime = prefs.getString('pickupTime') ?? pickupTime;
-      startTime = prefs.getString('startTime') ?? startTime;
-      diemDi = prefs.getString('diemDi') ?? '';
-      diemDen = prefs.getString('diemDen') ?? '';
-      ngayDi = prefs.getString('ngayDi') ?? '';
-      fullname = prefs.getString('full_name') ?? '';
-      phoneNumber = prefs.getString('phone') ?? '';
-      email = prefs.getString('email') ?? '';
+  final prefs = await SharedPreferences.getInstance();
 
-      try {
-      // Format chuẩn: "06:00 16/04/2025" → "2025-04-16 06:00:00"
-      final isoTime = _convertToIsoFormat('$startTime $ngayDi');
-      parsedStartTime = DateTime.parse(isoTime);
+  final tempSeatPrice = prefs.getInt('seatPrice') ?? 120000;
+  final tempPickupPoint = prefs.getString('pickupPoint') ?? pickupPoint;
+  final tempDropoffPoint = prefs.getString('dropoffPoint') ?? dropoffPoint;
+  final tempPickupTime = prefs.getString('pickupTime') ?? pickupTime;
+  final tempStartTime = prefs.getString('startTime') ?? startTime;
+  final tempDiemDi = prefs.getString('diemDi') ?? '';
+  final tempDiemDen = prefs.getString('diemDen') ?? '';
+  final tempNgayDi = prefs.getString('ngayDi') ?? '';
+  final tempFullname = prefs.getString('full_name') ?? '';
+  final tempPhone = prefs.getString('phone') ?? '';
+  final tempEmail = prefs.getString('email') ?? '';
+  
+  DateTime? parsedTime;
+  String suggestTime;
 
-      final suggestTime = parsedStartTime!.subtract(const Duration(hours: 1, minutes: 30));
-      suggestArriveTime = '${_formatTime(suggestTime)} ${_formatDate(suggestTime)}';
-    } catch (e) {
-      debugPrint('Lỗi định dạng thời gian: $e');
-      suggestArriveTime = pickupTime;
-    }
-    });
+  try {
+    final isoTime = _convertToIsoFormat('$tempStartTime $tempNgayDi');
+    parsedTime = DateTime.parse(isoTime);
+    final suggest = parsedTime.subtract(const Duration(hours: 1, minutes: 30));
+    suggestTime = '${_formatTime(suggest)} ${_formatDate(suggest)}';
+  } catch (e) {
+    debugPrint('Lỗi định dạng thời gian: $e');
+    parsedTime = null;
+    suggestTime = tempPickupTime;
   }
+
+  setState(() {
+    seatPrice = tempSeatPrice;
+    pickupPoint = tempPickupPoint;
+    dropoffPoint = tempDropoffPoint;
+    pickupTime = tempPickupTime;
+    startTime = tempStartTime;
+    diemDi = tempDiemDi;
+    diemDen = tempDiemDen;
+    ngayDi = tempNgayDi;
+    fullname = tempFullname;
+    phoneNumber = tempPhone;
+    email = tempEmail;
+    parsedStartTime = parsedTime;
+    suggestArriveTime = suggestTime;
+  });
+}
+
+Future<void> handleBookingAndNavigate(BuildContext context) async {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => const Center(child: CircularProgressIndicator()),
+  );
+
+  try {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setString('pickupPoint', pickupPoint);
+    await prefs.setString('dropoffPoint', dropoffPoint);
+    await prefs.setString('startTime', startTime);
+    await prefs.setString('ngayDi', ngayDi);
+    await prefs.setStringList('selectedSeats', selectedSeats);
+    await prefs.setInt('seatPrice', seatPrice);
+    await prefs.setInt('totalPrice', totalPrice);
+
+    await Future.delayed(const Duration(milliseconds: 200)); // tránh gắt khung hình
+
+    Navigator.pop(context); // đóng loading
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const Payment()),
+    );
+  } catch (e) {
+    Navigator.pop(context); // đóng loading nếu lỗi
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Đã xảy ra lỗi khi đặt vé: $e")),
+    );
+  }
+}
+
+
 
   String _convertToIsoFormat(String original) {
     // Chuyển "06:00 16/04/2025" => "2025-04-16 06:00:00"
@@ -111,14 +163,14 @@ class _TicketBookingPageState extends State<TicketBookingPage> {
     String assetPath;
     switch (state) {
       case SeatState.selected:
-        assetPath = 'image/chair_choosing.png';
+        assetPath = 'assets/image/chair_choosing.png';
         break;
       case SeatState.sold:
-        assetPath = 'image/chair_sold.png';
+        assetPath = 'assets/image/chair_sold.png';
         break;
       case SeatState.available:
       default:
-        assetPath = 'image/chair_default.png';
+        assetPath = 'assets/image/chair_default.png';
         break;
     }
 
@@ -146,7 +198,7 @@ class _TicketBookingPageState extends State<TicketBookingPage> {
               },
       child: Column(
         children: [
-          Image.asset(assetPath, width: 28),
+          Image.asset(assetPath, width: 19),
           Text(seatId, style: TextStyle(fontSize: 10, fontFamily: 'Inter', color: AppColors.black)),
         ],
       ),
@@ -154,22 +206,33 @@ class _TicketBookingPageState extends State<TicketBookingPage> {
   }
 
   Widget buildSeatGrid(List<String> seats) {
-    return GridView.builder(
-      padding: EdgeInsets.zero,
-      itemCount: seats.length,
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        mainAxisSpacing: 0.05,
-        crossAxisSpacing: 0.05,
-        childAspectRatio: 1.5,
-      ),
-      itemBuilder: (context, index) {
-        return buildSeat(seats[index]);
-      },
-    );
-  }
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      // Tính chiều cao cần thiết cho grid (số hàng)
+      final rowCount = (seats.length / 3).ceil();
+      final estimatedHeight = rowCount * 60.0 + (rowCount - 1) * 16.0; // mỗi item ~60px + spacing
+
+      return SizedBox(
+        height: estimatedHeight,
+        child: GridView.builder(
+          padding: EdgeInsets.zero,
+          itemCount: seats.length,
+          physics: NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            mainAxisSpacing: 16,
+            crossAxisSpacing: 0,
+            childAspectRatio: 1.5,
+          ),
+          itemBuilder: (context, index) {
+            return buildSeat(seats[index]);
+          },
+        ),
+      );
+    },
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -258,7 +321,12 @@ class _TicketBookingPageState extends State<TicketBookingPage> {
                     children: [
                       Row(
                         children: [
-                          Image.asset('/image/chair_sold.png', width: 20),
+                          Image.asset(
+                            'assets/image/chair_sold.png',
+                            width: 20,
+                            cacheHeight: 40,
+                            cacheWidth: 40,
+                          ),
                           SizedBox(width: 4),
                           Text('Đã bán', style: TextStyle(fontFamily: 'Inter', fontSize: 14),),
                         ],
@@ -266,7 +334,7 @@ class _TicketBookingPageState extends State<TicketBookingPage> {
                       Row(
                         children: [
                           Image.asset(
-                            '/image/chair_default.png',
+                            'assets/image/chair_default.png',
                             width: 20,
                           ),
                           SizedBox(width: 4),
@@ -276,7 +344,7 @@ class _TicketBookingPageState extends State<TicketBookingPage> {
                       Row(
                         children: [
                           Image.asset(
-                            '/image/chair_choosing.png',
+                            'assets/image/chair_choosing.png',
                             width: 20,
                           ),
                           SizedBox(width: 4),
@@ -500,23 +568,9 @@ class _TicketBookingPageState extends State<TicketBookingPage> {
                     height: 32,
                     child: ElevatedButton.icon(
                       onPressed: selectedSeats.isNotEmpty && agreedToTerms
-                        ? () async {
-                            final prefs = await SharedPreferences.getInstance();
-
-                            await prefs.setString('pickupPoint', pickupPoint);
-                            await prefs.setString('dropoffPoint', dropoffPoint);
-                            await prefs.setString('startTime', startTime);
-                            await prefs.setString('ngayDi', ngayDi);
-                            await prefs.setStringList('selectedSeats', selectedSeats);
-                            await prefs.setInt('seatPrice', seatPrice);
-                            await prefs.setInt('totalPrice', totalPrice);
-
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (_) => const Payment()),
-                            );
-                          }
+                        ? () => handleBookingAndNavigate(context)
                         : null,
+
                       icon: Icon(Icons.credit_card, size: 18, color: AppColors.white,),
                       label: Text(
                         'Thanh toán',

@@ -182,11 +182,10 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
               onPressed: _searchRoutes,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.mainOrange,
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(6),
                 ),
-                elevation: 4,
                 shadowColor: AppColors.mainOrange,
               ),
               child: const Text(

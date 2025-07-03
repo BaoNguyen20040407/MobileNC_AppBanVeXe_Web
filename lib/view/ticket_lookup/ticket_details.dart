@@ -5,6 +5,8 @@ import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/widget/appbar.dart';
 import 'package:giao_dien_1/widget/footer.dart';
 import 'package:giao_dien_1/view/main/homepage.dart';
+import 'package:giao_dien_1/model/ticket.dart';
+import 'dart:convert';
 
 class TicketDetails extends StatefulWidget {
   const TicketDetails({super.key});
@@ -30,20 +32,47 @@ class _TicketDetailsState extends State<TicketDetails> {
     _loadUserData();
   }
 
+  Future<void> _saveTicketToPrefs() async {
+  if (_selectedSeats.isEmpty) return;
+
+  final prefs = await SharedPreferences.getInstance();
+
+  final ticket = Ticket(
+    seatCode: _selectedSeats.first,
+    fullName: _name,
+    phone: _phone,
+    email: _email,
+    route: '$_pickupPoint - $_dropoffPoint',
+    time: _startTime,
+    date: _ngayDi,
+    totalPrice: _totalPrice,
+    pickupPoint: _pickupPoint,
+  );
+
+  final ticketKey = 'ticket_${_phone}_${_selectedSeats.first}';
+  final ticketJson = jsonEncode(ticket.toJson());
+
+  await prefs.setString(ticketKey, ticketJson);
+}
+
   Future<void> _loadUserData() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _name = prefs.getString('full_name') ?? '';
-      _phone = prefs.getString('phone') ?? '';
-      _email = prefs.getString('email') ?? '';
-      _pickupPoint = prefs.getString('pickupPoint') ?? '';
-      _dropoffPoint = prefs.getString('dropoffPoint') ?? '';
-      _ngayDi = prefs.getString('ngayDi') ?? '';
-      _startTime = prefs.getString('startTime') ?? '';
-      _totalPrice = prefs.getInt('totalPrice') ?? 0;
-      _selectedSeats = prefs.getStringList('selectedSeats') ?? [];
-    });
-  }
+  final prefs = await SharedPreferences.getInstance();
+  setState(() {
+    _name = prefs.getString('full_name') ?? '';
+    _phone = prefs.getString('phone') ?? '';
+    _email = prefs.getString('email') ?? '';
+    _pickupPoint = prefs.getString('pickupPoint') ?? '';
+    _dropoffPoint = prefs.getString('dropoffPoint') ?? '';
+    _ngayDi = prefs.getString('ngayDi') ?? '';
+    _startTime = prefs.getString('startTime') ?? '';
+    _totalPrice = prefs.getInt('totalPrice') ?? 0;
+    _selectedSeats = prefs.getStringList('selectedSeats') ?? [];
+  });
+
+  // GỌI HÀM LƯU VÉ
+  _saveTicketToPrefs();
+}
+
 
   String formatCurrency(int amount) {
     final formatter = NumberFormat("#,###", "vi_VN");
@@ -204,7 +233,6 @@ class _TicketDetailsState extends State<TicketDetails> {
                         settings: const RouteSettings(name: '/home'),
                       ),
                     );
-
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.mainOrange,

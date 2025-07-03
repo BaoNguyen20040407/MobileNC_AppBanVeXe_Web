@@ -258,7 +258,7 @@ class TripCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "Giá vé: ${formatCurrency(trip.giaVe)} đ",
+                      "Giá vé: ${formatCurrency(trip.giaVe)} VND",
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         color: AppColors.mainOrange,

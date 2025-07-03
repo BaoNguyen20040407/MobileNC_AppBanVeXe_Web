@@ -130,7 +130,7 @@ class _HistoryItem extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
         leading: Container(
           width: 36,
           height: 36,

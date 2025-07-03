@@ -7,6 +7,7 @@ import 'package:giao_dien_1/widget/footer.dart';
 import 'package:giao_dien_1/model/ticket.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
+import 'package:giao_dien_1/widget/ticket_info.dart';
 
 class TicketLookupScreen extends StatefulWidget {
   const TicketLookupScreen({super.key});
@@ -19,7 +20,7 @@ class _TicketLookupScreenState extends State<TicketLookupScreen> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _ticketCodeController = TextEditingController();
 
-  Ticket? _foundTicket;
+  List<Ticket> _foundTickets = [];
   bool _isSearched = false;
 
   String formatCurrency(int value) {
@@ -49,19 +50,28 @@ class _TicketLookupScreenState extends State<TicketLookupScreen> {
   Future<void> _findTicket() async {
   final prefs = await SharedPreferences.getInstance();
   final phone = _phoneController.text.trim();
-  final seatCode = _ticketCodeController.text.trim();
-  final key = 'ticket_${phone}_$seatCode';
+  final code = _ticketCodeController.text.trim();
+  final keys = prefs.getKeys();
 
-  final ticketJson = prefs.getString(key);
+  List<Ticket> matchedTickets = [];
+
+  for (final key in keys) {
+    if (key.startsWith('ticket_${phone}_')) {
+      if (code.isEmpty || key.contains('_$code')) {
+        final ticketJson = prefs.getString(key);
+        if (ticketJson != null) {
+          matchedTickets.add(Ticket.fromJson(jsonDecode(ticketJson)));
+        }
+      }
+    }
+  }
+
   setState(() {
     _isSearched = true;
-    if (ticketJson != null) {
-      _foundTicket = Ticket.fromJson(jsonDecode(ticketJson));
-    } else {
-      _foundTicket = null;
-    }
+    _foundTickets = matchedTickets;
   });
 }
+
 
   @override
   void dispose() {
@@ -198,8 +208,8 @@ class _TicketLookupScreenState extends State<TicketLookupScreen> {
             ),
 
             const SizedBox(height: 32),
-            if (_foundTicket != null)
-              _buildTicketCard(_foundTicket!)
+            if (_foundTickets.isNotEmpty)
+              ..._foundTickets.map((ticket) => _buildTicketCard(ticket)).toList()
             else if (_isSearched)
               const Padding(
                 padding: EdgeInsets.only(top: 16),
@@ -264,55 +274,7 @@ class _TicketLookupScreenState extends State<TicketLookupScreen> {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Hàng đầu: Số ghế + QR
-        Row(
-          children: [
-            Column(
-              children: [
-                Image.asset(
-                  'assets/image/qrcode.png',
-                  width: 40,
-                  height: 40,
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Số ghế',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AppColors.greenDark,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Inter',
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  ticket.seatCode,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Inter',
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _infoRow('Tuyến xe', ticket.route),
-                  const SizedBox(height: 4,),
-                  _infoRow('Thời gian', '${ticket.time} ${ticket.date}'),
-                  const SizedBox(height: 4,),
-                  _infoRow('Điểm đi', 'BX Nam Hải - ${ticket.pickupPoint}'),
-                  const SizedBox(height: 4,),
-                  _infoRow('Giá vé', '${formatCurrency(ticket.totalPrice)} VND'),
-                  const SizedBox(height: 16,),
-                ],
-              ),
-            ),
-          ],
-        ),
+        TicketInfoWidget(ticket: ticket),
 
         // Nút "Xem chi tiết vé"
         Center(

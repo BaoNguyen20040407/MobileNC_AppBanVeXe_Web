@@ -5,6 +5,7 @@ import 'package:giao_dien_1/widget/footer.dart';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'package:giao_dien_1/view/payment/wait_payment.dart';
 
 class Payment extends StatefulWidget {
   const Payment({super.key});
@@ -192,6 +193,37 @@ int remainingSeconds = 15 * 60; // 15 phút
                 ),
               ),
               SizedBox(height: 32),
+
+              SizedBox(
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => WaitPayment(),
+                        settings: const RouteSettings(name: '/wait_payment'),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.mainOrange,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  ),
+                  child: Text(
+                    'Xác nhận thanh toán',
+                    style: TextStyle(
+                      color: AppColors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      fontFamily: 'Inter', 
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 32),
+
               //Ngân Hàng
               Container(
                 decoration: BoxDecoration(

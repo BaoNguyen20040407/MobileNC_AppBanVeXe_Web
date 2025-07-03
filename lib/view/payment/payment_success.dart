@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/config/default.dart';
+import 'package:giao_dien_1/view/ticket_lookup/ticket_details.dart';
 import 'package:giao_dien_1/widget/appbar.dart';
 import 'package:giao_dien_1/widget/footer.dart';
 
@@ -39,21 +40,29 @@ class PaymentSuccess extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
+                  fontFamily: 'Inter',
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               const Text(
                 'Quý khách nhấn nút Xem vé xe dưới đây để xem\nthông tin chi tiết',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontFamily: 'Inter',
+                ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
               SizedBox(
-                width: 160,
-                height: 44,
                 child: ElevatedButton(
                   onPressed: () {
-                    //Chuyển sang trang chi tiết vé
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => TicketDetails(),
+                        settings: const RouteSettings(name: '/ticket_details'),
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.deepOrange,
@@ -67,6 +76,7 @@ class PaymentSuccess extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                       color: AppColors.white,
+                      fontFamily: 'Inter',
                     ),
                   ),
                 ),

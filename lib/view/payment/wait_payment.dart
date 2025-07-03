@@ -18,7 +18,10 @@ class _WaitPaymentState extends State<WaitPayment> {
     Future.delayed(const Duration(seconds: 5), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => PaymentSuccess()),
+        MaterialPageRoute(
+          builder: (_) => const PaymentSuccess(),
+          settings: const RouteSettings(name: '/payment_success'),
+        ),
       );
     });
   }
@@ -41,13 +44,14 @@ class _WaitPaymentState extends State<WaitPayment> {
                 color: AppColors.mainOrange,
               ),
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 32),
             const Text(
               'Hệ thống đang xử lý yêu cầu\nthanh toán',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
+                fontFamily: 'Inter',
               ),
             ),
             const SizedBox(height: 8),
@@ -56,6 +60,7 @@ class _WaitPaymentState extends State<WaitPayment> {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
+                fontFamily: 'Inter',
               ),
             ),
           ],

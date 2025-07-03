@@ -49,10 +49,15 @@ class _TicketDetailsState extends State<TicketDetails> {
     pickupPoint: _pickupPoint,
   );
 
+  // 1. Lưu theo key riêng (tuỳ chọn, nếu cần phân loại từng vé)
   final ticketKey = 'ticket_${_phone}_${_selectedSeats.first}';
   final ticketJson = jsonEncode(ticket.toJson());
-
   await prefs.setString(ticketKey, ticketJson);
+
+  // 2. Lưu thêm vào danh sách 'tickets' để các trang lọc đọc được
+  final List<String> ticketList = prefs.getStringList('tickets') ?? [];
+  ticketList.add(ticketJson);
+  await prefs.setStringList('tickets', ticketList);
 }
 
   Future<void> _loadUserData() async {

@@ -10,7 +10,7 @@ class TicketInfoWidget extends StatelessWidget {
 
   String formatCurrency(num amount) {
     final format = NumberFormat.currency(locale: 'vi_VN', symbol: '', decimalDigits: 0);
-    return format.format(amount);
+    return format.format(amount).replaceAll('\u00A0', '');
   }
 
   Widget _infoRow(String label, String value) {

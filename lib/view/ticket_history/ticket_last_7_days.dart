@@ -75,7 +75,7 @@ class _TicketLast7DaysPageState extends State<TicketLast7DaysPage> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Không có vé nào trong 7 ngày qua.\nHãy đặt vé nhé!',
+                      'Không có vé nào\ntrong 7 ngày qua\nHãy đặt vé nhé!',
                       style: TextStyle(
                         fontSize: 20,
                         color: AppColors.black,

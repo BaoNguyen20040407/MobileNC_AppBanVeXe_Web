@@ -57,7 +57,7 @@ class _TicketAllPageState extends State<TicketAllPage> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Không có vé nào cả.\nHãy đặt vé nhé!',
+                      'Không có vé nào cả\nHãy đặt vé nhé!',
                       style: TextStyle(
                         fontSize: 20,
                         color: AppColors.black,

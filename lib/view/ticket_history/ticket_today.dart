@@ -71,7 +71,7 @@ class _TicketTodayPageState extends State<TicketTodayPage> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Không có vé nào hôm nay.\nHãy đặt vé nhé!',
+                      'Không có vé nào hôm nay\nHãy đặt vé nhé!',
                       style: TextStyle(
                         fontSize: 20,
                         color: AppColors.black,

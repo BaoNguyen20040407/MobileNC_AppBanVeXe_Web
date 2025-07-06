@@ -8,11 +8,7 @@ class AppBarProfile extends StatefulWidget implements PreferredSizeWidget {
   final String title;
   final VoidCallback? onBack;
 
-  const AppBarProfile({
-    super.key,
-    required this.title,
-    this.onBack,
-  });
+  const AppBarProfile({super.key, required this.title, this.onBack});
 
   @override
   State<AppBarProfile> createState() => _AppBarProfileState();
@@ -62,9 +58,15 @@ class _AppBarProfileState extends State<AppBarProfile> {
       height: widget.preferredSize.height,
       padding: const EdgeInsets.only(top: 16, left: 24, right: 24),
       decoration: const BoxDecoration(
-        color: Color(0xFFF5A562),
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(0)),
+        image: DecorationImage(
+          image: AssetImage(
+            'assets/image/profile_appbar.png',
+          ), 
+          fit: BoxFit.cover,
+        ),
       ),
+
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -93,9 +95,11 @@ class _AppBarProfileState extends State<AppBarProfile> {
             },
             child: CircleAvatar(
               radius: 16,
-              backgroundImage: _avatar != null
-                  ? MemoryImage(_avatar!)
-                  : const AssetImage('assets/image/personicon.png') as ImageProvider,
+              backgroundImage:
+                  _avatar != null
+                      ? MemoryImage(_avatar!)
+                      : const AssetImage('assets/image/personicon.png')
+                          as ImageProvider,
             ),
           ),
         ],

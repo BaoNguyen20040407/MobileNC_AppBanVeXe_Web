@@ -146,31 +146,35 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
               // Nút đổi vị trí
               Align(
                 alignment: Alignment.center,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.mainOrange,
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.mainOrange.withOpacity(0.15), // 👈 bóng nhẹ
-                        blurRadius: 3,
-                        offset: const Offset(0, 1),
-                      ),
-                    ],
-                  ),
-                  child: IconButton(
-                    icon: const Icon(Icons.swap_vert, color: Colors.white, size: 20),
-                    onPressed: () {
-                      final temp = startController.text;
-                      startController.text = endController.text;
-                      endController.text = temp;
-                    },
-                    tooltip: 'Đổi điểm đi / điểm đến',
-                    splashColor: Colors.transparent,
-                    highlightColor: Colors.transparent,
-                    hoverColor: Colors.transparent,
-                    padding: const EdgeInsets.all(8),
-                    constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                child: SizedBox(
+                  width: 35, 
+                  height: 55,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.mainOrange,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.mainOrange.withOpacity(0.15), // 👈 bóng nhẹ
+                          blurRadius: 3,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.swap_vert, color: Colors.white, size: 20),
+                      onPressed: () {
+                        final temp = startController.text;
+                        startController.text = endController.text;
+                        endController.text = temp;
+                      },
+                      tooltip: 'Đổi điểm đi / điểm đến',
+                      splashColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      hoverColor: Colors.transparent,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(), 
+                    ),
                   ),
                 ),
               ),
@@ -182,11 +186,10 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
               onPressed: _searchRoutes,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.mainOrange,
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(6),
                 ),
-                elevation: 4,
                 shadowColor: AppColors.mainOrange,
               ),
               child: const Text(

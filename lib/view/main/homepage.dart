@@ -14,6 +14,8 @@ import 'package:giao_dien_1/widget/footer.dart';
 import 'package:giao_dien_1/view/guide/instruction_main.dart';
 import 'package:giao_dien_1/widget/tripcard.dart';
 import 'package:giao_dien_1/widget/trip_route_label.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:giao_dien_1/view/ticket_booking/ticket_booking.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -192,14 +194,27 @@ class _HomePageState extends State<HomePage> {
 
                         return Column(
                           children: [
-                            GestureDetector(
-                              onTap: () {
-                                // TODO: xử lý chọn chuyến
+                            TripCard(
+                              trip: trip,
+                              onTap: () async {
+                                debugPrint("Trip tapped: ${trip.diemDi} - ${trip.diemDen}");
+
+                                final prefs = await SharedPreferences.getInstance();
+                                await prefs.setString('pickupPoint', trip.diemDi);
+                                await prefs.setString('dropoffPoint', trip.diemDen);
+                                await prefs.setString('pickupTime', trip.gioBatDau);
+                                await prefs.setString('startTime', trip.gioBatDau);
+                                await prefs.setString('diemDi', trip.diemDi);
+                                await prefs.setString('diemDen', trip.diemDen);
+                                await prefs.setString('ngayDi', trip.ngayDi);
+                                await prefs.setInt('seatPrice', trip.giaVe);
+
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => TicketBookingPage()),
+                                );
                               },
-                              child: TripCard(trip: trip),
                             ),
-                            if (index != _filteredTrips.length - 1)
-                              const SizedBox(height: 16), // Thêm khoảng cách nếu không phải phần tử cuối
                           ],
                         );
                       })
@@ -422,35 +437,38 @@ class _RouteSearchCardState extends State<RouteSearchCard> {
                 // Khoảng cách giữa 2 cột
                 const SizedBox(width: 16),
 
-                // Cột chứa nút đảo
                 Column(
                   children: [
-                    const SizedBox(height: 24), 
-                    Container(
-                      decoration: BoxDecoration(
-                        color: AppColors.mainOrange,
-                        borderRadius: BorderRadius.circular(8), 
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.mainOrange.withOpacity(0.3),
-                            blurRadius: 1,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: IconButton(
-                        icon: const Icon(Icons.swap_vert, color: Colors.white),
-                        onPressed: () {
-                          final temp = widget.diemDiController.text;
-                          widget.diemDiController.text = widget.diemDenController.text;
-                          widget.diemDenController.text = temp;
-                        },
-                        tooltip: 'Đổi điểm đi / điểm đến',
-                        splashColor: Colors.transparent,
-                        highlightColor: Colors.transparent,
-                        hoverColor: Colors.transparent,
-                        padding: const EdgeInsets.all(10), 
-                        constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: 35,
+                      height: 55,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.mainOrange,
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.mainOrange.withOpacity(0.3),
+                              blurRadius: 1,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: IconButton(
+                          icon: const Icon(Icons.swap_vert, color: Colors.white, size: 20),
+                          onPressed: () {
+                            final temp = widget.diemDiController.text;
+                            widget.diemDiController.text = widget.diemDenController.text;
+                            widget.diemDenController.text = temp;
+                          },
+                          tooltip: 'Đổi điểm đi / điểm đến',
+                          splashColor: Colors.transparent,
+                          highlightColor: Colors.transparent,
+                          hoverColor: Colors.transparent,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
                       ),
                     ),
                   ],
@@ -603,7 +621,7 @@ class _RouteSearchCardState extends State<RouteSearchCard> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(6),
                   ),
                   shadowColor: AppColors.mainOrange
                 ),

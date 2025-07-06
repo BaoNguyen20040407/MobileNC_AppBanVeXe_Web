@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:giao_dien_1/view/ticket_lookup/ticket_details.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/widget/appbar.dart';
 import 'package:giao_dien_1/widget/footer.dart';
+import 'package:giao_dien_1/model/ticket.dart';
+import 'dart:convert';
+import 'package:intl/intl.dart';
+import 'package:giao_dien_1/widget/ticket_info.dart';
 
 class TicketLookupScreen extends StatefulWidget {
   const TicketLookupScreen({super.key});
@@ -14,6 +19,13 @@ class TicketLookupScreen extends StatefulWidget {
 class _TicketLookupScreenState extends State<TicketLookupScreen> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _ticketCodeController = TextEditingController();
+
+  List<Ticket> _foundTickets = [];
+  bool _isSearched = false;
+
+  String formatCurrency(int value) {
+  return NumberFormat("#,###", "vi_VN").format(value);
+}
 
   @override
   void initState() {
@@ -34,6 +46,32 @@ class _TicketLookupScreenState extends State<TicketLookupScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('phone', _phoneController.text.trim());
   }
+
+  Future<void> _findTicket() async {
+  final prefs = await SharedPreferences.getInstance();
+  final phone = _phoneController.text.trim();
+  final code = _ticketCodeController.text.trim();
+  final keys = prefs.getKeys();
+
+  List<Ticket> matchedTickets = [];
+
+  for (final key in keys) {
+    if (key.startsWith('ticket_${phone}_')) {
+      if (code.isEmpty || key.contains('_$code')) {
+        final ticketJson = prefs.getString(key);
+        if (ticketJson != null) {
+          matchedTickets.add(Ticket.fromJson(jsonDecode(ticketJson)));
+        }
+      }
+    }
+  }
+
+  setState(() {
+    _isSearched = true;
+    _foundTickets = matchedTickets;
+  });
+}
+
 
   @override
   void dispose() {
@@ -145,14 +183,13 @@ class _TicketLookupScreenState extends State<TicketLookupScreen> {
                   // Nút tìm vé (chưa xử lý)
                   Center(
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: _findTicket,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.mainOrange,
                         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(6),
                         ),
-                        elevation: 4,
                         shadowColor: AppColors.mainOrange,
                       ),
                       child: const Text(
@@ -170,34 +207,145 @@ class _TicketLookupScreenState extends State<TicketLookupScreen> {
               ),
             ),
 
-            const SizedBox(height: 30),
-            Image.asset(
-              'assets/image/lookup_illustration.png',
-              height: 150,
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              'NHÀ XE NAM HẢI',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.red,
-                fontSize: 20,
-                fontFamily: 'Inter',
+            const SizedBox(height: 32),
+            if (_foundTickets.isNotEmpty)
+              ..._foundTickets.map((ticket) => _buildTicketCard(ticket)).toList()
+            else if (_isSearched)
+              const Padding(
+                padding: EdgeInsets.only(top: 16),
+                child: Text(
+                  'Không tìm thấy thông tin phù hợp',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: AppColors.black,
+                    fontFamily: 'Inter',
+                  ),
+                ),
+              )
+            else ...[
+              Image.asset(
+                'assets/image/lookup_illustration.png',
+                height: 150,
               ),
-            ),
-            const Text(
-              'NHỮNG CHUYẾN ĐI AN TOÀN',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.red,
-                fontSize: 20,
-                fontFamily: 'Inter',
+              const SizedBox(height: 10),
+              const Text(
+                'NHÀ XE NAM HẢI',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.red,
+                  fontSize: 20,
+                  fontFamily: 'Inter',
+                ),
               ),
-            ),
+              const Text(
+                'NHỮNG CHUYẾN ĐI AN TOÀN',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.red,
+                  fontSize: 20,
+                  fontFamily: 'Inter',
+                ),
+              ),
+            ],
           ],
         ),
       ),
       bottomNavigationBar: FooterNavigation(),
     );
   }
+
+  Widget _buildTicketCard(Ticket ticket) {
+  return Container(
+    margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      border: Border.all(color: AppColors.mainOrange, width: 5),
+      borderRadius: BorderRadius.circular(16),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.grey.withOpacity(0.3),
+          spreadRadius: 1,
+          blurRadius: 6,
+          offset: const Offset(0, 3),
+        ),
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TicketInfoWidget(ticket: ticket),
+
+        // Nút "Xem chi tiết vé"
+        Center(
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => TicketDetails(),
+                  settings: const RouteSettings(name: '/ticket_details'),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.mainOrange,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              'Xem chi tiết vé',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                fontFamily: 'Inter',
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+
+Widget _infoRow(String label, String value) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 4),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 80, maxWidth: 100), // nhỏ hơn trước
+          child: Text(
+            '$label:',
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              fontFamily: 'Inter',
+              color: Colors.black87,
+            ),
+            softWrap: false,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        const SizedBox(width: 4), // giảm khoảng cách giữa tiêu đề và nội dung
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontSize: 14,
+              fontFamily: 'Inter',
+              color: Colors.black,
+            ),
+            softWrap: true,
+          ),
+        ),
+      ],
+    ),
+  );
+}
 }

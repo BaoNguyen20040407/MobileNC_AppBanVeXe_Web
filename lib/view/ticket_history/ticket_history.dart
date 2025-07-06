@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/widget/appbar_profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:giao_dien_1/view/ticket_history/ticket_today.dart';
+import 'package:giao_dien_1/view/ticket_history/ticket_last_7_days.dart';
+import 'package:giao_dien_1/view/ticket_history/ticket_last_30_days.dart';
+import 'package:giao_dien_1/view/ticket_history/ticket_all.dart';
 
 class TicketHistoryPage extends StatefulWidget {
   const TicketHistoryPage({super.key});
@@ -66,27 +70,57 @@ class _TicketHistoryPageState extends State<TicketHistoryPage> {
                       _HistoryItem(
                         icon: Icons.calendar_today,
                         label: 'Hôm nay',
-                        onTap: () => navigateTo('today'),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const TicketTodayPage(),
+                              settings: const RouteSettings(name: '/ticket_today'),
+                            ),
+                          );
+                        },
                       ),
                       const Divider(height: 1),
                       _HistoryItem(
                         icon: Icons.calendar_view_week,
                         label: '7 ngày trước',
-                        iconLabel: '7',
-                        onTap: () => navigateTo('7_day_ago'),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const TicketLast7DaysPage(),
+                              settings: const RouteSettings(name: '/ticket_7_days_ago'),
+                            ),
+                          );
+                        },
                       ),
                       const Divider(height: 1),
                       _HistoryItem(
                         icon: Icons.calendar_month,
                         label: '30 ngày trước',
-                        iconLabel: '30',
-                        onTap: () => navigateTo('30_day_ago'),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const TicketLast30DaysPage(),
+                              settings: const RouteSettings(name: '/ticket_30_days_ago'),
+                            ),
+                          );
+                        },
                       ),
                       const Divider(height: 1),
                       _HistoryItem(
                         icon: Icons.fact_check,
                         label: 'Tất cả',
-                        onTap: () => navigateTo('all'), // không còn onCheckChanged
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const TicketAllPage(),
+                              settings: const RouteSettings(name: '/ticket_all'),
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -130,7 +164,7 @@ class _HistoryItem extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
         leading: Container(
           width: 36,
           height: 36,

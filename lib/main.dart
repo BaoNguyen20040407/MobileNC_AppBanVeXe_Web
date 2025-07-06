@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/view/auth/splash_screen.dart';
 import 'package:giao_dien_1/view/profile/profile_screen.dart';
+import 'package:giao_dien_1/view/support/support.dart';
 
 
 void main() {
@@ -19,7 +20,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.deepOrange,
       ),
-      home: SplashScreen(),
+      home: SupportPage(),
     );
   }
 }

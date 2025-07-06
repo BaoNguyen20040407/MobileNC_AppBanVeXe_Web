@@ -25,6 +25,7 @@ flutter:
   assets:
     - assets/image/
     - assets/data/
+    - lib/data/qna.json
   
   fonts:
     - family: Inter

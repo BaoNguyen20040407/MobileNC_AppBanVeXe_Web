@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:giao_dien_1/view/support/support_answer_page.dart';
+import 'package:giao_dien_1/view/support/support_loading.dart';
 import 'package:giao_dien_1/widget/appbar_profile.dart';
 
 void main() {
@@ -50,7 +52,7 @@ class SupportPage extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF000000),
+                            color: Color(0xFFFF5722),
                           ),
                         ),
                       ),
@@ -102,7 +104,12 @@ class SupportPage extends StatelessWidget {
                         foregroundColor: Colors.white,
                       ),
                       onPressed: () {
-                        print('Button pressed');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => LoadingPage(),
+                          ),
+                        );
                       },
                       child: Text('Gửi', style: TextStyle(color: Colors.white)),
                     ),
@@ -117,20 +124,24 @@ class SupportPage extends StatelessWidget {
               'Nhà xe có hỗ trợ đổi lịch?',
               'Có thể hoàn tiền vé không?',
               'Tôi không nhận được vé điện tử?',
-            ]),
-            SizedBox(height: 16),
+            ], context),
+
             _buildSection('CÂU HỎI CỦA TÔI', [
               'Mang được mấy ký hành lý? 💬',
               'Đổi vé thế nào?',
               'Làm sao để đổi hoặc huỷ vé đã đặt?',
-            ]),
+            ], context),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSection(String title, List<String> questions) {
+  Widget _buildSection(
+    String title,
+    List<String> questions,
+    BuildContext context,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -142,22 +153,28 @@ class SupportPage extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(
-            children: questions.map((q) => _buildQuestionTile(q)).toList(),
+            children:
+                questions.map((q) => _buildQuestionTile(context, q)).toList(),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildQuestionTile(String question) {
+
+  Widget _buildQuestionTile(BuildContext context, String question) {
     return Column(
       children: [
         Material(
           color: Colors.transparent,
           child: InkWell(
             onTap: () {
-              // TODO: Navigate to detailed Q&A page
-              print('Tapped on: \$question');
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SupportAnswerPage(question: question),
+                ),
+              );
             },
             splashColor: Colors.black26,
             highlightColor: Colors.black12,

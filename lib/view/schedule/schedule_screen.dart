@@ -44,13 +44,13 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     setState(() {
       hasSearched = true;
 
-      if (start.isEmpty || end.isEmpty) {
+      if (start.isEmpty && end.isEmpty) {
         filteredTrips = [];
         return;
       }
 
       filteredTrips = allTrips.where((trip) {
-        return trip.diemDi.toLowerCase().contains(start) &&
+        return trip.diemDi.toLowerCase().contains(start) ||
                trip.diemDen.toLowerCase().contains(end);
       }).toList();
     });
@@ -118,17 +118,67 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          TextField(
-            controller: startController,
-            decoration: _inputDecoration('Nhập điểm đi'),
-            cursorColor: AppColors.mainOrange,
-            style: const TextStyle(fontSize: 16, color: AppColors.black87),
-          ),
-          TextField(
-            controller: endController,
-            decoration: _inputDecoration('Nhập điểm đến'),
-            cursorColor: AppColors.mainOrange,
-            style: const TextStyle(fontSize: 16, color: AppColors.black87),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Cột chứa 2 ô nhập liệu
+              Expanded(
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: startController,
+                      decoration: _inputDecoration('Nhập điểm đi'),
+                      cursorColor: AppColors.mainOrange,
+                      style: const TextStyle(fontSize: 16, color: AppColors.black87),
+                    ),
+                    TextField(
+                      controller: endController,
+                      decoration: _inputDecoration('Nhập điểm đến'),
+                      cursorColor: AppColors.mainOrange,
+                      style: const TextStyle(fontSize: 16, color: AppColors.black87),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(width: 16), // Khoảng cách giữa TextField và nút
+
+              // Nút đổi vị trí
+              Align(
+                alignment: Alignment.center,
+                child: SizedBox(
+                  width: 35, 
+                  height: 55,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.mainOrange,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.mainOrange.withOpacity(0.15), // 👈 bóng nhẹ
+                          blurRadius: 3,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.swap_vert, color: Colors.white, size: 20),
+                      onPressed: () {
+                        final temp = startController.text;
+                        startController.text = endController.text;
+                        endController.text = temp;
+                      },
+                      tooltip: 'Đổi điểm đi / điểm đến',
+                      splashColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      hoverColor: Colors.transparent,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(), 
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 16),
           Center(
@@ -136,11 +186,10 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
               onPressed: _searchRoutes,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.mainOrange,
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(6),
                 ),
-                elevation: 4,
                 shadowColor: AppColors.mainOrange,
               ),
               child: const Text(

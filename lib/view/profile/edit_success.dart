@@ -8,7 +8,7 @@ class EditSuccessScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF3E0),
+      backgroundColor: AppColors.softOrangeBackground,
       appBar: AppBarProfile(title: 'SỬA THÔNG TIN TAI KHOẢN'),
       body: Center(
         child: Column(

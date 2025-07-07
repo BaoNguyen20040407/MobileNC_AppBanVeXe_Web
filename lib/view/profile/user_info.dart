@@ -3,6 +3,8 @@ import 'package:giao_dien_1/widget/appbar_profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/view/profile/edit_user_info.dart';
+import 'dart:convert';
+import 'dart:typed_data';
 
 class UserInfo extends StatefulWidget {
   const UserInfo({super.key});
@@ -22,6 +24,7 @@ class _UserInfoState extends State<UserInfo> {
   String? _gender;
   String? _job;
   String? _intro;
+  Uint8List? _avatarBytes;
 
   @override
   void initState() {
@@ -30,26 +33,31 @@ class _UserInfoState extends State<UserInfo> {
   }
 
   Future<void> _loadUserInfo() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _avatarUrl = prefs.getString('image_url') ?? '';
-      _fullName = prefs.getString('full_name') ?? '';
-      _userName = prefs.getString('username') ?? '';
-      _phone = prefs.getString('phone') ?? '';
-      _dob = prefs.getString('dob') ?? '';
-      _address = prefs.getString('address') ?? '';
-      _email = prefs.getString('email') ?? '';
-      _gender = prefs.getString('gender');
-      _job = prefs.getString('job');
-      _intro = prefs.getString('intro');
-    });
-  }
+  final prefs = await SharedPreferences.getInstance();
+  setState(() {
+    final base64Image = prefs.getString('image_base64');
+    if (base64Image != null && base64Image.isNotEmpty) {
+      _avatarBytes = base64Decode(base64Image);
+    }
+
+    _fullName = prefs.getString('full_name') ?? '';
+    _userName = prefs.getString('username') ?? '';
+    _phone = prefs.getString('phone') ?? '';
+    _dob = prefs.getString('dob') ?? '';
+    _address = prefs.getString('address') ?? '';
+    _email = prefs.getString('email') ?? '';
+    _gender = prefs.getString('gender');
+    _job = prefs.getString('job');
+    _intro = prefs.getString('intro');
+  });
+}
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF3E0),
-      appBar: const AppBarProfile(title: 'THÔNG TIN TÀI KHOẢN'),
+      backgroundColor: AppColors.softOrangeBackground,
+      appBar: AppBarProfile(title: 'THÔNG TIN TÀI KHOẢN'),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Column(
@@ -58,9 +66,9 @@ class _UserInfoState extends State<UserInfo> {
             const SizedBox(height: 16),
             CircleAvatar(
               radius: 48,
-              backgroundImage: _avatarUrl.isNotEmpty
-                  ? NetworkImage(_avatarUrl)
-                  : const AssetImage('assets/image/personicon.png') as ImageProvider,
+              backgroundImage: _avatarBytes != null
+                ? MemoryImage(_avatarBytes!)
+                : const AssetImage('assets/image/personicon.png') as ImageProvider,
             ),
             const SizedBox(height: 8),
             Text(

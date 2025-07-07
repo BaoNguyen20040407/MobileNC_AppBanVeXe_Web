@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
-
+import 'package:giao_dien_1/view/payment/payment.dart';
 
 
 class SplashScreen extends StatefulWidget {

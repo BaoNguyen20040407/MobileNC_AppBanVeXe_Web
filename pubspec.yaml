@@ -7,8 +7,12 @@ environment:
   sdk: ^3.7.2
 
 dependencies:
+  file_picker: ^10.2.0
   flutter:
     sdk: flutter
+  image_picker: ^1.1.2
+  intl: ^0.20.2
+  url_launcher: ^6.3.1
 
 dev_dependencies:
   flutter_test:
@@ -21,6 +25,7 @@ flutter:
   assets:
     - assets/image/
     - assets/data/
+    - lib/data/qna.json
   
   fonts:
     - family: Inter

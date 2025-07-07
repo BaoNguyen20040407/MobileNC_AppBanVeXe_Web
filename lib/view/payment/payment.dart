@@ -1,0 +1,389 @@
+import 'package:flutter/material.dart';
+import 'package:giao_dien_1/config/default.dart';
+import 'package:giao_dien_1/widget/appbar.dart';
+import 'package:giao_dien_1/widget/footer.dart';
+import 'dart:async';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
+import 'package:giao_dien_1/view/payment/wait_payment.dart';
+
+class Payment extends StatefulWidget {
+  const Payment({super.key});
+
+  @override
+  State<Payment> createState() => _PaymentState();
+}
+
+class _PaymentState extends State<Payment> {
+int remainingSeconds = 15 * 60; // 15 phút
+ final List<String> items1 = [
+  'assets/image/vietqr.png',
+  'assets/image/atm.png',
+  'assets/image/vnpay.png',
+  
+ ];
+ final List<String> items2 = [
+  
+  'assets/image/visa.png',
+  'assets/image/viettel.png',
+  'assets/image/spay.png',
+  
+ ];
+ final List<String> items3 = [
+  'assets/image/momo.png',
+  'assets/image/zalopay.png',
+ ];
+
+  String _name = '';
+  String _phone = '';
+  String _email = '';
+  String _pickupPoint = '';
+  String _dropoffPoint = '';
+  String _ngayDi = '';
+  String _startTime = '';
+  int _totalPrice = 0;
+
+  String formatCurrency(int amount) {
+  final formatter = NumberFormat("#,###", "vi_VN");
+  return '${formatter.format(amount)} VNĐ';
+  }
+
+  Future<void> _loadUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _name = prefs.getString('full_name') ?? '';
+      _phone = prefs.getString('phone') ?? '';
+      _email = prefs.getString('email') ?? '';
+      _pickupPoint = prefs.getString('pickupPoint') ?? '';
+      _dropoffPoint = prefs.getString('dropoffPoint') ?? '';
+      _ngayDi = prefs.getString('ngayDi') ?? '';
+      _startTime = prefs.getString('startTime') ?? '';
+      _totalPrice = prefs.getInt('totalPrice') ?? 0;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    startCountdown();
+    _loadUser();
+  }
+
+  void startCountdown() {
+    Timer.periodic(Duration(seconds: 1), (timer) {
+      if (remainingSeconds == 0) {
+        timer.cancel();
+      } else {
+        setState(() {
+          remainingSeconds--;
+        });
+      }
+    });
+  }
+
+  String get timerDisplay {
+    final minutes = (remainingSeconds ~/ 60).toString().padLeft(2, '0');
+    final seconds = (remainingSeconds % 60).toString().padLeft(2, '0');
+    return "$minutes:$seconds";
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: CustomAppBar(),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
+          child: Column(
+            children: [
+              Text(
+                '$_pickupPoint - $_dropoffPoint',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.mainOrange,
+                  fontSize: 20,
+                  fontFamily: 'Inter',
+                ),
+              ),
+              SizedBox(height: 4),
+              Text(
+                '$_ngayDi',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.mainOrange,
+                  fontSize: 20,
+                  fontFamily: 'Inter',
+                ),
+              ),
+              SizedBox(height: 32),
+              Text(
+                'Tổng thanh toán',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Inter',
+                ),
+              ),
+              Text(
+                formatCurrency(_totalPrice),
+                style: TextStyle(
+                  fontSize: 24,
+                  color: AppColors.mainOrange,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Inter',
+                ),
+              ),
+              SizedBox(height: 32),
+              Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.black),
+                  borderRadius: BorderRadius.circular(16),
+                  color: AppColors.greyLight,
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      'Thời gian giữ chỗ còn lại $timerDisplay',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                    ),
+                    SizedBox(height: 8),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.asset(
+                        'assets/image/qrcode.png', // Ảnh QR giả
+                        width: 280,
+                        height: 280,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Nhận tiền từ mọi Ngân hàng và Ví điện tử',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.black,
+                        fontFamily: 'Inter',
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Hướng dẫn thanh toán bằng Momo',
+                        style: TextStyle(
+                          color: AppColors.greenDark,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        instructionRow("1", "Mở ứng dụng Momo trên app điện thoại"),
+                        instructionRow("2", "Dùng biểu tượng để quét mã QR"),
+                        instructionRow("3", "Quét mã ở trang này và thanh toán"),
+                      ],
+                    ),
+             
+                  ],
+                ),
+              ),
+              SizedBox(height: 32),
+
+              SizedBox(
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => WaitPayment(),
+                        settings: const RouteSettings(name: '/wait_payment'),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.mainOrange,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  ),
+                  child: Text(
+                    'Xác nhận thanh toán',
+                    style: TextStyle(
+                      color: AppColors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      fontFamily: 'Inter', 
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 32),
+
+              //Ngân Hàng
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.black),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Chọn ngân hàng thanh toán',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold, 
+                          fontSize: 17,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                      SizedBox(height: 16),
+
+                      // Hàng 1: 3 ảnh
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Image.asset('assets/image/vietqr.png', width: 100, height: 50),
+                          Image.asset('assets/image/atm.png', width: 100, height: 50),
+                          Image.asset('assets/image/vnpay.png', width: 100, height: 50),
+                        ],
+                      ),
+                      SizedBox(height: 16),
+
+                      // Hàng 2: 3 ảnh
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Image.asset('assets/image/visa.png', width: 100, height: 50),
+                          Image.asset('assets/image/viettel.png', width: 100, height: 50),
+                          Image.asset('assets/image/spay.png', width: 100, height: 50),
+                        ],
+                      ),
+                      SizedBox(height: 16),
+
+                      // Hàng 3: 2 ảnh + 1 khoảng trống
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Image.asset('assets/image/momo.png', width: 100, height: 50),
+                          Image.asset('assets/image/zalopay.png', width: 100, height: 50),
+                          SizedBox(width: 100),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: 32),
+              //Thông tin user
+              Container(
+                padding: EdgeInsets.all(12),
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.black),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Thông tin khách hàng',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 17,
+                        fontFamily: 'Inter',
+                      ),
+                    ),
+                    SizedBox(height: 8),
+
+                    buildInfoRow('Họ tên', _name, isBold: true),
+                    SizedBox(height: 8),
+                    buildInfoRow('Số điện thoại', _phone),
+                    SizedBox(height: 8),
+                    buildInfoRow('Email', _email),
+                    SizedBox(height: 8),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: FooterNavigation(),
+    );
+  }
+
+  Widget buildInfoRow(String label, String value, {bool isBold = false}) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Text(
+        label,
+        style: TextStyle(
+          fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+          fontFamily: 'Inter',
+        ),
+      ),
+      Flexible(
+        child: Text(
+          value,
+          textAlign: TextAlign.right,
+          style: TextStyle(
+            fontFamily: 'Inter',
+            color: AppColors.black,
+            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+          ),
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    ],
+  );
+}
+
+
+  Widget instructionRow(String number, String text) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 6),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(
+            color: AppColors.white.withOpacity(0.1),
+            border: Border.all(color: AppColors.white, width: 1.5),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            number,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppColors.black,
+              fontSize: 14,
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 15,
+              fontFamily: 'Inter',
+              height: 1.4,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+}

@@ -69,5 +69,75 @@
       "giaVe": 350000,
       "loaiGhe": "Giường",
       "image": "assets/image/bus1.jpg"
-    }
-]  
+    },
+      {
+        "id": 6,
+        "loaiChuyen": "thang",
+        "diemDi": "Hà Nội",
+        "diemDen": "TP.HCM",
+        "gioBatDau": "08:00",
+        "gioKetThuc": "14:50",
+        "soChoConLai": 31,
+        "giaVe": 450000,
+        "loaiGhe": "Giường",
+        "image": "assets/image/bus1.jpg",
+        "ngayDi": "19/06/2025"
+      },
+      {
+        "id": 7,
+        "loaiChuyen": "thang",
+        "diemDi": "Hà Nội",
+        "diemDen": "TP.HCM",
+        "gioBatDau": "08:00",
+        "gioKetThuc": "15:50",
+        "soChoConLai": 25,
+        "giaVe": 450000,
+        "loaiGhe": "Giường",
+        "image": "assets/image/bus2.jpg",
+        "ngayDi": "19/06/2025"
+      },
+      {
+        "id": 8,
+        "loaiChuyen": "thang",
+        "diemDi": "Hà Nội",
+        "diemDen": "TP.HCM",
+        "gioBatDau": "06:00",
+        "gioKetThuc": "14:50",
+        "soChoConLai": 20,
+        "giaVe": 450000,
+        "loaiGhe": "Giường",
+        "image": "assets/image/bus1.jpg",
+        "ngayDi": "19/06/2025"
+      },
+      {
+        "id": 9,
+        "loaiChuyen": "thang",
+        "diemDi": "Hà Nội",
+        "diemDen": "TP.HCM",
+        "gioBatDau": "12:40",
+        "gioKetThuc": "21:00",
+        "soChoConLai": 37,
+        "giaVe": 450000,
+        "loaiGhe": "Giường",
+        "image": "assets/image/bus2.jpg",
+        "ngayDi": "19/06/2025"
+      },
+      {
+        "id": 10,
+        "loaiChuyen": "trungchuyen",
+        "diemDi": "Hà Nội",
+        "diemDen": "TP.HCM",
+        "gioBatDau": "15:00",
+        "gioKetThuc": "23:00",
+        "trungChuyen": {
+          "diaDiem": "Huế",
+          "thoiGianDung": "30 phút",
+          "gioDung": "18:30"
+        },
+        "ngayDi": "19/06/2025",
+        "soChoConLai": 30,
+        "giaVe": 350000,
+        "loaiGhe": "Giường",
+        "image": "assets/image/bus1.jpg"
+      }
+    ]

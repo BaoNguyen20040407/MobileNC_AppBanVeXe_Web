@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:giao_dien_1/view/profile/profile_screen.dart';
 
 class AppBarProfile extends StatefulWidget implements PreferredSizeWidget {
   final String title;
@@ -89,10 +90,14 @@ class _AppBarProfileState extends State<AppBarProfile> {
 
           // Avatar
           GestureDetector(
-            onTap: () async {
-              await Navigator.pushNamed(context, '/profile');
-              _loadAvatar(); // Tải lại avatar sau khi quay lại
-            },
+          onTap: () async {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ProfileScreen()),
+            );
+            _loadAvatar(); // Load lại sau khi quay về
+          },
+
             child: CircleAvatar(
               radius: 16,
               backgroundImage:

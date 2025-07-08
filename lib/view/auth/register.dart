@@ -39,6 +39,10 @@ class _RegisterState extends State<Register> {
   final bool _obscurePassword1 = true;
   String? _passwordError;
 
+  //Kiểm tra password nhập lần 2
+  final TextEditingController _confirmPasswordController = TextEditingController();
+  String? _confirmPasswordError;
+
   //Kiểm tra định dạng hình ảnh
   final TextEditingController _imageUrlController = TextEditingController();
   String? _imageUrlError;
@@ -88,32 +92,39 @@ Future<void> _loadPhoneNumber() async {
   final isAddressVailid = _addressError == null && _addressController.text.isNotEmpty;
   final isUsernameValid = _usernameError == null && _usernameController.text.isNotEmpty;
   final isPasswordValid = _passwordError == null && _passwordController.text.isNotEmpty;
+  final isConfirmPasswordValid = _confirmPasswordError == null && _confirmPasswordController.text.isNotEmpty;
   final isDobFilled = _dobController.text.isNotEmpty;
   final isImageUrlValid = _imageUrlError == null && _imageUrlController.text.isNotEmpty;
 
   if (isNameValid &&
-      isEmailValid &&
-      isAddressVailid &&
-      isUsernameValid &&
-      isPasswordValid &&
-      isDobFilled &&
-      isImageUrlValid) {
-        await _saveUserData();
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
-    );
-  } else {
-    setState(() {
-      if (_nameController.text.isEmpty) _nameError ??= 'Vui lòng nhập họ tên';
-      if (_emailController.text.isEmpty) _emailError ??= 'Vui lòng nhập email';
-      if (_addressController.text.isEmpty) _addressError ??= 'Vui lòng nhập nơi ở';
-      if (_usernameController.text.isEmpty) _usernameError ??= 'Vui lòng nhập username';
-      if (_passwordController.text.isEmpty) _passwordError ??= 'Vui lòng nhập mật khẩu';
-      if (_imageUrlController.text.isEmpty) _imageUrlError ??= 'Vui lòng nhập URL hình ảnh';
-      if (_dobController.text.isEmpty) _dobError ??= 'Vui lòng chọn ngày sinh';
-    });
-  } 
+    isEmailValid &&
+    isAddressVailid &&
+    isUsernameValid &&
+    isPasswordValid &&
+    isConfirmPasswordValid &&
+    isDobFilled &&
+    isImageUrlValid) {
+  await _saveUserData();
+  Navigator.push(
+    context,
+    MaterialPageRoute(builder: (_) => const LoginScreen()),
+  );
+} else {
+  setState(() {
+    if (_nameController.text.isEmpty) _nameError ??= 'Vui lòng nhập họ tên';
+    if (_emailController.text.isEmpty) _emailError ??= 'Vui lòng nhập email';
+    if (_addressController.text.isEmpty) _addressError ??= 'Vui lòng nhập nơi ở';
+    if (_usernameController.text.isEmpty) _usernameError ??= 'Vui lòng nhập username';
+    if (_passwordController.text.isEmpty) _passwordError ??= 'Vui lòng nhập mật khẩu';
+    if (_confirmPasswordController.text.isEmpty) {
+      _confirmPasswordError ??= 'Vui lòng nhập lại mật khẩu';
+    } else if (_confirmPasswordController.text != _passwordController.text) {
+      _confirmPasswordError = 'Mật khẩu không khớp';
+    }
+    if (_imageUrlController.text.isEmpty) _imageUrlError ??= 'Vui lòng nhập URL hình ảnh';
+    if (_dobController.text.isEmpty) _dobError ??= 'Vui lòng chọn ngày sinh';
+  });
+  }
 }
 
   String formatDate(DateTime date) {
@@ -346,6 +357,32 @@ Future<void> _loadPhoneNumber() async {
                 },
               ),
               const SizedBox(height: 16),
+
+              //Nhập lại mật khẩu
+              CustomInputField(
+                controller: _confirmPasswordController,
+                labelText: "Nhập lại mật khẩu",
+                prefixIcon: Icons.lock,
+                obscureText: _obscurePassword,
+                showToggleVisibility: true,
+                onToggleObscureText: () {
+                  setState(() {
+                    _obscurePassword = !_obscurePassword;
+                  });
+                },
+                keyboardType: TextInputType.visiblePassword,
+                errorText: _confirmPasswordError,
+                onChanged: (value) {
+                  if (value != _passwordController.text) {
+                    _confirmPasswordError = 'Mật khẩu không khớp';
+                  } else {
+                    _confirmPasswordError = null;
+                  }
+                  setState(() {});
+                },
+              ),
+              const SizedBox(height: 16),
+
 
               //Url Hình ảnh
               CustomInputField(

@@ -13,7 +13,7 @@ class SuccessPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.check_circle,
-                size: 80, color: Color(0xFFFF5722)),
+                size: 80, color: AppColors.mainOrange),
             SizedBox(height: 32),
             Text(
               'Đặt câu hỏi thành công',

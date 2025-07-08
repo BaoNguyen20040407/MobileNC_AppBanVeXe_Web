@@ -3,7 +3,8 @@ import 'package:giao_dien_1/widget/appbar_profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:giao_dien_1/view/support/support.dart';
+import 'package:giao_dien_1/view/support_and_feedback/support/support.dart';
+import 'package:giao_dien_1/view/support_and_feedback/feedback/feedback.dart';
 
 class SupportAndFeedback extends StatefulWidget {
   const SupportAndFeedback({super.key});
@@ -57,7 +58,13 @@ class _SupportAndFeedbackState extends State<SupportAndFeedback> {
                       leading: const Icon(Icons.chat_bubble_outline),
                       title: const Text('Góp ý'),
                       onTap: () {
-                        // TODO: Chuyển sang trang Góp ý
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => FeedbackPage(),
+                            settings: const RouteSettings(name: '/feedback'),
+                          ),
+                        );
                       },
                     ),
                   ],

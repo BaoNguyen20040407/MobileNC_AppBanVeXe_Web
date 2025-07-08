@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:giao_dien_1/view/support/support_answer_page.dart';
-import 'package:giao_dien_1/view/support/support_loading.dart';
+import 'package:giao_dien_1/view/support_and_feedback/support/support_answer_page.dart';
+import 'package:giao_dien_1/view/support_and_feedback/support/support_loading.dart';
 import 'package:giao_dien_1/widget/appbar_profile.dart';
 import 'package:giao_dien_1/config/default.dart';
 

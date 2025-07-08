@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/widget/appbar_profile.dart';
-import 'package:giao_dien_1/view/support/support_success.dart';
+import 'package:giao_dien_1/view/support_and_feedback/support/support_success.dart';
 import 'package:giao_dien_1/config/default.dart';
 
 class LoadingPage extends StatefulWidget {

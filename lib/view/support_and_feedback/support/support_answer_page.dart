@@ -181,14 +181,6 @@ class _SupportAnswerPageState extends State<SupportAnswerPage> {
                   ),
 
                   const SizedBox(height: 32),
-
-                  Center(
-                    child: Image.asset(
-                      'image/bitexco.png',
-                      height: 200,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
                 ],
               ),
       ),

@@ -179,14 +179,6 @@ class _FeedbackAnswerPageState extends State<FeedbackAnswerPage> {
                   ),
 
                   const SizedBox(height: 32),
-
-                  Center(
-                    child: Image.asset(
-                      'image/bitexco.png',
-                      height: 200,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
                 ],
               ),
       ),

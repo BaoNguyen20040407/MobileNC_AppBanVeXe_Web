@@ -3,6 +3,7 @@ import 'package:giao_dien_1/widget/appbar_profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:giao_dien_1/view/support/support.dart';
 
 class SupportAndFeedback extends StatefulWidget {
   const SupportAndFeedback({super.key});
@@ -42,7 +43,13 @@ class _SupportAndFeedbackState extends State<SupportAndFeedback> {
                       leading: const Icon(Icons.support_agent),
                       title: const Text('Hỗ trợ'),
                       onTap: () {
-                        // TODO: Chuyển sang trang Hỗ trợ
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SupportPage(),
+                            settings: const RouteSettings(name: '/support'),
+                          ),
+                        );
                       },
                     ),
                     const Divider(height: 1),

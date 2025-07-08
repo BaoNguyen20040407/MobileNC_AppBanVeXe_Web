@@ -795,7 +795,6 @@ class PopularRoutesSection extends StatelessWidget {
       'to': 'Đà Lạt',
       'distance': '305km',
       'duration': '8h00ph',
-      'date': '04/10/2024',
       'price': '290.000 VNĐ',
     },
     {
@@ -803,7 +802,6 @@ class PopularRoutesSection extends StatelessWidget {
       'to': 'Cần Thơ',
       'distance': '166km',
       'duration': '3h12ph',
-      'date': '04/10/2024',
       'price': '165.000 VNĐ',
     },
     {
@@ -811,7 +809,6 @@ class PopularRoutesSection extends StatelessWidget {
       'to': 'Hải Phòng',
       'distance': '120km',
       'duration': '2h00ph',
-      'date': '04/10/2024',
       'price': '90.000 VNĐ',
     },
     {
@@ -819,14 +816,35 @@ class PopularRoutesSection extends StatelessWidget {
       'to': 'Thanh Hóa',
       'distance': '150km',
       'duration': '3h30ph',
-      'date': '04/10/2024',
       'price': '165.000 VNĐ',
     },
   ];
 
+  PopularRoutesSection({super.key});
+  
+
+  // Hàm xử lý khi người dùng chọn tuyến
+  Future<void> _handleRouteTap(BuildContext context, Map<String, String> route) async {
+  final prefs = await SharedPreferences.getInstance();
+
+  final now = DateTime.now();
+  final formattedDate = '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
+
+  await prefs.setString('diemDi', route['from']!);
+  await prefs.setString('diemDen', route['to']!);
+  await prefs.setString('ngayDi', formattedDate);
+
+  Navigator.push(
+    context,
+    MaterialPageRoute(builder: (_) => TicketBookingPage()),
+  );
+}
+
   @override
   Widget build(BuildContext context) {
-    // Nhóm các route theo 'from'
+    final now = DateTime.now();
+    final formattedDate = '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
+    
     final groupedRoutes = <String, List<Map<String, String>>>{};
     for (var route in routes) {
       final from = route['from']!;
@@ -836,8 +854,8 @@ class PopularRoutesSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(height: 32),
-        Center(
+        const SizedBox(height: 32),
+        const Center(
           child: Text(
             'TUYẾN PHỔ BIẾN',
             style: TextStyle(
@@ -848,40 +866,38 @@ class PopularRoutesSection extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(height: 4),
-        Center(
+        const SizedBox(height: 4),
+        const Center(
           child: Text(
             'Được khách hàng tin tưởng và lựa chọn',
             style: TextStyle(fontSize: 14, fontFamily: 'Inter'),
           ),
         ),
-        SizedBox(height: 16),
-        // Các khối tuyến phổ biến
+        const SizedBox(height: 16),
         ...groupedRoutes.entries.map((entry) {
           final from = entry.key;
           final destinations = entry.value;
 
-          // Xác định ảnh tương ứng với điểm đi
           String imagePath = 'assets/default.jpg';
           if (from.contains('Hồ Chí Minh')) imagePath = 'assets/image/hochiminh.png';
           if (from.contains('Hà Nội')) imagePath = 'assets/image/hanoi.png';
 
           return Container(
-            margin: EdgeInsets.symmetric(horizontal: 0, vertical: 16),
+            margin: const EdgeInsets.symmetric(vertical: 16),
             decoration: BoxDecoration(
               border: Border.all(color: AppColors.greyShade300),
               borderRadius: BorderRadius.circular(12),
               color: Colors.white,
             ),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,  // Căn top cho cả Row
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Bên trái: ảnh + text
+                // Ảnh bên trái
                 Container(
                   width: 100,
                   height: 135,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(
+                    borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(10),
                       bottomLeft: Radius.circular(10),
                     ),
@@ -891,21 +907,20 @@ class PopularRoutesSection extends StatelessWidget {
                     ),
                   ),
                   child: Container(
-                    padding: EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(8),
                     alignment: Alignment.topLeft,
                     decoration: BoxDecoration(
                       color: AppColors.black.withOpacity(0.3),
-                      borderRadius: BorderRadius.only(
+                      borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(10),
                         bottomLeft: Radius.circular(10),
                       ),
                     ),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,  // tránh giãn cao hơn
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
+                        const Text(
                           'Tuyến xe từ',
                           style: TextStyle(
                             color: AppColors.white,
@@ -913,10 +928,10 @@ class PopularRoutesSection extends StatelessWidget {
                             fontFamily: 'Inter',
                           ),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Text(
                           from,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: AppColors.white,
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
@@ -928,70 +943,68 @@ class PopularRoutesSection extends StatelessWidget {
                   ),
                 ),
 
+                // Danh sách các điểm đến
                 Expanded(
                   child: Padding(
-                    padding: EdgeInsets.fromLTRB(12, 0, 12, 0),
+                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
                     child: ListView.separated(
                       shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(), // nếu bạn muốn tránh scroll riêng bên trong
+                      physics: const NeverScrollableScrollPhysics(),
                       itemCount: destinations.length,
-                      separatorBuilder: (context, index) {
-                        return Divider(
-                          color: AppColors.greyShade300,
-                          thickness: 1,
-                          height: 1,
-                          indent: 0,
-                          endIndent: 0,
-                        );
-                      },
+                      separatorBuilder: (_, __) => Divider(
+                        color: AppColors.greyShade300,
+                        thickness: 1,
+                        height: 1,
+                      ),
                       itemBuilder: (context, index) {
                         final route = destinations[index];
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 8, bottom: 8),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,  
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    route['to']!,
-                                    style: TextStyle(
-                                      color: AppColors.greenDark,
-                                      fontWeight: FontWeight.w600,
-                                      fontFamily: 'Inter',
-                                      fontSize: 14, 
+                        return GestureDetector(
+                          onTap: () => _handleRouteTap(context, route),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      route['to']!,
+                                      style: const TextStyle(
+                                        color: AppColors.greenDark,
+                                        fontWeight: FontWeight.w600,
+                                        fontFamily: 'Inter',
+                                        fontSize: 14,
+                                      ),
                                     ),
-                                  ),
-                                  Text(
-                                    route['price']!,
-                                    style: TextStyle(
-                                      color: AppColors.mainOrange,
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: 'Inter',
-                                      fontSize: 14, 
+                                    Text(
+                                      route['price']!,
+                                      style: const TextStyle(
+                                        color: AppColors.mainOrange,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'Inter',
+                                        fontSize: 14,
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                '${route['distance']} - ${route['duration']} - ${route['date']}',
-                                style: TextStyle(
-                                  color: AppColors.black,
-                                  fontSize: 14,
-                                  fontFamily: 'Inter',
+                                  ],
                                 ),
-                              ),
-                            ],
+                                const SizedBox(height: 8),
+                                Text(
+                                  '${route['distance']} - ${route['duration']} - $formattedDate',
+                                  style: const TextStyle(
+                                    color: AppColors.black,
+                                    fontSize: 14,
+                                    fontFamily: 'Inter',
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         );
                       },
                     ),
                   ),
                 ),
-
               ],
             ),
           );
@@ -1000,7 +1013,6 @@ class PopularRoutesSection extends StatelessWidget {
     );
   }
 }
-
 
 class TrustInfoSection extends StatelessWidget {
   @override

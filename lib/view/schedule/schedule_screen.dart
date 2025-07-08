@@ -5,6 +5,8 @@ import 'package:giao_dien_1/widget/footer.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:giao_dien_1/model/trip.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:giao_dien_1/view/ticket_booking/ticket_booking.dart';
 
 // ... các import giữ nguyên
 
@@ -352,7 +354,22 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                     Align(
                       alignment: Alignment.centerRight,
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () async {
+                          final prefs = await SharedPreferences.getInstance();
+
+                          await prefs.setString('diemDi', route.diemDi);
+                          await prefs.setString('diemDen', route.diemDen);
+
+                          // Mặc định ngày đi là hôm nay:
+                          final now = DateTime.now();
+                          final formattedToday = '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
+                          await prefs.setString('ngayDi', formattedToday);
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => TicketBookingPage()),
+                          );
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.softOrange,
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),

@@ -3,25 +3,25 @@ import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/widget/appbar.dart';
 import 'package:giao_dien_1/widget/admin_option_card.dart';
 import 'package:giao_dien_1/widget/exit_button.dart';
+import 'package:giao_dien_1/widget/appbar_admin.dart';
 
-class ManagePeopleScreen extends StatelessWidget {
+class ManageStationScreen extends StatelessWidget {
   final List<Map<String, dynamic>> items = [
-    {'title': 'Khách hàng', 'icon': Icons.person},
-    {'title': 'Nhân viên', 'icon': Icons.badge},
-    {'title': 'Tài khoản', 'icon': Icons.account_circle},
+    {'title': 'Bến xe', 'icon': Icons.directions_bus},
+    {'title': 'Xe', 'icon': Icons.directions_transit},
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
-      appBar: CustomAppBar(),
+      appBar: CustomAppBarAdmin(),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(24, 32, 24, 16),
         child: Column(
           children: [
             const Text(
-              'QUẢN LÝ NGƯỜI',
+              'QUẢN LÝ BẾN XE',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -31,10 +31,10 @@ class ManagePeopleScreen extends StatelessWidget {
             ),
             const SizedBox(height: 32),
 
-            /// ✅ Grid không dùng Expanded
+            /// ✅ GridView không dùng Expanded
             GridView.builder(
-              shrinkWrap: true, // Giúp GridView chiếm chiều cao đúng
-              physics: const NeverScrollableScrollPhysics(), // Không cuộn
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
               itemCount: items.length,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
@@ -49,18 +49,15 @@ class ManagePeopleScreen extends StatelessWidget {
                   title: item['title'] as String,
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('${item['title']} đang được phát triển'),
-                      ),
+                      SnackBar(content: Text('${item['title']} đang được phát triển')),
                     );
                   },
                 );
               },
             ),
 
-            const SizedBox(height: 32), // Khoảng cách rõ ràng trước nút
-
-            const ExitButton(),
+            const SizedBox(height: 32),
+            const ExitButton(), // ✅ Dùng widget đã chuẩn hoá
           ],
         ),
       ),

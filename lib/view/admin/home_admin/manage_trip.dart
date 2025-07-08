@@ -3,6 +3,7 @@ import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/widget/appbar.dart';
 import 'package:giao_dien_1/widget/admin_option_card.dart';
 import 'package:giao_dien_1/widget/exit_button.dart';
+import 'package:giao_dien_1/widget/appbar_admin.dart';
 
 class ManageTripScreen extends StatelessWidget {
   final List<Map<String, dynamic>> items = [
@@ -15,7 +16,7 @@ class ManageTripScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
-      appBar: CustomAppBar(),
+      appBar: CustomAppBarAdmin(),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(24, 32, 24, 16),
         child: Column(

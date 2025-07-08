@@ -4,7 +4,7 @@ import 'package:giao_dien_1/view/auth/phone_number_input.dart';
 import 'confirm_email_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:giao_dien_1/widget/input_field.dart';
-import 'package:giao_dien_1/view/admin/homeadmin/homeadmin.dart';
+import 'package:giao_dien_1/view/admin/home_admin/homeadmin.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

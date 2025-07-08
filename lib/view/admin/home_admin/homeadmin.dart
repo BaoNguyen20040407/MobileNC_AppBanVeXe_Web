@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/widget/appbar.dart';
 import 'package:giao_dien_1/config/default.dart';
-import 'package:giao_dien_1/view/admin/homeadmin/manage_people.dart';
-import 'package:giao_dien_1/view/admin/homeadmin/manage_station.dart';
-import 'package:giao_dien_1/view/admin/homeadmin/manage_trip.dart';
+import 'package:giao_dien_1/view/admin/home_admin/manage_people.dart';
+import 'package:giao_dien_1/view/admin/home_admin/manage_station.dart';
+import 'package:giao_dien_1/view/admin/home_admin/manage_trip.dart';
 import 'package:giao_dien_1/widget/admin_option_card.dart';
+import 'package:giao_dien_1/widget/appbar_admin.dart';
 
 class HomeAdmin extends StatelessWidget {
   @override
@@ -20,7 +21,7 @@ class HomeAdmin extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.white,
-      appBar: CustomAppBar(),
+      appBar: CustomAppBarAdmin(),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
         child: GridView.builder(

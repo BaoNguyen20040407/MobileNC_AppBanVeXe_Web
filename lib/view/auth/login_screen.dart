@@ -4,6 +4,7 @@ import 'package:giao_dien_1/view/auth/phone_number_input.dart';
 import 'confirm_email_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:giao_dien_1/widget/input_field.dart';
+import 'package:giao_dien_1/view/admin/homeadmin/homeadmin.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -97,6 +98,16 @@ class _LoginScreenState extends State<LoginScreen> {
                         MaterialPageRoute(
                           builder: (_) => HomePage(),
                           settings: const RouteSettings(name: '/home'),
+                        ),
+                      );
+                    }
+                    if (userNameInput == 'BaoNguyen04' && passwordInput == 'BaoNguyen04')
+                    {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => HomeAdmin(),
+                          settings: const RouteSettings(name: '/home_admin'),
                         ),
                       );
                     }

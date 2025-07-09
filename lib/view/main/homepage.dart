@@ -791,14 +791,14 @@ class _PromotionSectionState extends State<PromotionSection> {
 class PopularRoutesSection extends StatelessWidget {
   final List<Map<String, String>> routes = [
     {
-      'from': 'Thành phố Hồ Chí Minh',
+      'from': 'TP.HCM',
       'to': 'Đà Lạt',
       'distance': '305km',
       'duration': '8h00ph',
       'price': '290.000 VNĐ',
     },
     {
-      'from': 'Thành phố Hồ Chí Minh',
+      'from': 'TP.HCM',
       'to': 'Cần Thơ',
       'distance': '166km',
       'duration': '3h12ph',
@@ -888,7 +888,7 @@ class PopularRoutesSection extends StatelessWidget {
           final destinations = entry.value;
 
           String imagePath = 'assets/default.jpg';
-          if (from.contains('Hồ Chí Minh')) imagePath = 'assets/image/hochiminh.png';
+          if (from.contains('TP.HCM')) imagePath = 'assets/image/hochiminh.png';
           if (from.contains('Hà Nội')) imagePath = 'assets/image/hanoi.png';
 
           return Container(

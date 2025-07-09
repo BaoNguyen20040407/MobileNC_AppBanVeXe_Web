@@ -7,6 +7,11 @@ import 'package:giao_dien_1/widget/footer.dart';
 import 'package:giao_dien_1/view/main/homepage.dart';
 import 'package:giao_dien_1/model/ticket.dart';
 import 'dart:convert';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
+import 'package:barcode/barcode.dart';
+import 'package:flutter/services.dart';
 
 class TicketDetails extends StatefulWidget {
   const TicketDetails({super.key});
@@ -58,6 +63,120 @@ class _TicketDetailsState extends State<TicketDetails> {
   final List<String> ticketList = prefs.getStringList('tickets') ?? [];
   ticketList.add(ticketJson);
   await prefs.setStringList('tickets', ticketList);
+}
+
+Future<void> _exportTicketToPDF() async {
+  final pdf = pw.Document();
+
+  // Load font hỗ trợ tiếng Việt
+  final fontData = await rootBundle.load('assets/font/inter_18pt_regular.ttf');
+  final ttf = pw.Font.ttf(fontData);
+
+  final fontData1 = await rootBundle.load('assets/font/inter_18pt_bold.ttf');
+  final ttf1 = pw.Font.ttf(fontData1);
+
+  // Load logo
+  final logoBytes = await rootBundle.load('assets/image/logovexekhach_1.png');
+  final logoImage = pw.MemoryImage(logoBytes.buffer.asUint8List());
+
+  // Tạo QR code
+  final qrCodeData = '''
+    Họ tên: $_name
+    SĐT: $_phone
+    Email: $_email
+    Tuyến: $_pickupPoint - $_dropoffPoint
+    Ngày đi: $_ngayDi $_startTime
+    Ghế: ${_selectedSeats.join(', ')}
+    Giá vé: ${formatCurrency(_totalPrice)}
+    ''';
+
+  final barcode = Barcode.qrCode();
+  final qrSvg = barcode.toSvg(qrCodeData, width: 150, height: 150);
+
+  // Trang PDF
+  pdf.addPage(
+    pw.Page(
+      build: (pw.Context context) {
+        return pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.center,
+          children: [
+            // Logo căn giữa
+            pw.Center(
+              child: pw.Image(logoImage, width: 100),
+            ),
+            pw.SizedBox(height: 16),
+
+            // Tiêu đề căn giữa
+            pw.Center(
+              child: pw.Text(
+                'THÔNG TIN VÉ XE',
+                style: pw.TextStyle(font: ttf1, fontSize: 22, fontWeight: pw.FontWeight.bold),
+              ),
+            ),
+            pw.SizedBox(height: 16),
+
+            // Thông tin vé
+            pw.Text('Họ tên: $_name', style: pw.TextStyle(font: ttf)),
+            pw.SizedBox(height: 8),
+            pw.Text('SĐT: $_phone', style: pw.TextStyle(font: ttf)),
+            pw.SizedBox(height: 8),
+            pw.Text('Email: $_email', style: pw.TextStyle(font: ttf)),
+            pw.SizedBox(height: 8),
+            pw.Text('Tuyến: $_pickupPoint - $_dropoffPoint', style: pw.TextStyle(font: ttf)),
+            pw.SizedBox(height: 8),
+            pw.Text('Thời gian: $_startTime $_ngayDi', style: pw.TextStyle(font: ttf)),
+            pw.SizedBox(height: 8),
+            pw.RichText(
+              text: pw.TextSpan(
+                text: 'Ghế: ',
+                style: pw.TextStyle(
+                  font: ttf1,
+                  color: PdfColor.fromInt(0xFF006400),
+                ),
+                children: [
+                  pw.TextSpan(
+                    text: _selectedSeats.join(', '),
+                    style: pw.TextStyle(
+                      font: ttf1,
+                      fontWeight: pw.FontWeight.bold,
+                      color: PdfColor.fromInt(0xFF006400),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            pw.SizedBox(height: 8),
+            pw.Text('Giá vé: ${formatCurrency(_totalPrice)}', style: pw.TextStyle(font: ttf)),
+            pw.SizedBox(height: 8),
+            pw.Text('PTTT: Momo', style: pw.TextStyle(font: ttf)),
+            pw.SizedBox(height: 8),
+            pw.Text('Trạng thái: Thanh toán thành công', style: pw.TextStyle(font: ttf)),
+            pw.SizedBox(height: 24),
+
+            // QR code căn giữa
+            pw.Text('Mã QR kiểm tra vé:', style: pw.TextStyle(font: ttf, fontSize: 14)),
+            pw.SizedBox(height: 8),
+            pw.Center(
+              child: pw.SvgImage(svg: qrSvg, width: 150, height: 150),
+            ),
+          ],
+        );
+      },
+    ),
+  );
+
+  try {
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => pdf.save(),
+    );
+  } catch (e) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Đã xảy ra lỗi khi tạo PDF')),
+      );
+    }
+    debugPrint('Lỗi tạo PDF: $e');
+  }
 }
 
   Future<void> _loadUserData() async {
@@ -229,33 +348,68 @@ class _TicketDetailsState extends State<TicketDetails> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => HomePage(),
-                        settings: const RouteSettings(name: '/home'),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    // Nút In vé PDF
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: _exportTicketToPDF,
+                        icon: const Icon(Icons.picture_as_pdf, color: Colors.white),
+                        label: const Text(
+                          'In vé PDF',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'Inter',
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.greenDark,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
                       ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.mainOrange,
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
                     ),
-                  ),
-                  child: const Text(
-                    'Về trang chủ',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
+                    const SizedBox(width: 12), // khoảng cách giữa 2 nút
+
+                    // Nút Về trang chủ
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => HomePage(),
+                              settings: const RouteSettings(name: '/home'),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.home, color: Colors.white),
+                        label: const Text(
+                          'Về trang chủ',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'Inter',
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.mainOrange,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
+
               ],
             ),
           ),

@@ -30,7 +30,7 @@ class _TicketBookingPageState extends State<TicketBookingPage> {
   String pickupPoint = "Bến Xe Nam Hải - TP. Hồ Chí Minh";
   String dropoffPoint = "Bến Xe Nam Hải - Hà Nội";
   String pickupTime = "05:00 16/04/2025";
-  String startTime = "06:00 16/04/2025";
+  String startTime = "";
   String diemDi = '';
   String diemDen = '';
   String ngayDi = '';
@@ -73,16 +73,16 @@ class _TicketBookingPageState extends State<TicketBookingPage> {
   DateTime? parsedTime;
   String suggestTime;
 
-  try {
-    final isoTime = _convertToIsoFormat('$tempStartTime $tempNgayDi');
-    parsedTime = DateTime.parse(isoTime);
-    final suggest = parsedTime.subtract(const Duration(hours: 1, minutes: 30));
-    suggestTime = '${_formatTime(suggest)} ${_formatDate(suggest)}';
-  } catch (e) {
-    debugPrint('Lỗi định dạng thời gian: $e');
-    parsedTime = null;
-    suggestTime = tempPickupTime;
-  }
+  if (tempStartTime.trim().isNotEmpty && tempNgayDi.trim().isNotEmpty) {
+  final isoTime = _convertToIsoFormat('$tempStartTime $tempNgayDi');
+  parsedTime = DateTime.parse(isoTime);
+  final suggest = parsedTime.subtract(const Duration(hours: 1, minutes: 30));
+  suggestTime = '${_formatTime(suggest)} ${_formatDate(suggest)}';
+} else {
+  parsedTime = null;
+  suggestTime = tempPickupTime; // dùng giờ đón mặc định
+}
+
 
   setState(() {
     seatPrice = tempSeatPrice;
@@ -113,7 +113,7 @@ Future<void> handleBookingAndNavigate(BuildContext context) async {
 
     await prefs.setString('pickupPoint', pickupPoint);
     await prefs.setString('dropoffPoint', dropoffPoint);
-    await prefs.setString('startTime', startTime);
+    await prefs.setString('startTime', '06:00'); 
     await prefs.setString('ngayDi', ngayDi);
     await prefs.setStringList('selectedSeats', selectedSeats);
     await prefs.setInt('seatPrice', seatPrice);
@@ -137,12 +137,24 @@ Future<void> handleBookingAndNavigate(BuildContext context) async {
 
 
   String _convertToIsoFormat(String original) {
-    // Chuyển "06:00 16/04/2025" => "2025-04-16 06:00:00"
-    final parts = original.split(' ');
-    final time = parts[0];
-    final date = parts[1].split('/');
-    return '${date[2]}-${date[1]}-${date[0]} $time:00';
+  try {
+    final parts = original.trim().split(' ');
+    if (parts.length != 2) throw FormatException('Thiếu thời gian hoặc ngày');
+
+    final time = parts[0].trim();
+    final dateParts = parts[1].split('/');
+    if (dateParts.length != 3) throw FormatException('Ngày sai định dạng');
+
+    final day = dateParts[0].padLeft(2, '0');
+    final month = dateParts[1].padLeft(2, '0');
+    final year = dateParts[2];
+
+    return '$year-$month-$day $time:00';
+  } catch (e) {
+    debugPrint('Lỗi chuyển đổi định dạng thời gian: $e');
+    throw e;
   }
+}
 
   String _formatTime(DateTime dt) {
     return dt.hour.toString().padLeft(2, '0') + ':' + dt.minute.toString().padLeft(2, '0');
@@ -456,7 +468,7 @@ Future<void> handleBookingAndNavigate(BuildContext context) async {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildInfoRow('Tuyến xe:', '$pickupPoint - $dropoffPoint'),
+                      _buildInfoRow('Tuyến xe:', '$diemDi - $diemDen'),
                       SizedBox(height: 8),
                       _buildInfoRow('Giờ xuất bến:', '$startTime $ngayDi'),
                       SizedBox(height: 8),
@@ -464,7 +476,7 @@ Future<void> handleBookingAndNavigate(BuildContext context) async {
                       SizedBox(height: 8),
                       _buildInfoRow('Số ghế:', selectedSeats.join(', '), isSeat: true),
                       SizedBox(height: 8),
-                      _buildInfoRow('Điểm trả khách:', dropoffPoint),
+                      _buildInfoRow('Điểm trả khách:', diemDen),
                       SizedBox(height: 8),
                       _buildInfoRow('Tổng tiền lượt đi:', '${formatCurrency(totalPrice)}', isTotal: true),
                       SizedBox(height: 8),
@@ -522,7 +534,7 @@ Future<void> handleBookingAndNavigate(BuildContext context) async {
               children: [
                 Expanded(
                   child: SizedBox(
-                    height: 32,
+                    height: 40,
                     child: OutlinedButton.icon(
                       onPressed: () {
                         Navigator.of(context).pushAndRemoveUntil(
@@ -565,7 +577,7 @@ Future<void> handleBookingAndNavigate(BuildContext context) async {
                 SizedBox(width: 16),
                 Expanded(
                   child: SizedBox(
-                    height: 32,
+                    height: 40,
                     child: ElevatedButton.icon(
                       onPressed: selectedSeats.isNotEmpty && agreedToTerms
                         ? () => handleBookingAndNavigate(context)

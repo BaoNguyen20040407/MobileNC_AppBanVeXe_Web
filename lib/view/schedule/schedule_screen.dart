@@ -359,6 +359,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
                           await prefs.setString('diemDi', route.diemDi);
                           await prefs.setString('diemDen', route.diemDen);
+                          await prefs.setInt('seatPrice', route.giaVe);
+
 
                           // Mặc định ngày đi là hôm nay:
                           final now = DateTime.now();

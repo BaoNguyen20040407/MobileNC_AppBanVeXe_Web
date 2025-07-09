@@ -834,6 +834,15 @@ class PopularRoutesSection extends StatelessWidget {
   await prefs.setString('diemDen', route['to']!);
   await prefs.setString('ngayDi', formattedDate);
 
+  // Parse giá từ '290.000 VNĐ' → 290000
+  final rawPrice = route['price'] ?? '120.000 VNĐ';
+  final cleanedPrice = int.tryParse(
+    rawPrice.replaceAll('.', '').replaceAll(' VNĐ', '')
+  ) ?? 120000;
+
+  await prefs.setInt('seatPrice', cleanedPrice);
+
+
   Navigator.push(
     context,
     MaterialPageRoute(builder: (_) => TicketBookingPage()),

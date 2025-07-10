@@ -42,6 +42,8 @@ int remainingSeconds = 15 * 60; // 15 phút
   String _ngayDi = '';
   String _startTime = '';
   int _totalPrice = 0;
+  String _diemDi = '';
+  String _diemDen = '';
 
   String formatCurrency(int amount) {
   final formatter = NumberFormat("#,###", "vi_VN");
@@ -59,6 +61,8 @@ int remainingSeconds = 15 * 60; // 15 phút
       _ngayDi = prefs.getString('ngayDi') ?? '';
       _startTime = prefs.getString('startTime') ?? '';
       _totalPrice = prefs.getInt('totalPrice') ?? 0;
+      _diemDi = prefs.getString('diemDi') ?? '';
+      _diemDen = prefs.getString('diemDen') ?? '';
     });
   }
 
@@ -98,7 +102,7 @@ int remainingSeconds = 15 * 60; // 15 phút
           child: Column(
             children: [
               Text(
-                '$_pickupPoint - $_dropoffPoint',
+                '$_diemDi - $_diemDen',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: AppColors.mainOrange,

@@ -30,6 +30,8 @@ class _TicketDetailsState extends State<TicketDetails> {
   String _startTime = '';
   int _totalPrice = 0;
   List<String> _selectedSeats = [];
+  String _diemDi = '';
+  String _diemDen = '';
 
   @override
   void initState() {
@@ -43,16 +45,17 @@ class _TicketDetailsState extends State<TicketDetails> {
   final prefs = await SharedPreferences.getInstance();
 
   final ticket = Ticket(
-    seatCode: _selectedSeats.first,
-    fullName: _name,
-    phone: _phone,
-    email: _email,
-    route: '$_pickupPoint - $_dropoffPoint',
-    time: _startTime,
-    date: _ngayDi,
-    totalPrice: _totalPrice,
-    pickupPoint: _pickupPoint,
-  );
+  seatCode: _selectedSeats.first,
+  fullName: _name,
+  phone: _phone,
+  email: _email,
+  time: _startTime,
+  date: _ngayDi,
+  route: '$_diemDi - $_diemDen',
+  totalPrice: _totalPrice,
+  pickupPoint: _pickupPoint,
+);
+
 
   // 1. Lưu theo key riêng (tuỳ chọn, nếu cần phân loại từng vé)
   final ticketKey = 'ticket_${_phone}_${_selectedSeats.first}';
@@ -84,7 +87,7 @@ Future<void> _exportTicketToPDF() async {
     Họ tên: $_name
     SĐT: $_phone
     Email: $_email
-    Tuyến: $_pickupPoint - $_dropoffPoint
+    Tuyến: $_diemDi - $_diemDen
     Ngày đi: $_ngayDi $_startTime
     Ghế: ${_selectedSeats.join(', ')}
     Giá vé: ${formatCurrency(_totalPrice)}
@@ -122,7 +125,7 @@ Future<void> _exportTicketToPDF() async {
             pw.SizedBox(height: 8),
             pw.Text('Email: $_email', style: pw.TextStyle(font: ttf)),
             pw.SizedBox(height: 8),
-            pw.Text('Tuyến: $_pickupPoint - $_dropoffPoint', style: pw.TextStyle(font: ttf)),
+            pw.Text('Tuyến: $_diemDi - $_diemDen', style: pw.TextStyle(font: ttf)),
             pw.SizedBox(height: 8),
             pw.Text('Thời gian: $_startTime $_ngayDi', style: pw.TextStyle(font: ttf)),
             pw.SizedBox(height: 8),
@@ -191,6 +194,9 @@ Future<void> _exportTicketToPDF() async {
     _startTime = prefs.getString('startTime') ?? '';
     _totalPrice = prefs.getInt('totalPrice') ?? 0;
     _selectedSeats = prefs.getStringList('selectedSeats') ?? [];
+    _diemDi = prefs.getString('diemDi') ?? '';
+    _diemDen = prefs.getString('diemDen') ?? '';
+
   });
 
   // GỌI HÀM LƯU VÉ
@@ -297,7 +303,7 @@ Future<void> _exportTicketToPDF() async {
                   ),
                 ),
                 const SizedBox(height: 8),
-                infoRow('Tuyến xe:', '$_pickupPoint - $_dropoffPoint'),
+                infoRow('Tuyến xe:', '$_diemDi - $_diemDen'),
                 infoRow('Thời gian:', '$_startTime $_ngayDi'),
                 infoRow('Số ghế:', _selectedSeats.join(', ')),
                 infoRow('Điểm lên xe:', 'BX Nam Hải - TP. HCM'),

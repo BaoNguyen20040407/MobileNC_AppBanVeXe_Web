@@ -40,6 +40,10 @@ class TicketInfoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final parts = ticket.route.split(' - ');
+    final diemDi = parts.isNotEmpty ? parts[0] : '';
+    final diemDen = parts.length > 1 ? parts[1] : '';
+
     return Row(
       children: [
         Column(
@@ -75,12 +79,12 @@ class TicketInfoWidget extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _infoRow('Tuyến xe', ticket.route),
+              _infoRow('Tuyến xe', '$diemDi - $diemDen'),
               const SizedBox(height: 4),
               _infoRow('Thời gian', '${ticket.time} ${ticket.date}'),
               const SizedBox(height: 4),
-              _infoRow('Điểm đi', 'BX Nam Hải - ${ticket.pickupPoint}'),
-              const SizedBox(height: 4),
+              _infoRow('Điểm lên xe', ticket.pickupPoint),
+              const SizedBox(height: 4,),
               _infoRow('Giá vé', '${formatCurrency(ticket.totalPrice)} VND'),
               const SizedBox(height: 16),
             ],

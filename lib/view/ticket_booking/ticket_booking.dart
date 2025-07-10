@@ -113,11 +113,12 @@ Future<void> handleBookingAndNavigate(BuildContext context) async {
 
     await prefs.setString('pickupPoint', pickupPoint);
     await prefs.setString('dropoffPoint', dropoffPoint);
-    await prefs.setString('startTime', '06:00'); 
+    await prefs.setString('startTime', startTime); 
     await prefs.setString('ngayDi', ngayDi);
     await prefs.setStringList('selectedSeats', selectedSeats);
     await prefs.setInt('seatPrice', seatPrice);
     await prefs.setInt('totalPrice', totalPrice);
+    await prefs.setString('route', '$diemDi - $diemDen'); 
 
     await Future.delayed(const Duration(milliseconds: 200)); // tránh gắt khung hình
 

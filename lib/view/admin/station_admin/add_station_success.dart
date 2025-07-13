@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/config/default.dart';
+import 'package:giao_dien_1/view/admin/station_admin/station_list.dart';
 import 'package:giao_dien_1/view/ticket_lookup/ticket_details.dart';
 import 'package:giao_dien_1/widget/appbar_admin.dart';
 import 'package:giao_dien_1/widget/footer.dart';
@@ -50,8 +51,8 @@ class AddStationSuccess extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => TicketDetails(),
-                        settings: const RouteSettings(name: '/ticket_details'),
+                        builder: (_) => StationList(),
+                        settings: const RouteSettings(name: '/station_list'),
                       ),
                     );
                   },

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/config/default.dart';
+import 'package:giao_dien_1/view/admin/home_admin/homeadmin.dart';
 import 'package:giao_dien_1/widget/appbar.dart';
 import 'package:giao_dien_1/widget/admin_option_card.dart';
 import 'package:giao_dien_1/widget/exit_button.dart';
@@ -61,7 +62,14 @@ class ManagePeopleScreen extends StatelessWidget {
 
             const SizedBox(height: 32), // Khoảng cách rõ ràng trước nút
 
-            const ExitButton(),
+            ExitButton(
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => HomeAdmin()),
+              );
+            },
+          ),
           ],
         ),
       ),

@@ -49,7 +49,7 @@ void addStation() async {
       backgroundColor: AppColors.white,
       appBar: CustomAppBarAdmin(),
       body: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 32, 24, 16),
+        padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
         child: Column(
           children: [
             const Text(
@@ -103,7 +103,7 @@ void addStation() async {
                 showToggleVisibility: false,
               ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 32),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly, // hoặc .center, .spaceBetween
               children: [

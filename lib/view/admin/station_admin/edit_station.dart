@@ -95,7 +95,7 @@ Future<void> deleteStation() async {
       backgroundColor: AppColors.white,
       appBar: CustomAppBarAdmin(),
       body: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 32, 24, 16),
+        padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
         child: Column(
           children: [
             const Text(
@@ -147,7 +147,7 @@ Future<void> deleteStation() async {
               showToggleVisibility: false,
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 32),
 
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -162,7 +162,6 @@ Future<void> deleteStation() async {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      side: const BorderSide(color: AppColors.mainOrange, width: 1.2),
                       elevation: 3,
                       shadowColor: AppColors.mainOrange.withOpacity(0.2),
                     ).copyWith(
@@ -184,42 +183,136 @@ Future<void> deleteStation() async {
                   width: 140,
                   child: ElevatedButton(
                   onPressed: () async {
-  final confirm = await showDialog<bool>(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('Xác nhận'),
-      content: const Text('Bạn có chắc không?'),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(false), // Không xóa
-          child: const Text('Hủy'),
-        ),
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(true), // Xóa
-          child: const Text('Xóa'),
-        ),
-      ],
-    ),
-  );
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        backgroundColor: AppColors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        titlePadding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
+                        contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
+                        actionsPadding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+                        title: const Text(
+                          'Bạn có chắc không?',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                        content: const Text(
+                          'Dữ liệu này có thể bị xóa',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontFamily: 'Inter',
+                            color: Colors.black87,
+                          ),
+                        ),
+                        actionsAlignment: MainAxisAlignment.end,
+                        actions: [
+                          OutlinedButton(
+                            style: ButtonStyle(
+                              side: MaterialStateProperty.all(
+                                const BorderSide(color: Colors.black),
+                              ),
+                              shape: MaterialStateProperty.all(
+                                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              ),
+                              padding: MaterialStateProperty.all(
+                                const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                              ),
+                              overlayColor: MaterialStateProperty.all(Colors.transparent), // ✅ Tắt hover tím
+                              backgroundColor: MaterialStateProperty.all(Colors.white),    // ✅ Nền trắng
+                              foregroundColor: MaterialStateProperty.all(Colors.black),    // ✅ Text đen
+                            ),
+                            onPressed: () => Navigator.of(context).pop(false),
+                            child: const Text(
+                              'Hủy',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Inter',
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                              elevation: 0,
+                            ),
+                            onPressed: () => Navigator.of(context).pop(true),
+                            child: const Text(
+                              'Xóa',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Inter',
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
 
-  if (confirm == true) {
-    // Người dùng xác nhận xóa
-    await deleteStation();
-    await showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Thông báo'),
-        content: const Text('Dữ liệu đã xóa'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-},
+                    if (confirm == true) {
+                      // Người dùng xác nhận xóa
+                      await deleteStation();
+                      await showDialog<void>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          backgroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          titlePadding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
+                          contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
+                          actionsPadding: const EdgeInsets.fromLTRB(24, 24, 16, 16),
+                          title: const Text(
+                            'Xóa thành công!',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Inter',
+                              color: Colors.black,
+                            ),
+                          ),
+                          content: const Text(
+                            'Dữ liệu đã được xóa khỏi hệ thống.',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontFamily: 'Inter',
+                              color: Colors.black87,
+                            ),
+                          ),
+                          actionsAlignment: MainAxisAlignment.end,
+                          actions: [
+                            ElevatedButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.mainOrange,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                elevation: 0,
+                              ),
+                              child: const Text(
+                                'Đóng',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Inter',
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.red,  // màu đỏ cho nút xóa
                   padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),

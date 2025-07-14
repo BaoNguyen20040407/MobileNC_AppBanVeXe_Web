@@ -11,6 +11,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:giao_dien_1/view/admin/home_admin/manage_station.dart';
+import 'package:giao_dien_1/config/config.dart';
 
 class StationList extends StatefulWidget {
   const StationList({super.key});
@@ -32,7 +33,7 @@ class _StationListState extends State<StationList> {
   }
 
   Future<void> fetchStations() async {
-    final response = await http.get(Uri.parse('http://localhost:3000/benxe'));
+    final response = await http.get(Uri.parse('$baseURL/benxe'));
 
     if (response.statusCode == 200) {
       setState(() {
@@ -213,63 +214,105 @@ Widget build(BuildContext context) {
                     const SizedBox(height: 16),
 
                     // Bảng dữ liệu
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Container(
-                        width: MediaQuery.of(context).size.width * 0.78,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: AppColors.mainOrange),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
+                    Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: AppColors.mainOrange),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
                         child: DataTable(
                           headingRowColor: MaterialStateProperty.all(AppColors.softOrange),
-                          columnSpacing: 16,
+                          columnSpacing: 8,
+                          dataRowMinHeight: 40,
+                          dataRowMaxHeight: 48,
                           columns: const [
-                            DataColumn(label: Text('Mã BX', style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter',))),
-                            DataColumn(label: Text('Tên Bến xe', style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter',))),
-                            DataColumn(label: Text('Tỉnh/Thành', style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter',))),
+                            DataColumn(
+                              label: SizedBox(
+                                width: 80,
+                                child: Text(
+                                  'Mã BX',
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                ),
+                              ),
+                            ),
+                            DataColumn(
+                              label: SizedBox(
+                                width: 160,
+                                child: Text(
+                                  'Tên Bến xe',
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                ),
+                              ),
+                            ),
+                            DataColumn(
+                              label: SizedBox(
+                                width: 250,
+                                child: Text(
+                                  'Địa chỉ',
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                ),
+                              ),
+                            ),
+                            DataColumn(
+                              label: SizedBox(
+                                width: 120,
+                                child: Text(
+                                  'Tỉnh/Thành',
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                ),
+                              ),
+                            ),
                           ],
                           rows: filteredList.map((station) {
                             return DataRow(
-                              color: MaterialStateProperty.resolveWith<Color?>(
-                                (Set<MaterialState> states) {
-                                  if (states.contains(MaterialState.hovered)) {
-                                    return Colors.transparent; // Không đổi màu khi hover
-                                  }
-                                  return null; // Mặc định
-                                },
-                              ),
                               cells: [
-                                DataCell(InkWell(
-                                  child: Text(
-                                    station['MaBX'] ?? '',
-                                    style: const TextStyle(
-                                      color: AppColors.black,
-                                      fontFamily: 'Inter',
-                                    ),
-                                  ),
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(builder: (context) => EditStation(station: station)),
-                                    );
-                                  },
-                                )),
                                 DataCell(
-                                  Text(
-                                    station['TenBX'] ?? '',
-                                    style: const TextStyle(
-                                      fontFamily: 'Inter',
-                                      color: AppColors.black,
+                                  SizedBox(
+                                    width: 80,
+                                    child: InkWell(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(builder: (context) => EditStation(station: station)),
+                                        );
+                                      },
+                                      child: Text(
+                                        station['MaBX'] ?? '',
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(fontFamily: 'Inter'),
+                                      ),
                                     ),
                                   ),
                                 ),
                                 DataCell(
-                                  Text(
-                                    station['TinhThanh'] ?? '',
-                                    style: const TextStyle(
-                                      fontFamily: 'Inter',
-                                      color: AppColors.black,
+                                  SizedBox(
+                                    width: 160,
+                                    child: Text(
+                                      station['TenBX'] ?? '',
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(fontFamily: 'Inter'),
+                                    ),
+                                  ),
+                                ),
+                                DataCell(
+                                  SizedBox(
+                                    width: 250,
+                                    child: Text(
+                                      station['DiaChi'] ?? '',
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(fontFamily: 'Inter'),
+                                    ),
+                                  ),
+                                ),
+                                DataCell(
+                                  SizedBox(
+                                    width: 120,
+                                    child: Text(
+                                      station['TinhThanh'] ?? '',
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(fontFamily: 'Inter'),
                                     ),
                                   ),
                                 ),
@@ -279,6 +322,7 @@ Widget build(BuildContext context) {
                         ),
                       ),
                     ),
+
 
                     const SizedBox(height: 16),
 

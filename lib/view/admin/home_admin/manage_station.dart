@@ -52,7 +52,7 @@ class ManageStationScreen extends StatelessWidget {
                 crossAxisCount: 2,
                 crossAxisSpacing: 32,
                 mainAxisSpacing: 32,
-                childAspectRatio: 1.5,
+                childAspectRatio: 1,
               ),
               itemBuilder: (context, index) {
                 final item = items[index];

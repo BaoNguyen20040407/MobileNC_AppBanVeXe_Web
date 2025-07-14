@@ -40,9 +40,9 @@ class ManagePeopleScreen extends StatelessWidget {
               itemCount: items.length,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                crossAxisSpacing: 24,
-                mainAxisSpacing: 24,
-                childAspectRatio: 1.2,
+                crossAxisSpacing: 32,
+                mainAxisSpacing: 32,
+                childAspectRatio: 1,
               ),
               itemBuilder: (context, index) {
                 final item = items[index];

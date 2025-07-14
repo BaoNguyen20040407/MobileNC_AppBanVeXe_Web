@@ -7,6 +7,7 @@ import 'package:giao_dien_1/widget/input_field.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:giao_dien_1/view/admin/station_admin/edit_station_success.dart';
+import 'package:giao_dien_1/view/admin/station_admin/station_list.dart';
 
 class EditStation extends StatefulWidget {
   final Map<String, dynamic> station;
@@ -303,9 +304,14 @@ padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
                               actionsAlignment: MainAxisAlignment.end,
                               actions: [
                                 ElevatedButton(
-                                  onPressed: () => Navigator.of(context).pop(),
+                                  onPressed: () {
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(builder: (_) => const StationList()),
+                                    );
+                                  },
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.mainOrange,
+                                    backgroundColor: AppColors.red,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(8),
                                     ),

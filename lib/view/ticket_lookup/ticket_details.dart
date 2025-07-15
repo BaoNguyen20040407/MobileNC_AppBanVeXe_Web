@@ -36,8 +36,14 @@ class _TicketDetailsState extends State<TicketDetails> {
   @override
   void initState() {
     super.initState();
-    _loadUserData();
+    Future.microtask(() => _loadAndProcessData());
   }
+
+
+  Future<void> _loadAndProcessData() async {
+  await _loadUserData();         // Load dữ liệu từ SharedPreferences
+  await _saveTicketToPrefs();    // Lưu lại vé
+}
 
   Future<void> _saveTicketToPrefs() async {
   if (_selectedSeats.isEmpty) return;

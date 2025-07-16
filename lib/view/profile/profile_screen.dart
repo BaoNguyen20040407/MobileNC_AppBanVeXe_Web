@@ -10,6 +10,8 @@ import 'dart:io';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:giao_dien_1/view/notification/notifications_screen.dart';
+import 'package:giao_dien_1/view/location/location.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -147,8 +149,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Icons.location_on_outlined,
                   "Địa chỉ của bạn",
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    // TODO: Navigation
+                  onTap: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const LocationScreen(), 
+                        settings: const RouteSettings(name: '/location'),
+                      ),
+                    );
+
+                    if (result != null && result is LatLng) {
+                      print('Địa chỉ đã chọn: ${result.latitude}, ${result.longitude}');
+                      // TODO: xử lý lưu hoặc hiển thị địa chỉ
+                    }
                   },
                 ),
                 _buildMenuItem(

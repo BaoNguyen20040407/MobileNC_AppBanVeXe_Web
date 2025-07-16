@@ -350,7 +350,7 @@ Widget build(BuildContext context) {
           ),
 
           // ✅ EXIT BUTTON Ở NGOÀI KHUNG
-          const SizedBox(height: 24),
+          const SizedBox(height: 32),
           ExitButton(
             onPressed: () {
               Navigator.pushReplacement(
@@ -359,7 +359,6 @@ Widget build(BuildContext context) {
               );
             },
           ),
-          const SizedBox(height: 24),
         ],
       ),
     ),

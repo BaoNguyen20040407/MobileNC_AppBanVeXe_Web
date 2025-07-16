@@ -1,30 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/config/default.dart';
-import 'package:giao_dien_1/view/admin/customer_admin.dart/customer.dart';
+import 'package:giao_dien_1/view/admin/account/account_admin/account_admin.dart';
 import 'package:giao_dien_1/view/admin/home_admin/homeadmin.dart';
+import 'package:giao_dien_1/view/admin/home_admin/manage_people.dart';
 import 'package:giao_dien_1/widget/appbar.dart';
 import 'package:giao_dien_1/widget/admin_option_card.dart';
 import 'package:giao_dien_1/widget/exit_button.dart';
 import 'package:giao_dien_1/widget/appbar_admin.dart';
-import 'package:giao_dien_1/view/admin/account/account.dart';
-import 'package:giao_dien_1/view/admin/employee_admin/employee_list.dart';
+import 'package:giao_dien_1/view/admin/account/account_user/account_user.dart';
 
-class ManagePeopleScreen extends StatelessWidget {
+class AccountScreen extends StatelessWidget {
+  AccountScreen({super.key});
+
   final List<Map<String, dynamic>> items = [
     {
-      'title': 'Khách hàng', 
-      'icon': Icons.person,
-      'route': CustomerListScreen(),
+      'title': 'Tài khoản khách hàng',
+      'icon': Icons.person_outline,
+      'route': AccountUserList(),
     },
     {
-      'title': 'Nhân viên', 
-      'icon': Icons.badge,
-      'route': EmployeeListScreen(),
-    },
-    {
-      'title': 'Tài khoản', 
-      'icon': Icons.account_circle,
-      'route': AccountScreen(),
+      'title': 'Tài khoản nhân viên',
+      'icon': Icons.manage_accounts,
+      'route': AccountStaffList(), // Chưa có trang
     },
   ];
 
@@ -38,7 +35,7 @@ class ManagePeopleScreen extends StatelessWidget {
         child: Column(
           children: [
             const Text(
-              'QUẢN LÝ NGƯỜI',
+              'QUẢN LÝ BẾN XE',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -48,10 +45,10 @@ class ManagePeopleScreen extends StatelessWidget {
             ),
             const SizedBox(height: 32),
 
-            /// ✅ Grid không dùng Expanded
+            /// ✅ GridView không dùng Expanded
             GridView.builder(
-              shrinkWrap: true, // Giúp GridView chiếm chiều cao đúng
-              physics: const NeverScrollableScrollPhysics(), // Không cuộn
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
               itemCount: items.length,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
@@ -83,13 +80,12 @@ class ManagePeopleScreen extends StatelessWidget {
               },
             ),
 
-            const SizedBox(height: 32), // Khoảng cách rõ ràng trước nút
-
+            const SizedBox(height: 32),
             ExitButton(
             onPressed: () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (_) => HomeAdmin()),
+                MaterialPageRoute(builder: (_) => ManagePeopleScreen()),
               );
             },
           ),

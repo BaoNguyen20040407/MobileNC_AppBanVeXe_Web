@@ -44,6 +44,7 @@ int remainingSeconds = 15 * 60; // 15 phút
   int _totalPrice = 0;
   String _diemDi = '';
   String _diemDen = '';
+  Timer? _countdownTimer;
 
   String formatCurrency(int amount) {
   final formatter = NumberFormat("#,###", "vi_VN");
@@ -73,17 +74,24 @@ int remainingSeconds = 15 * 60; // 15 phút
     _loadUser();
   }
 
-  void startCountdown() {
-    Timer.periodic(Duration(seconds: 1), (timer) {
-      if (remainingSeconds == 0) {
-        timer.cancel();
-      } else {
-        setState(() {
-          remainingSeconds--;
-        });
-      }
-    });
+  @override
+  void dispose() {
+    _countdownTimer?.cancel();
+    super.dispose();
   }
+
+
+  void startCountdown() {
+  _countdownTimer = Timer.periodic(Duration(seconds: 2), (timer) {
+    if (remainingSeconds == 0) {
+      timer.cancel();
+    } else {
+      setState(() {
+        remainingSeconds--;
+      });
+    }
+  });
+}
 
   String get timerDisplay {
     final minutes = (remainingSeconds ~/ 60).toString().padLeft(2, '0');

@@ -204,9 +204,6 @@ Future<void> _exportTicketToPDF() async {
     _diemDen = prefs.getString('diemDen') ?? '';
 
   });
-
-  // GỌI HÀM LƯU VÉ
-  _saveTicketToPrefs();
 }
 
 

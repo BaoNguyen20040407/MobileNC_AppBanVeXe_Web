@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:giao_dien_1/view/admin/station_admin/add_station_success.dart';
 import 'package:giao_dien_1/config/config.dart';
+import 'package:giao_dien_1/widget/create_button.dart';
 
 class AddStation extends StatefulWidget {
   const AddStation({super.key});
@@ -106,35 +107,15 @@ void addStation() async {
 
               const SizedBox(height: 32),
 
-              // Nút
               Row(
                 children: [
                   Expanded(
-                    child: SizedBox(
-                      height: 42,
-                      child: ElevatedButton(
-                        onPressed: addStation,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.mainOrange,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                          elevation: 3,
-                        ),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.add, color: Colors.white, size: 18),
-                            SizedBox(width: 6),
-                            Text('Tạo mới', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14, fontFamily: 'Inter')),
-                          ],
-                        ),
-                      ),
-                    ),
+                    child: CreateButton(onPressed: addStation),
                   ),
                   const SizedBox(width: 16),
                   const Expanded(child: ExitButton()),
                 ],
               ),
-
               const SizedBox(height: 32),
             ],
           ),

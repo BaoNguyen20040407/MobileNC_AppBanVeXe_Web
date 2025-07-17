@@ -3,6 +3,8 @@ import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/widget/appbar_admin.dart';
 import 'package:giao_dien_1/widget/exit_button.dart';
 import 'package:giao_dien_1/view/admin/home_admin/manage_people.dart';
+import 'package:giao_dien_1/view/admin/customer_admin/add_customer.dart';
+import 'package:giao_dien_1/widget/choice_chip_selector.dart';
 
 class CustomerListScreen extends StatefulWidget {
   const CustomerListScreen({super.key});
@@ -100,11 +102,40 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
                           child: Wrap(
                             spacing: 8,
                             children: [
-                              _buildChoiceChip('Mã KH', 'MaKH'),
-                              _buildChoiceChip('Họ tên', 'HoVaTen'),
-                              _buildChoiceChip('SĐT', 'SDT'),
-                              _buildChoiceChip('Email', 'Email'),
-                              _buildChoiceChip('Địa chỉ', 'DiaChi'),
+                                ChoiceChipSelector(
+                                label: 'Mã KH',
+                                value: 'MaKH',
+                                selectedValue: selectedColumn,
+                                onSelected: (val) => setState(() => selectedColumn = val),
+                              ),
+                              const SizedBox(width: 8),
+                              ChoiceChipSelector(
+                                label: 'Họ tên',
+                                value: 'HoVaTen',
+                                selectedValue: selectedColumn,
+                                onSelected: (val) => setState(() => selectedColumn = val),
+                              ),
+                              const SizedBox(width: 8),
+                              ChoiceChipSelector(
+                                label: 'SĐT',
+                                value: 'SDT',
+                                selectedValue: selectedColumn,
+                                onSelected: (val) => setState(() => selectedColumn = val),
+                              ),
+                              const SizedBox(width: 8),
+                              ChoiceChipSelector(
+                                label: 'Email',
+                                value: 'Email',
+                                selectedValue: selectedColumn,
+                                onSelected: (val) => setState(() => selectedColumn = val),
+                              ),
+                              const SizedBox(width: 8),
+                              ChoiceChipSelector(
+                                label: 'Địa chỉ',
+                                value: 'DiaChi',
+                                selectedValue: selectedColumn,
+                                onSelected: (val) => setState(() => selectedColumn = val),
+                              ),
                             ],
                           ),
                         ),
@@ -118,7 +149,15 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
                           IconButton(
                             icon: const Icon(Icons.add_circle),
                             tooltip: 'Thêm khách hàng',
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const AddCustomerScreen(),
+                                  settings: RouteSettings(name: '/add_customer'),
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),
@@ -182,24 +221,6 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildChoiceChip(String label, String value) {
-    return ChoiceChip(
-      label: Text(label, style: const TextStyle(fontFamily: 'Inter')),
-      selected: selectedColumn == value,
-      onSelected: (_) => setState(() => selectedColumn = value),
-      selectedColor: AppColors.mainOrange,
-      backgroundColor: Colors.white,
-      labelStyle: TextStyle(
-        color: selectedColumn == value ? Colors.white : Colors.black87,
-        fontWeight: FontWeight.bold,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: BorderSide(color: AppColors.mainOrange),
       ),
     );
   }

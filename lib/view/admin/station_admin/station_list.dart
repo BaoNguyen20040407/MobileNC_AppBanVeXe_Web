@@ -12,6 +12,7 @@ import 'package:printing/printing.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:giao_dien_1/view/admin/home_admin/manage_station.dart';
 import 'package:giao_dien_1/config/config.dart';
+import 'package:giao_dien_1/widget/choice_chip_selector.dart';
 
 class StationList extends StatefulWidget {
   const StationList({super.key});
@@ -168,13 +169,33 @@ Widget build(BuildContext context) {
                             scrollDirection: Axis.horizontal,
                             child: Row(
                               children: [
-                                _buildChoiceChip('Mã BX', 'MaBX'),
+                                ChoiceChipSelector(
+                                  label: 'Mã BX',
+                                  value: 'MaBX',
+                                  selectedValue: selectedColumn,
+                                  onSelected: (val) => setState(() => selectedColumn = val),
+                                ),
                                 const SizedBox(width: 8),
-                                _buildChoiceChip('Tên bến xe', 'TenBX'),
+                                ChoiceChipSelector(
+                                  label: 'Tên bến xe',
+                                  value: 'TenBX',
+                                  selectedValue: selectedColumn,
+                                  onSelected: (val) => setState(() => selectedColumn = val),
+                                ),
                                 const SizedBox(width: 8),
-                                _buildChoiceChip('Địa chỉ', 'DiaChi'),
+                                ChoiceChipSelector(
+                                  label: 'Địa chỉ',
+                                  value: 'DiaChi',
+                                  selectedValue: selectedColumn,
+                                  onSelected: (val) => setState(() => selectedColumn = val),
+                                ),
                                 const SizedBox(width: 8),
-                                _buildChoiceChip('Tỉnh/Thành', 'TinhThanh'),
+                                ChoiceChipSelector(
+                                  label: 'Tỉnh/Thành',
+                                  value: 'TinhThanh',
+                                  selectedValue: selectedColumn,
+                                  onSelected: (val) => setState(() => selectedColumn = val),
+                                ),
                               ],
                             ),
                           ),
@@ -361,25 +382,6 @@ Widget build(BuildContext context) {
           ),
         ],
       ),
-    ),
-  );
-}
-
-// Helper cho ChoiceChip
-Widget _buildChoiceChip(String label, String value) {
-  return ChoiceChip(
-    label: Text(label, style: const TextStyle(fontFamily: 'Inter')),
-    selected: selectedColumn == value,
-    onSelected: (_) => setState(() => selectedColumn = value),
-    selectedColor: AppColors.mainOrange,
-    backgroundColor: Colors.white,
-    labelStyle: TextStyle(
-      color: selectedColumn == value ? Colors.white : Colors.black87,
-      fontWeight: FontWeight.bold,
-    ),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(8),
-      side: BorderSide(color: AppColors.mainOrange),
     ),
   );
 }

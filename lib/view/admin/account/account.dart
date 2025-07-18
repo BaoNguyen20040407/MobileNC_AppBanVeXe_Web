@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/config/default.dart';
-import 'package:giao_dien_1/view/admin/account/account_admin/account_admin.dart';
+import 'package:giao_dien_1/view/admin/account/account_admin/account_admin_list.dart';
 import 'package:giao_dien_1/view/admin/home_admin/homeadmin.dart';
 import 'package:giao_dien_1/view/admin/home_admin/manage_people.dart';
 import 'package:giao_dien_1/widget/appbar.dart';
 import 'package:giao_dien_1/widget/admin_option_card.dart';
 import 'package:giao_dien_1/widget/exit_button.dart';
 import 'package:giao_dien_1/widget/appbar_admin.dart';
-import 'package:giao_dien_1/view/admin/account/account_user/account_user.dart';
+import 'package:giao_dien_1/view/admin/account/account_user/account_user_list.dart';
 
 class AccountScreen extends StatelessWidget {
   AccountScreen({super.key});

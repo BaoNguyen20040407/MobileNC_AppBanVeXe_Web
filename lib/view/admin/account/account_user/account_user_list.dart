@@ -3,6 +3,8 @@ import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/widget/exit_button.dart';
 import 'package:giao_dien_1/widget/appbar_admin.dart';
 import 'package:giao_dien_1/view/admin/account/account.dart';
+import 'package:giao_dien_1/view/admin/account/account_user/add_account_user.dart';
+import 'package:giao_dien_1/widget/choice_chip_selector.dart';
 
 class AccountUserList extends StatefulWidget {
   const AccountUserList({super.key});
@@ -18,7 +20,7 @@ class _AccountUserListState extends State<AccountUserList> {
 
   @override
   Widget build(BuildContext context) {
-    final List<dynamic> filteredList = []; // Giao diện, không có dữ liệu
+    final List<dynamic> filteredList = []; // Giao diện trống
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -57,30 +59,30 @@ class _AccountUserListState extends State<AccountUserList> {
                       const SizedBox(height: 16),
 
                       // Tìm kiếm
-                    TextField(
-                      controller: searchController,
-                      decoration: InputDecoration(
-                        hintText: 'Nhập từ khóa...',
-                        hintStyle: const TextStyle(fontFamily: 'Inter'),
-                        suffixIcon: IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            searchController.clear();
-                            setState(() {});
-                          },
+                      TextField(
+                        controller: searchController,
+                        decoration: InputDecoration(
+                          hintText: 'Nhập từ khóa...',
+                          hintStyle: const TextStyle(fontFamily: 'Inter'),
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              searchController.clear();
+                              setState(() {});
+                            },
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(color: AppColors.mainOrange, width: 1.5),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(color: AppColors.mainOrange, width: 2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(color: AppColors.mainOrange, width: 1.5),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(color: AppColors.mainOrange, width: 2),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        onChanged: (_) => setState(() {}),
                       ),
-                      onChanged: (_) => setState(() {}),
-                    ),
 
                       const SizedBox(height: 16),
 
@@ -99,25 +101,39 @@ class _AccountUserListState extends State<AccountUserList> {
                           ),
                         ],
                       ),
+
                       if (showSearchOptions)
-                        Column(
-                          children: [
-                            const SizedBox(height: 8),
-                            SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                children: [
-                                  _buildChoiceChip('Mã TK', 'MaTK'),
-                                  const SizedBox(width: 8),
-                                  _buildChoiceChip('Email', 'Email'),
-                                  const SizedBox(width: 8),
-                                  _buildChoiceChip('Mật khẩu', 'Password'),
-                                  const SizedBox(width: 8),
-                                  _buildChoiceChip('Mã KH', 'MaKH'),
-                                ],
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Wrap(
+                            spacing: 8,
+                            children: [
+                              ChoiceChipSelector(
+                                label: 'Mã TK',
+                                value: 'MaTK',
+                                selectedValue: selectedColumn,
+                                onSelected: (val) => setState(() => selectedColumn = val),
                               ),
-                            ),
-                          ],
+                              ChoiceChipSelector(
+                                label: 'Email',
+                                value: 'Email',
+                                selectedValue: selectedColumn,
+                                onSelected: (val) => setState(() => selectedColumn = val),
+                              ),
+                              ChoiceChipSelector(
+                                label: 'Mật khẩu',
+                                value: 'Password',
+                                selectedValue: selectedColumn,
+                                onSelected: (val) => setState(() => selectedColumn = val),
+                              ),
+                              ChoiceChipSelector(
+                                label: 'Mã KH',
+                                value: 'MaKH',
+                                selectedValue: selectedColumn,
+                                onSelected: (val) => setState(() => selectedColumn = val),
+                              ),
+                            ],
+                          ),
                         ),
 
                       const SizedBox(height: 8),
@@ -138,7 +154,15 @@ class _AccountUserListState extends State<AccountUserList> {
                               IconButton(
                                 icon: const Icon(Icons.add_circle),
                                 tooltip: 'Thêm tài khoản',
-                                onPressed: () {},
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const AddCustomerAccountScreen(),
+                                      settings: const RouteSettings(name: '/add_account_user'),
+                                    ),
+                                  );
+                                },
                               ),
                             ],
                           ),
@@ -147,7 +171,6 @@ class _AccountUserListState extends State<AccountUserList> {
 
                       const SizedBox(height: 16),
 
-                      // Bảng dữ liệu (trống)
                       Container(
                         width: double.infinity,
                         decoration: BoxDecoration(
@@ -207,24 +230,6 @@ class _AccountUserListState extends State<AccountUserList> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildChoiceChip(String label, String value) {
-    return ChoiceChip(
-      label: Text(label, style: const TextStyle(fontFamily: 'Inter')),
-      selected: selectedColumn == value,
-      onSelected: (_) => setState(() => selectedColumn = value),
-      selectedColor: AppColors.mainOrange,
-      backgroundColor: Colors.white,
-      labelStyle: TextStyle(
-        color: selectedColumn == value ? Colors.white : Colors.black87,
-        fontWeight: FontWeight.bold,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: BorderSide(color: AppColors.mainOrange),
       ),
     );
   }

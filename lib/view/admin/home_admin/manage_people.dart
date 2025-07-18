@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/config/default.dart';
-import 'package:giao_dien_1/view/admin/customer_admin/customer.dart';
+import 'package:giao_dien_1/view/admin/customer_admin/customer_list.dart';
 import 'package:giao_dien_1/view/admin/home_admin/homeadmin.dart';
 import 'package:giao_dien_1/widget/appbar.dart';
 import 'package:giao_dien_1/widget/admin_option_card.dart';

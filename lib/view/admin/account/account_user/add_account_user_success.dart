@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/config/default.dart';
+import 'package:giao_dien_1/view/admin/account/account_user/account_user_list.dart';
 import 'package:giao_dien_1/widget/appbar_admin.dart';
-import 'package:giao_dien_1/view/admin/customer_admin/customer_list.dart';
 
-class AddCustomerSuccess extends StatelessWidget {
-  const AddCustomerSuccess({super.key});
+class AddAccountUserSuccess extends StatelessWidget {
+  const AddAccountUserSuccess({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +35,7 @@ class AddCustomerSuccess extends StatelessWidget {
               ),
               const SizedBox(height: 32),
               const Text(
-                'Thêm khách hàng thành công',
+                'Thêm tài khoản khách hàng thành công',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -49,8 +49,8 @@ class AddCustomerSuccess extends StatelessWidget {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const CustomerListScreen(),
-                        settings: const RouteSettings(name: '/khách hàng'),
+                        builder: (_) => const AccountUserList(),
+                        settings: const RouteSettings(name: '/tài khoản khách hàng'),
                       ),
                     );
                   },

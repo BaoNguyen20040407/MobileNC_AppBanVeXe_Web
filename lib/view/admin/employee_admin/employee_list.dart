@@ -3,6 +3,7 @@ import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/widget/appbar_admin.dart';
 import 'package:giao_dien_1/widget/exit_button.dart';
 import 'package:giao_dien_1/view/admin/home_admin/manage_people.dart';
+import 'package:giao_dien_1/view/admin/employee_admin/add_employee.dart';
 
 class EmployeeListScreen extends StatefulWidget {
   const EmployeeListScreen({super.key});
@@ -117,8 +118,16 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
                           Text('Tổng số: ${filteredList.length}', style: const TextStyle(fontFamily: 'Inter')),
                           IconButton(
                             icon: const Icon(Icons.add_circle),
-                            tooltip: 'Thêm nhân viên',
-                            onPressed: () {},
+                            tooltip: 'Thêm khách hàng',
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const AddEmployeeScreen(),
+                                  settings: RouteSettings(name: '/add_employee'),
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),

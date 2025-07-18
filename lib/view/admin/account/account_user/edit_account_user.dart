@@ -4,6 +4,7 @@ import 'package:giao_dien_1/view/admin/account/account_user/account_user_list.da
 import 'package:giao_dien_1/widget/appbar_admin.dart';
 import 'package:giao_dien_1/widget/input_field.dart';
 import 'package:giao_dien_1/view/admin/account/account_user/edit_account_user_success.dart';
+import 'package:giao_dien_1/widget/edit_action_button.dart';
 
 class EditCustomerAccountScreen extends StatefulWidget {
   final Map<String, dynamic> accountData;
@@ -244,38 +245,8 @@ class _EditCustomerAccountScreenState extends State<EditCustomerAccountScreen> {
                     Expanded(
                       child: SizedBox(
                         height: 42,
-                        child: ElevatedButton(
+                        child: EditActionButton(
                           onPressed: _submitForm,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.greenDark,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            side: const BorderSide(color: AppColors.greenDark, width: 1.2),
-                            elevation: 3,
-                            shadowColor: AppColors.greenDark.withOpacity(0.2),
-                          ).copyWith(
-                            overlayColor: MaterialStateProperty.all(Colors.transparent),
-                            surfaceTintColor: MaterialStateProperty.all(Colors.transparent),
-                          ),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.save, color: Colors.white, size: 18),
-                              SizedBox(width: 6),
-                              Text(
-                                'Cập nhật',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                  fontFamily: 'Inter',
-                                ),
-                              ),
-                            ],
-                          ),
                         ),
                       ),
                     ),

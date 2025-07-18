@@ -21,7 +21,7 @@ class AccountScreen extends StatelessWidget {
     {
       'title': 'Tài khoản nhân viên',
       'icon': Icons.manage_accounts,
-      'route': AccountStaffList(), // Chưa có trang
+      'route': AccountStaffList(),
     },
   ];
 
@@ -35,7 +35,7 @@ class AccountScreen extends StatelessWidget {
         child: Column(
           children: [
             const Text(
-              'QUẢN LÝ BẾN XE',
+              'QUẢN LÝ TÀI KHOẢN',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,

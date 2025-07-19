@@ -4,6 +4,7 @@ import 'package:giao_dien_1/widget/appbar_admin.dart';
 import 'package:giao_dien_1/widget/exit_button.dart';
 import 'package:giao_dien_1/widget/choice_chip_selector.dart';
 import 'package:giao_dien_1/view/admin/home_admin/homeadmin.dart';
+import 'package:giao_dien_1/view/admin/support_admin/reply_support.dart';
 
 class SupportListScreen extends StatefulWidget {
   const SupportListScreen({super.key});
@@ -18,6 +19,7 @@ class _SupportListScreenState extends State<SupportListScreen> {
   bool showSearchOptions = false;
 
   final List<Map<String, String>> supports = [];
+
 
   @override
   Widget build(BuildContext context) {
@@ -215,12 +217,24 @@ class _SupportListScreenState extends State<SupportListScreen> {
                                     ),
                                     trailing: IconButton(
                                       icon: const Icon(Icons.reply, color: AppColors.mainOrange),
-                                      onPressed: () {
-                                        // TODO: mở form trả lời
+                                      onPressed: () async {
+                                        final updated = await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => ReplySupportScreen(supportItem: support),
+                                          ),
+                                        );
+
+                                        if (updated == true) {
+                                          // TODO: Gọi lại API / cập nhật lại danh sách
+                                          setState(() {
+                                            // Nếu dùng API thật, reload lại từ server
+                                            // Còn nếu dùng demo tạm, có thể chỉnh trực tiếp support['CauTraLoi'] trong danh sách nếu cần
+                                          });
+                                        }
                                       },
                                     ),
                                   ),
-
                                 );
                               }).toList(),
                             ),

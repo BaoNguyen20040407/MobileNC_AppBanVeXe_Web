@@ -4,6 +4,7 @@ import 'package:giao_dien_1/widget/appbar_admin.dart';
 import 'package:giao_dien_1/widget/exit_button.dart';
 import 'package:giao_dien_1/widget/choice_chip_selector.dart';
 import 'package:giao_dien_1/view/admin/home_admin/homeadmin.dart';
+import 'package:giao_dien_1/view/admin/feedback_admin/reply_feedback.dart';
 
 class FeedbackListScreen extends StatefulWidget {
   const FeedbackListScreen({super.key});
@@ -214,7 +215,12 @@ class _FeedbackListScreenState extends State<FeedbackListScreen> {
                                     trailing: IconButton(
                                       icon: const Icon(Icons.reply, color: AppColors.mainOrange),
                                       onPressed: () {
-                                        // TODO: mở form phản hồi
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => ReplyFeedbackScreen(feedbackItem: feedback),
+                                          ),
+                                        );
                                       },
                                     ),
                                   ),

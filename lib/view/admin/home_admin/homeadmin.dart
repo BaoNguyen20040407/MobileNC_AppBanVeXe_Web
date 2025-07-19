@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:giao_dien_1/view/admin/feedback_admin/feedback_list.dart';
+import 'package:giao_dien_1/view/admin/support_admin/support_list.dart';
 import 'package:giao_dien_1/widget/appbar.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/view/admin/home_admin/manage_people.dart';
@@ -15,8 +17,8 @@ class HomeAdmin extends StatelessWidget {
       {'title': 'Quản lý Bến xe', 'icon': Icons.directions_bus, 'route': '/manage_station'},
       {'title': 'Quản lý Chuyến xe', 'icon': Icons.directions, 'route': '/manage_trip'},
       {'title': 'Quản lý Vé', 'icon': Icons.confirmation_number, 'route': '/'},
-      {'title': 'Trả lời Hỗ trợ', 'icon': Icons.support_agent, 'route': '/'},
-      {'title': 'Trả lời Góp ý', 'icon': Icons.chat, 'route': '/'},
+      {'title': 'Trả lời Hỗ trợ', 'icon': Icons.support_agent, 'route': '/support'},
+      {'title': 'Trả lời Góp ý', 'icon': Icons.chat, 'route': '/feedback'},
     ];
 
     return Scaffold(
@@ -49,6 +51,12 @@ class HomeAdmin extends StatelessWidget {
                     break;
                   case '/manage_trip':
                     Navigator.push(context, MaterialPageRoute(builder: (_) => ManageTripScreen()));
+                    break;
+                  case '/support':
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => SupportListScreen()));
+                    break;
+                  case '/feedback':
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => FeedbackListScreen()));
                     break;
                   default:
                     // Hiện thông báo placeholder

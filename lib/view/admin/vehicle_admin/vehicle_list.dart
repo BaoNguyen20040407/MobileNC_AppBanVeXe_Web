@@ -119,7 +119,7 @@ class _VehicleListState extends State<VehicleList> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                      const SizedBox(height: 16),
+                    
                       TextField(
                         controller: searchController,
                         decoration: InputDecoration(

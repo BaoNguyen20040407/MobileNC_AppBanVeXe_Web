@@ -7,12 +7,12 @@ import 'dart:convert';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:giao_dien_1/view/admin/home_admin/manage_station.dart';
+import 'package:giao_dien_1/view/admin/home_admin/manage_trip.dart';
 import 'package:giao_dien_1/widget/choice_chip_selector.dart';
 import 'package:giao_dien_1/view/admin/stop_admin/add_stop.dart';
 import 'package:giao_dien_1/view/admin/stop_admin/edit_stop.dart';
-import 'package:giao_dien_1/widget/input_field.dart';
 import 'package:giao_dien_1/config/config.dart';
+import 'package:giao_dien_1/widget/pagination_control.dart';
 
 class StopList extends StatefulWidget {
   const StopList({super.key});
@@ -236,9 +236,42 @@ class _StopListState extends State<StopList> {
                             dataRowMinHeight: 40,
                             dataRowMaxHeight: 48,
                             columns: const [
-                              DataColumn(label: SizedBox(width: 80, child: Text('Mã CX'))),
-                              DataColumn(label: SizedBox(width: 80, child: Text('Thứ tự'))),
-                              DataColumn(label: SizedBox(width: 200, child: Text('Điểm dừng'))),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 80, 
+                                  child: Text(
+                                    'Mã CX', 
+                                    style: TextStyle(
+                                      fontFamily: 'Inter', 
+                                      fontWeight: FontWeight.bold
+                                    ),
+                                  )
+                                )
+                              ),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 80, 
+                                  child: Text(
+                                    'Thứ tự', 
+                                    style: TextStyle(
+                                      fontFamily: 'Inter', 
+                                      fontWeight: FontWeight.bold
+                                    )
+                                  )
+                                )
+                              ),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 200, 
+                                  child: Text(
+                                    'Điểm dừng', 
+                                    style: TextStyle(
+                                      fontFamily: 'Inter', 
+                                      fontWeight: FontWeight.bold
+                                    )
+                                  )
+                                )
+                              ),
                             ],
                             rows: filteredList.map((item) {
                               return DataRow(
@@ -264,21 +297,14 @@ class _StopListState extends State<StopList> {
                       ),
                       const SizedBox(height: 16),
                       // Phân trang
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          TextButton(onPressed: () {}, child: const Text("Đầu")),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            margin: const EdgeInsets.symmetric(horizontal: 4),
-                            decoration: BoxDecoration(
-                              color: AppColors.mainOrange,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: const Text('1', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                          ),
-                          TextButton(onPressed: () {}, child: const Text("Cuối")),
-                        ],
+                      PaginationControls(
+                        currentPage: 1,
+                        onFirstPressed: () {
+                          print("Go to first page");
+                        },
+                        onLastPressed: () {
+                          print("Go to last page");
+                        },
                       ),
                     ],
                   ),
@@ -290,7 +316,7 @@ class _StopListState extends State<StopList> {
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (_) => ManageStationScreen()),
+                  MaterialPageRoute(builder: (_) => ManageTripScreen()),
                 );
               },
             ),

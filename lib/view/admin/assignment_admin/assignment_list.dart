@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/config/default.dart';
+import 'package:giao_dien_1/view/admin/home_admin/manage_trip.dart';
 import 'package:giao_dien_1/widget/exit_button.dart';
 import 'package:giao_dien_1/widget/appbar_admin.dart';
 import 'package:http/http.dart' as http;
@@ -9,9 +10,9 @@ import 'package:giao_dien_1/view/admin/assignment_admin/edit_assignment.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:giao_dien_1/view/admin/home_admin/manage_station.dart';
 import 'package:giao_dien_1/config/config.dart';
 import 'package:giao_dien_1/widget/choice_chip_selector.dart';
+import 'package:giao_dien_1/widget/pagination_control.dart';
 
 class AssignmentList extends StatefulWidget {
   const AssignmentList({super.key});
@@ -270,21 +271,14 @@ class _AssignmentListState extends State<AssignmentList> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          TextButton(onPressed: () {}, child: const Text("Đầu", style: TextStyle(fontFamily: 'Inter'))),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            margin: const EdgeInsets.symmetric(horizontal: 4),
-                            decoration: BoxDecoration(
-                              color: AppColors.mainOrange,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: const Text('1', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                          ),
-                          TextButton(onPressed: () {}, child: const Text("Cuối", style: TextStyle(fontFamily: 'Inter'))),
-                        ],
+                      PaginationControls(
+                        currentPage: 1,
+                        onFirstPressed: () {
+                          print("Go to first page");
+                        },
+                        onLastPressed: () {
+                          print("Go to last page");
+                        },
                       ),
                     ],
                   ),
@@ -292,7 +286,14 @@ class _AssignmentListState extends State<AssignmentList> {
               ),
             ),
             const SizedBox(height: 32),
-            ExitButton(onPressed: () => Navigator.pop(context)),
+            ExitButton(
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => ManageTripScreen()),
+                );
+              },
+            ),
           ],
         ),
       ),

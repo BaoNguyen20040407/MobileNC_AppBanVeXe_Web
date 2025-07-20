@@ -4,6 +4,7 @@ import 'package:giao_dien_1/widget/appbar_admin.dart';
 import 'package:giao_dien_1/widget/exit_button.dart';
 import 'package:giao_dien_1/view/admin/home_admin/manage_people.dart';
 import 'package:giao_dien_1/view/admin/employee_admin/add_employee.dart';
+import 'package:giao_dien_1/widget/pagination_control.dart';
 
 class EmployeeListScreen extends StatefulWidget {
   const EmployeeListScreen({super.key});
@@ -157,21 +158,14 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
                       const SizedBox(height: 16),
 
                       // Phân trang
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          TextButton(onPressed: () {}, child: const Text("Đầu", style: TextStyle(fontFamily: 'Inter', color: AppColors.black))),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            margin: const EdgeInsets.symmetric(horizontal: 4),
-                            decoration: BoxDecoration(
-                              color: AppColors.mainOrange,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: const Text('1', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                          ),
-                          TextButton(onPressed: () {}, child: const Text("Cuối", style: TextStyle(fontFamily: 'Inter', color: AppColors.black))),
-                        ],
+                      PaginationControls(
+                        currentPage: 1,
+                        onFirstPressed: () {
+                          print("Go to first page");
+                        },
+                        onLastPressed: () {
+                          print("Go to last page");
+                        },
                       ),
                     ],
                   ),

@@ -9,6 +9,7 @@ import 'dart:convert';
 import 'package:giao_dien_1/widget/edit_action_button.dart';
 import 'package:giao_dien_1/view/admin/vehicle_admin/edit_vehicle_success.dart';
 import 'package:giao_dien_1/widget/dropdown_field.dart';
+import 'package:giao_dien_1/widget/confirm_delete_button.dart';
 
 class EditVehicle extends StatefulWidget {
   final Map<String, dynamic> vehicle;
@@ -202,61 +203,16 @@ class _EditVehicleState extends State<EditVehicle> {
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: SizedBox(
-                      height: 42,
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          final confirm = await showDialog<bool>(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              backgroundColor: AppColors.white,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                              title: const Text('Bạn có chắc không?',
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                              content: const Text('Dữ liệu này có thể bị xóa'),
-                              actions: [
-                                OutlinedButton(
-                                  onPressed: () => Navigator.of(context).pop(false),
-                                  child: const Text('Hủy'),
-                                ),
-                                ElevatedButton(
-                                  onPressed: () => Navigator.of(context).pop(true),
-                                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                                  child: const Text('Xóa'),
-                                ),
-                              ],
-                            ),
-                          );
-
-                          if (confirm == true) {
-                            await deleteVehicle();
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.red,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                          side: const BorderSide(color: AppColors.mainOrange, width: 1.2),
-                          elevation: 3,
-                          shadowColor: AppColors.mainOrange.withOpacity(0.2),
-                        ),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.delete, color: Colors.white, size: 18),
-                            SizedBox(width: 6),
-                            Text(
-                              'Xóa',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                                fontFamily: 'Inter',
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                    child: ConfirmDeleteButton(
+                      onConfirmDelete: deleteVehicle,
+                      successTitle: 'Xóa thành công!',
+                      successMessage: 'Dữ liệu đã được xóa khỏi hệ thống.',
+                      onSuccessClose: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (_) => const VehicleList()),
+                        );
+                      },
                     ),
                   ),
                 ],

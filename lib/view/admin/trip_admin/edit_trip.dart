@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/config/config.dart';
 import 'package:giao_dien_1/config/default.dart';
-import 'package:giao_dien_1/widget/exit_button.dart';
 import 'package:giao_dien_1/widget/appbar_admin.dart';
 import 'package:giao_dien_1/widget/input_field.dart';
 import 'package:http/http.dart' as http;
@@ -9,6 +8,7 @@ import 'dart:convert';
 import 'package:giao_dien_1/view/admin/trip_admin/edit_trip_success.dart';
 import 'package:giao_dien_1/view/admin/trip_admin/trip_list.dart';
 import 'package:giao_dien_1/widget/edit_action_button.dart';
+import 'package:giao_dien_1/widget/confirm_delete_button.dart';
 
 class EditTrip extends StatefulWidget {
   final Map<String, dynamic> trip;
@@ -186,61 +186,16 @@ class _EditTripState extends State<EditTrip> {
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: SizedBox(
-                      height: 42,
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          final confirm = await showDialog<bool>(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              backgroundColor: AppColors.white,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                              title: const Text('Bạn có chắc không?'),
-                              content: const Text('Dữ liệu này có thể bị xóa'),
-                              actions: [
-                                TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Hủy')),
-                                ElevatedButton(
-                                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                                  onPressed: () => Navigator.pop(context, true),
-                                  child: const Text('Xóa'),
-                                ),
-                              ],
-                            ),
-                          );
-                          if (confirm == true) {
-                            await deleteTrip();
-                            await showDialog<void>(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: const Text('Xóa thành công!'),
-                                content: const Text('Dữ liệu đã được xóa khỏi hệ thống.'),
-                                actions: [
-                                  ElevatedButton(
-                                    onPressed: () => Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(builder: (_) => const TripList()),
-                                    ),
-                                    child: const Text('Đóng'),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.red,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                        ),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.delete, color: Colors.white, size: 18),
-                            SizedBox(width: 6),
-                            Text('Xóa', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14, fontFamily: 'Inter')),
-                          ],
-                        ),
-                      ),
+                    child: ConfirmDeleteButton(
+                      onConfirmDelete: deleteTrip,
+                      successTitle: 'Xóa thành công!',
+                      successMessage: 'Dữ liệu đã được xóa khỏi hệ thống.',
+                      onSuccessClose: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (_) => const TripList()),
+                        );
+                      },
                     ),
                   ),
                 ],

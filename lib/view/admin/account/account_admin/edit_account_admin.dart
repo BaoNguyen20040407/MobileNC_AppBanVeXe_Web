@@ -291,7 +291,6 @@ class _EditAccountAdminScreenState extends State<EditAccountAdminScreen> {
                     ),
                   ],
                 ),
-
               ],
             ),
           ),

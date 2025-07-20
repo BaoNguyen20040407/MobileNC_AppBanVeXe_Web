@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/view/admin/home_admin/homeadmin.dart';
-import 'package:giao_dien_1/widget/appbar.dart';
 import 'package:giao_dien_1/widget/admin_option_card.dart';
 import 'package:giao_dien_1/widget/exit_button.dart';
 import 'package:giao_dien_1/widget/appbar_admin.dart';
 import 'package:giao_dien_1/view/admin/station_admin/station_list.dart';
+import 'package:giao_dien_1/view/admin/vehicle_admin/vehicle_list.dart';
 
 class ManageStationScreen extends StatelessWidget {
   ManageStationScreen({super.key});
@@ -19,7 +19,7 @@ class ManageStationScreen extends StatelessWidget {
     {
       'title': 'Xe',
       'icon': Icons.directions_transit,
-      'route': null, // Chưa có trang
+      'route': const VehicleList(), // Chưa có trang
     },
   ];
 

@@ -7,7 +7,8 @@ import 'package:giao_dien_1/widget/create_button.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:giao_dien_1/config/config.dart';
-import 'package:giao_dien_1/view/admin/assignment_admin/add_assignment_success.dart'; // Tạo file này giống AddStopSuccess
+import 'package:giao_dien_1/view/admin/assignment_admin/add_assignment_success.dart';
+import 'package:giao_dien_1/widget/dropdown_field.dart';
 
 class AddAssignment extends StatefulWidget {
   const AddAssignment({super.key});
@@ -99,67 +100,30 @@ class _AddAssignmentState extends State<AddAssignment> {
               ),
               const SizedBox(height: 32),
 
-              // Dropdown MaCX
-              InputDecorator(
-                decoration: InputDecoration(
-                  labelText: "Mã chuyến xe",
-                  prefixIcon: const Icon(Icons.directions_bus),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.mainOrange),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    isExpanded: true,
-                    value: selectedMaCX,
-                    hint: const Text('Chọn mã chuyến xe'),
-                    items: maCXList.map((value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                    onChanged: (newValue) {
-                      setState(() {
-                        selectedMaCX = newValue;
-                      });
-                    },
-                  ),
-                ),
+              CustomDropdownField(
+                value: selectedMaCX,
+                items: maCXList,
+                labelText: "Mã chuyến xe",
+                prefixIcon: Icons.directions_bus,
+                onChanged: (newValue) {
+                  setState(() {
+                    selectedMaCX = newValue;
+                  });
+                },
               ),
               const SizedBox(height: 16),
 
               // Dropdown MaNV
-              InputDecorator(
-                decoration: InputDecoration(
-                  labelText: "Mã nhân viên",
-                  prefixIcon: const Icon(Icons.person),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.mainOrange),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    isExpanded: true,
-                    value: selectedMaNV,
-                    hint: const Text('Chọn mã nhân viên'),
-                    items: maNVList.map((value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                    onChanged: (newValue) {
-                      setState(() {
-                        selectedMaNV = newValue;
-                      });
-                    },
-                  ),
-                ),
+              CustomDropdownField(
+                value: selectedMaNV,
+                items: maNVList,
+                labelText: "Mã nhân viên",
+                prefixIcon: Icons.person,
+                onChanged: (newValue) {
+                  setState(() {
+                    selectedMaNV = newValue;
+                  });
+                },
               ),
               const SizedBox(height: 16),
 

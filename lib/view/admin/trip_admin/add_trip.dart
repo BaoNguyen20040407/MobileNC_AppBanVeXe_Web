@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:giao_dien_1/view/admin/trip_admin/add_trip_success.dart';
 import 'package:giao_dien_1/config/config.dart';
 import 'package:giao_dien_1/widget/create_button.dart';
+import 'package:giao_dien_1/widget/dropdown_field.dart';
 
 class AddTrip extends StatefulWidget {
   const AddTrip({super.key});
@@ -106,16 +107,11 @@ class _AddTripState extends State<AddTrip> {
                 showToggleVisibility: false,
               ),
               const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
+              CustomDropdownField(
                 value: selectedBienSo,
-                decoration: const InputDecoration(
-                  labelText: 'Biển số xe',
-                  prefixIcon: Icon(Icons.directions_bus),
-                  border: OutlineInputBorder(),
-                ),
-                items: bienSoList.map((bs) =>
-                  DropdownMenuItem(value: bs, child: Text(bs))
-                ).toList(),
+                items: bienSoList,
+                labelText: 'Biển số xe',
+                prefixIcon: Icons.directions_bus,
                 onChanged: (val) => setState(() => selectedBienSo = val),
               ),
               const SizedBox(height: 16),

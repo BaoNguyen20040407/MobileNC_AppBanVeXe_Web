@@ -11,6 +11,7 @@ App đặt vé xe khách Nam Hải giúp cho khách hàng có thể:
 - Xem thông báo của nhà xe gửi đến khách hàng về chuyến xe
 - Xem/ sửa thông tin tài khoản, đổi mật khẩu
 - Định vị được vị trí của mình qua tính năng tích hợp Google Map
+
 Về phía admin
 - Quản lý được các thông tin liên quan về khách hàng, nhân viên, tài khoản, bến xe, chuyến xe, nhân sự liên quan, vé.
 - Gửi thông báo đến khách hàng về những thông tin liên quan đến nhà xe, chuyến xe...

@@ -10,7 +10,7 @@
       "giaVe": 450000,
       "loaiGhe": "Giường",
       "image": "assets/image/bus1.jpg",
-      "ngayDi": "19/06/2025"
+      "ngayDi": "22/07/2025"
     },
     {
       "id": 2,
@@ -23,7 +23,7 @@
       "giaVe": 450000,
       "loaiGhe": "Giường",
       "image": "assets/image/bus2.jpg",
-      "ngayDi": "19/06/2025"
+      "ngayDi": "22/07/2025"
       
     },
     {
@@ -37,7 +37,7 @@
       "giaVe": 450000,
       "loaiGhe": "Giường",
       "image": "assets/image/bus1.jpg",
-      "ngayDi": "19/06/2025"
+      "ngayDi": "22/07/2025"
     },
     {
       "id": 4,
@@ -50,7 +50,7 @@
       "giaVe": 450000,
       "loaiGhe": "Giường",
       "image": "assets/image/bus2.jpg",
-      "ngayDi": "19/06/2025"
+      "ngayDi": "22/07/2025"
     },
     {
       "id": 5,
@@ -64,7 +64,7 @@
         "thoiGianDung": "30 phút",
         "gioDung": "18:30"
       },
-      "ngayDi": "19/06/2025",
+      "ngayDi": "22/07/2025",
       "soChoConLai": 30,
       "giaVe": 350000,
       "loaiGhe": "Giường",
@@ -81,7 +81,7 @@
         "giaVe": 450000,
         "loaiGhe": "Giường",
         "image": "assets/image/bus1.jpg",
-        "ngayDi": "19/06/2025"
+        "ngayDi": "22/07/2025"
       },
       {
         "id": 7,
@@ -94,7 +94,7 @@
         "giaVe": 450000,
         "loaiGhe": "Giường",
         "image": "assets/image/bus2.jpg",
-        "ngayDi": "19/06/2025"
+        "ngayDi": "22/07/2025"
       },
       {
         "id": 8,
@@ -107,7 +107,7 @@
         "giaVe": 450000,
         "loaiGhe": "Giường",
         "image": "assets/image/bus1.jpg",
-        "ngayDi": "19/06/2025"
+        "ngayDi": "22/07/2025"
       },
       {
         "id": 9,
@@ -120,7 +120,7 @@
         "giaVe": 450000,
         "loaiGhe": "Giường",
         "image": "assets/image/bus2.jpg",
-        "ngayDi": "19/06/2025"
+        "ngayDi": "22/07/2025"
       },
       {
         "id": 10,
@@ -134,7 +134,7 @@
           "thoiGianDung": "30 phút",
           "gioDung": "18:30"
         },
-        "ngayDi": "19/06/2025",
+        "ngayDi": "22/07/2025",
         "soChoConLai": 30,
         "giaVe": 350000,
         "loaiGhe": "Giường",

@@ -13,7 +13,8 @@ class CustomInputField extends StatelessWidget {
   final bool showToggleVisibility;
   final Function(String)? onChanged;
   final bool readOnly;
-  final VoidCallback? onTap; 
+  final VoidCallback? onTap;
+  final String? Function(String?)? validator;
 
   const CustomInputField({
     super.key,
@@ -29,15 +30,19 @@ class CustomInputField extends StatelessWidget {
     this.onChanged,
     this.readOnly = false,
     this.onTap,
+    this.validator, // now optional
   });
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
+    return TextFormField(
       controller: controller,
       obscureText: obscureText,
       keyboardType: keyboardType,
       onChanged: onChanged,
+      readOnly: readOnly,
+      onTap: onTap,
+      validator: validator, // ✅ <--- now used properly
       cursorColor: AppColors.mainOrange,
       decoration: InputDecoration(
         labelText: labelText,
@@ -54,16 +59,20 @@ class CustomInputField extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Icon(prefixIcon),
         ),
-        prefixIconConstraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-        suffixIcon: showToggleVisibility
-            ? IconButton(
-                icon: Icon(
-                  obscureText ? Icons.visibility_off : Icons.visibility,
-                  color: AppColors.black,
-                ),
-                onPressed: onToggleObscureText,
-              )
-            : null,
+        prefixIconConstraints: const BoxConstraints(
+          minWidth: 48,
+          minHeight: 48,
+        ),
+        suffixIcon:
+            showToggleVisibility
+                ? IconButton(
+                  icon: Icon(
+                    obscureText ? Icons.visibility_off : Icons.visibility,
+                    color: AppColors.black,
+                  ),
+                  onPressed: onToggleObscureText,
+                )
+                : null,
         enabledBorder: const OutlineInputBorder(
           borderSide: BorderSide(color: AppColors.mainOrange),
         ),
@@ -78,7 +87,10 @@ class CustomInputField extends StatelessWidget {
         ),
         hintStyle: TextStyle(color: AppColors.greyLight),
         floatingLabelStyle: const TextStyle(color: AppColors.black),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20.0,
+          vertical: 16.0,
+        ),
       ),
     );
   }

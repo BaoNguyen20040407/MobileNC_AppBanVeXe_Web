@@ -96,19 +96,20 @@ class _PhoneNumberInputState extends State<Phone_Number_Input> {
               ),
 
               const SizedBox(height: 32),
-              OrangeButton1(
-                text: "Tiếp tục", 
-                onPressed: () async{
-                  _handleContinue();
-                  if (_phoneError == null) {
-                    final phone = _phoneController.text.trim();
-                    await _savePhoneNumber(phone);
-                    Navigator.push(
-                      context, 
-                      MaterialPageRoute(builder: (context) => const Welcome())
-                    );
-                  }
-                }),
+OrangeButton1(
+  text: "Tiếp tục", 
+  onPressed: () async {
+    if (_handleContinue()) {
+      final phone = _phoneController.text.trim();
+      await _savePhoneNumber(phone);
+      Navigator.pushReplacement(
+        context, 
+        MaterialPageRoute(builder: (context) => const Welcome())
+      );
+    }
+  }
+),
+
               const SizedBox(height: 32),
               RichText(
                 textAlign: TextAlign.justify,

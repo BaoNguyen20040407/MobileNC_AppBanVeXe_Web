@@ -5,6 +5,8 @@ import 'confirm_email_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:giao_dien_1/widget/input_field.dart';
 import 'package:giao_dien_1/view/admin/home_admin/homeadmin.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -14,12 +16,12 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  bool _obscurePassword = true; 
+  bool _obscurePassword = true;
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   String? _usernameError;
-  String? _passwordError; 
+  String? _passwordError;
 
   @override
   Widget build(BuildContext context) {
@@ -82,27 +84,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     final userNameInput = _usernameController.text.trim();
                     final passwordInput = _passwordController.text.trim();
 
-                    final pref = await SharedPreferences.getInstance();
-                    final saveUsername = pref.getString('username');
-                    final savePassword = pref.getString('password');
-
                     setState(() {
                       _usernameError = null;
                       _passwordError = null;
                     });
 
-                    if (userNameInput == saveUsername && passwordInput == savePassword)
-                    {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => HomePage(),
-                          settings: const RouteSettings(name: '/home'),
-                        ),
-                      );
-                    }
-                    if (userNameInput == 'BaoNguyen04' && passwordInput == 'BaoNguyen04')
-                    {
+                    if (userNameInput == 'BaoNguyen04' &&
+                        passwordInput == 'BaoNguyen04') {
+                      print('🟢 Admin login detected');
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
@@ -110,20 +99,82 @@ class _LoginScreenState extends State<LoginScreen> {
                           settings: const RouteSettings(name: '/home_admin'),
                         ),
                       );
+                      return;
                     }
-                    else {
+
+                    try {
+                      final url = Uri.parse('http://10.0.2.2:3000/login');
+                      print('📡 Sending POST request to $url');
+                      print(
+                        'Login request: username=${_usernameController.text}, password=${_passwordController.text}',
+                      );
+
+                      final response = await http.post(
+                        url,
+                        headers: {'Content-Type': 'application/json'},
+                        body: jsonEncode({
+                          'username': _usernameController.text,
+                          'password': _passwordController.text,
+                        }),
+                      );
+
+                      print('📥 Response status: ${response.statusCode}');
+                      print('📥 Response body: ${response.body}');
+                      print('Login response: ${response.body}');
+
+                      if (response.statusCode == 200) {
+                        final data = jsonDecode(response.body);
+                        print('✅ Login successful. Data: $data');
+
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.setString(
+                          'username',
+                          data['data']['username'],
+                        );
+
+                        // Navigate based on role
+                        if (data['role'] == 'admin') {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (_) => HomeAdmin()),
+                          );
+                        } else {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (_) => HomePage()),
+                          );
+                        }
+                      } else {
+                        print('❌ Login failed. Status: ${response.statusCode}');
+
+                        try {
+                          final responseData = jsonDecode(response.body);
+                          print(
+                            '❌ Error message from server: ${responseData['message']}',
+                          );
+
+                          setState(() {
+                            _usernameError = ' ';
+                            _passwordError =
+                                responseData['error'] ??
+                                'Đăng nhập không thành công';
+                          });
+                        } catch (jsonError) {
+                          print('🛑 Failed to decode error JSON: $jsonError');
+                          setState(() {
+                            _passwordError =
+                                'Phản hồi không hợp lệ từ máy chủ.';
+                          });
+                        }
+                      }
+                    } catch (e) {
+                      print('🛑 Exception caught: $e');
                       setState(() {
-                        if (userNameInput != saveUsername) 
-                        {
-                          _usernameError = 'Tên đăng nhập không đúng';
-                        }
-                        if (passwordInput != savePassword)
-                        {
-                          _passwordError = 'Mật khẩu không đúng';
-                        }
+                        _passwordError = 'Lỗi kết nối đến máy chủ';
                       });
                     }
                   },
+
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF5722),
                     shape: RoundedRectangleBorder(
@@ -133,7 +184,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   child: const Text(
                     "Đăng Nhập",
-                    style: TextStyle(fontSize: 17, color: Colors.white, fontFamily: 'Inter', fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 17,
+                      color: Colors.white,
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
@@ -144,18 +200,20 @@ class _LoginScreenState extends State<LoginScreen> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => ConfirmEmailScreen()),
+                    MaterialPageRoute(
+                      builder: (context) => ConfirmEmailScreen(),
+                    ),
                   );
                 },
                 style: ButtonStyle(
-                  overlayColor: WidgetStateProperty.resolveWith<Color?>(
-                    (Set<WidgetState> states) {
-                      if (states.contains(WidgetState.hovered)) {
-                        return Colors.transparent;
-                      }
-                      return null;
-                    },
-                  ),
+                  overlayColor: WidgetStateProperty.resolveWith<Color?>((
+                    Set<WidgetState> states,
+                  ) {
+                    if (states.contains(WidgetState.hovered)) {
+                      return Colors.transparent;
+                    }
+                    return null;
+                  }),
                 ),
                 child: const Text(
                   "Quên mật khẩu?",
@@ -173,17 +231,25 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text("Không có tài khoản? ", style: TextStyle(fontFamily: 'Inter', fontSize: 14),),
+                    const Text(
+                      "Không có tài khoản? ",
+                      style: TextStyle(fontFamily: 'Inter', fontSize: 14),
+                    ),
                     TextButton(
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => Phone_Number_Input()),
+                          MaterialPageRoute(
+                            builder: (context) => Phone_Number_Input(),
+                          ),
                         );
                       },
                       style: ButtonStyle(
-                        overlayColor: WidgetStateProperty.all(Colors.transparent), // Loại bỏ màu khi nhấn/hover
-                        splashFactory: NoSplash.splashFactory, // Loại bỏ hiệu ứng splash
+                        overlayColor: WidgetStateProperty.all(
+                          Colors.transparent,
+                        ), // Loại bỏ màu khi nhấn/hover
+                        splashFactory:
+                            NoSplash.splashFactory, // Loại bỏ hiệu ứng splash
                         padding: WidgetStateProperty.all(EdgeInsets.zero),
                         minimumSize: WidgetStateProperty.all(Size(0, 0)),
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,

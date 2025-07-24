@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:giao_dien_1/config/config.dart';
 import 'package:giao_dien_1/view/main/homepage.dart';
 import 'package:giao_dien_1/view/auth/phone_number_input.dart';
 import 'confirm_email_screen.dart';
@@ -103,7 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     }
 
                     try {
-                      final url = Uri.parse('http://10.0.2.2:3000/login');
+                      final url = Uri.parse('$baseURL/login');
                       print('📡 Sending POST request to $url');
                       print(
                         'Login request: username=${_usernameController.text}, password=${_passwordController.text}',

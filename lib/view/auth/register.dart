@@ -9,6 +9,7 @@ import 'package:giao_dien_1/view/auth/phone_number_input.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
+import 'package:giao_dien_1/config/config.dart';
 
 
 class Register extends StatefulWidget {
@@ -19,7 +20,7 @@ class Register extends StatefulWidget {
 }
 
 Future<bool> registerCustomer(Map<String, String> customerData) async {
-  final url = Uri.parse('http://10.0.2.2:3000/insert-khachhang');
+  final url = Uri.parse('$baseURL/insert-khachhang');
 
   final response = await http.post(
     url,
@@ -100,7 +101,7 @@ class _RegisterState extends State<Register> {
   }
 
 Future<void> _submitData() async {
-  var uri = Uri.parse('http://10.0.2.2:3000/insert-khachhang');
+  var uri = Uri.parse('$baseURL/insert-khachhang');
   var request = http.MultipartRequest('POST', uri);
 
   request.fields['HoVaTen'] = _nameController.text.trim();
@@ -124,17 +125,20 @@ Future<void> _submitData() async {
     request.files.add(multipartFile);
   }
 
+  print("🟡 Gửi request insert khách hàng");
   var response = await request.send();
   final res = await http.Response.fromStream(response);
+  print('Raw Response Body: ${res.body}');
   final responseData = jsonDecode(res.body);
 
   print('Server Response (KHACHHANG): $responseData');
 
   if (responseData['success'] == true && responseData['MaKH'] != null) {
+    print("🟢 Gửi request insert tài khoản");
     // Now create TAIKHOANKH
     final maKH = responseData['MaKH'];
     final accountRes = await http.post(
-      Uri.parse('http://10.0.2.2:3000/insert-taikhoankh'),
+      Uri.parse('$baseURL/insert-taikhoankh'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'TenDangNhapKH': _usernameController.text.trim(),
@@ -142,9 +146,13 @@ Future<void> _submitData() async {
         'MaKH': maKH,
       }),
     );
-
+      try {
     final accResponseBody = jsonDecode(accountRes.body);
-    print('TAIKHOANKH Insert Response: $accResponseBody');
+    print('✅ TAIKHOANKH Insert Response: $accResponseBody');
+  } catch (e, stackTrace) {
+    print('❌ Lỗi khi decode JSON từ accountRes.body: $e');
+    print('🔍 StackTrace: $stackTrace');
+  }
   } else {
     print('Failed to register KHACHHANG');
   }

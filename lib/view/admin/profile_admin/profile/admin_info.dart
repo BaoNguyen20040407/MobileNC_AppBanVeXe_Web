@@ -28,6 +28,7 @@ class _AdminInfoState extends State<AdminInfo> {
   String _maNV = '';
   String _avatarUrl = '';
   Uint8List? _avatarBytes;
+  String _username = '';
 
   @override
   void initState() {
@@ -57,7 +58,7 @@ class _AdminInfoState extends State<AdminInfo> {
           _ngayVaoLam = nv['NgayVaoLam'] ?? '';
           _chucVu = nv['ChucVu'] ?? '';
           _phongBan = nv['PhongBan'] ?? '';
-
+          _username = nv['username'] ?? '';
           final imgPath = nv['URLHinhAnh'];
           if (imgPath != null && imgPath.isNotEmpty) {
             _avatarUrl = '$baseURL$imgPath';
@@ -158,7 +159,7 @@ class _AdminInfoState extends State<AdminInfo> {
               ),
             const SizedBox(height: 8),
             Text(
-              _maNV,
+              _username,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 17,

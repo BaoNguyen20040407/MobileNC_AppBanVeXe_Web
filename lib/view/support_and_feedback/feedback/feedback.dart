@@ -1,7 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 import 'package:giao_dien_1/widget/appbar_profile.dart';
 import 'package:giao_dien_1/config/default.dart';
+import 'package:giao_dien_1/config/config.dart';
 import 'package:giao_dien_1/view/support_and_feedback/feedback/feedback_answer.dart';
 import 'package:giao_dien_1/view/support_and_feedback/feedback/feedback_loading.dart';
 
@@ -15,30 +18,89 @@ class FeedbackPage extends StatefulWidget {
 class _FeedbackPageState extends State<FeedbackPage> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
-
-  List<String> _myFeedbacks = [];
+  List<Map<String, dynamic>> _myFeedbacks = [];
+  String? _maKH;
 
   @override
   void initState() {
     super.initState();
-    _loadSavedFeedbacks();
+    _getMaKHAndLoadFeedbacks();
   }
 
-  Future<void> _loadSavedFeedbacks() async {
+  Future<void> _getMaKHAndLoadFeedbacks() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _myFeedbacks = prefs.getStringList('my_feedbacks') ?? [];
-    });
+    final username = prefs.getString('username');
+    if (username == null) return;
+
+    try {
+      final response = await http.get(Uri.parse('$baseURL/api/full-user/$username'));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        _maKH = data['data']['MaKH'];
+        if (_maKH != null) {
+          await _loadMyFeedbacks(_maKH!);
+        }
+      }
+    } catch (e) {
+      print('Lỗi lấy MaKH: $e');
+    }
   }
 
-  Future<void> _addNewFeedback(String title) async {
-    final prefs = await SharedPreferences.getInstance();
-    _myFeedbacks.insert(0, title);
-    await prefs.setStringList('my_feedbacks', _myFeedbacks);
-    setState(() {
-      _titleController.clear();
-      _contentController.clear();
-    });
+  Future<void> _loadMyFeedbacks(String maKH) async {
+    try {
+      final response = await http.get(Uri.parse('$baseURL/gopy/khachhang/$maKH'));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          _myFeedbacks = List<Map<String, dynamic>>.from(data['data']);
+        });
+      }
+    } catch (e) {
+      print('Lỗi khi tải góp ý của tôi: $e');
+    }
+  }
+
+  Future<void> _addNewFeedback(String title, String content) async {
+    if (_maKH == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Không tìm thấy mã khách hàng')),
+      );
+      return;
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse('$baseURL/gopy'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'TieuDe': title,
+          'NoiDungGopY': content,
+          'MaKH': _maKH,
+        }),
+      );
+
+      final result = jsonDecode(response.body);
+      if (result['success']) {
+        await _loadMyFeedbacks(_maKH!);
+        setState(() {
+          _titleController.clear();
+          _contentController.clear();
+        });
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => LoadingPage()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Gửi góp ý thất bại')),
+        );
+      }
+    } catch (e) {
+      print('Lỗi gửi góp ý: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Có lỗi xảy ra')),
+      );
+    }
   }
 
   @override
@@ -70,7 +132,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
         boxShadow: [
           BoxShadow(
             color: AppColors.mainOrange,
-            offset: Offset(0, 0),
+            offset: const Offset(0, 0),
             blurRadius: 0,
           ),
         ],
@@ -104,10 +166,14 @@ class _FeedbackPageState extends State<FeedbackPage> {
           Center(
             child: ElevatedButton(
               onPressed: () async {
-                String title = _titleController.text.trim();
-                if (title.isNotEmpty) {
-                  await _addNewFeedback(title);
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => LoadingPage()));
+                final title = _titleController.text.trim();
+                final content = _contentController.text.trim();
+                if (title.isNotEmpty && content.isNotEmpty) {
+                  await _addNewFeedback(title, content);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Vui lòng điền đủ tiêu đề và nội dung')),
+                  );
                 }
               },
               style: ElevatedButton.styleFrom(
@@ -178,6 +244,11 @@ class _FeedbackPageState extends State<FeedbackPage> {
               ),
             ),
           ),
+          if (_myFeedbacks.isEmpty)
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Text('Bạn chưa có góp ý nào.', style: TextStyle(fontFamily: 'Inter')),
+            ),
           ..._myFeedbacks.map((feedback) {
             return Column(
               children: [
@@ -186,7 +257,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => FeedbackAnswerPage(question: feedback),
+                        builder: (_) => FeedbackAnswerPage(maGY: feedback['MaGY']),
                       ),
                     );
                   },
@@ -198,7 +269,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            feedback,
+                            feedback['TieuDe'] ?? '',
                             style: const TextStyle(fontSize: 14, fontFamily: 'Inter'),
                           ),
                         ),

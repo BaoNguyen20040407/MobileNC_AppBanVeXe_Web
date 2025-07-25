@@ -1,4 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+import 'package:giao_dien_1/config/config.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/widget/appbar_admin.dart';
 import 'package:giao_dien_1/widget/exit_button.dart';
@@ -19,14 +23,38 @@ class _FeedbackListScreenState extends State<FeedbackListScreen> {
   String selectedColumn = 'MaGY';
   bool showSearchOptions = false;
 
-  final List<Map<String, String>> feedbacks = [];
+  List<Map<String, dynamic>> feedbacks = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchFeedbacks();
+  }
+
+  Future<void> _fetchFeedbacks() async {
+    try {
+      final response = await http.get(Uri.parse('$baseURL/gopy'));
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        if (json['success'] == true) {
+          setState(() {
+            feedbacks = List<Map<String, dynamic>>.from(json['data']);
+          });
+        }
+      } else {
+        print('❌ Server lỗi khi lấy góp ý');
+      }
+    } catch (e) {
+      print('❌ Lỗi kết nối khi gọi API góp ý: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final filteredList = feedbacks.where((item) {
       final searchLower = searchController.text.toLowerCase();
       if (searchLower.isEmpty) return true;
-      final field = (item[selectedColumn] ?? '').toLowerCase();
+      final field = (item[selectedColumn]?.toString() ?? '').toLowerCase();
       return field.contains(searchLower);
     }).toList();
 
@@ -155,91 +183,122 @@ class _FeedbackListScreenState extends State<FeedbackListScreen> {
 
                       const SizedBox(height: 16),
 
-                      filteredList.isEmpty
-                          ? Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: AppColors.mainOrange),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: const Center(
-                                child: Text(
-                                  'Chưa có dữ liệu để hiển thị',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey,
-                                    fontFamily: 'Inter',
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                      Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.mainOrange),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: DataTable(
+                            headingRowColor: MaterialStateProperty.all(AppColors.softOrange),
+                            columnSpacing: 8,
+                            dataRowMinHeight: 44,
+                            dataRowMaxHeight: 52,
+                            columns: const [
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 80,
+                                  child: Text('Mã GY', style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter')),
                                 ),
                               ),
-                            )
-                          : Column(
-                              children: filteredList.map((feedback) {
-                                return Card(
-                                  margin: const EdgeInsets.only(bottom: 8),
-                                  child: ListTile(
-                                    title: Text(
-                                      'Mã góp ý: ${feedback['MaGY'] ?? ''}',
-                                      style: const TextStyle(fontWeight: FontWeight.w600),
-                                    ),
-                                    subtitle: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text('Tiêu đề: ${feedback['TieuDe'] ?? ''}'),
-                                        Text('Nội dung: ${feedback['NoiDungGopY'] ?? ''}'),
-                                        if ((feedback['PhanHoi'] ?? '').isNotEmpty)
-                                          Padding(
-                                            padding: const EdgeInsets.only(top: 4),
-                                            child: Text(
-                                              'Phản hồi: ${feedback['PhanHoi']}',
-                                              style: const TextStyle(color: AppColors.greenDark),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 160,
+                                  child: Text('Tiêu đề', style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter')),
+                                ),
+                              ),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 250,
+                                  child: Text('Nội dung', style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter')),
+                                ),
+                              ),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 250,
+                                  child: Text('Phản hồi', style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter')),
+                                ),
+                              ),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 100,
+                                  child: Text('Mã KH', style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter')),
+                                ),
+                              ),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 100,
+                                  child: Text('Mã NV', style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter')),
+                                ),
+                              ),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 80,
+                                  child: Text('Phản hồi', style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter')),
+                                ),
+                              ),
+                            ],
+                            rows: filteredList.map((feedback) {
+                              return DataRow(
+                                cells: [
+                                  DataCell(
+                                    SizedBox(
+                                      width: 80,
+                                      child: InkWell(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => ReplyFeedbackScreen(feedbackItem: feedback),
                                             ),
+                                          );
+                                        },
+                                        child: Text(
+                                          feedback['MaGY'] ?? '',
+                                          style: const TextStyle(
+                                            fontFamily: 'Inter',
+                                            color: AppColors.black,
                                           ),
-                                        const SizedBox(height: 4),
-                                        Row(
-                                          children: [
-                                            const Icon(Icons.person, size: 12, color: AppColors.mainOrange),
-                                            const SizedBox(width: 4),
-                                            Text('Khách: ${feedback['MaKH'] ?? '-'}',
-                                                style: const TextStyle(fontSize: 12)),
-                                            const SizedBox(width: 16),
-                                            const Icon(Icons.badge, size: 12, color: AppColors.mainOrange),
-                                            const SizedBox(width: 4),
-                                            Text('NV: ${feedback['MaNV'] ?? '-'}',
-                                                style: const TextStyle(fontSize: 12)),
-                                          ],
                                         ),
-                                      ],
-                                    ),
-                                    trailing: IconButton(
-                                      icon: const Icon(Icons.reply, color: AppColors.mainOrange),
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => ReplyFeedbackScreen(feedbackItem: feedback),
-                                          ),
-                                        );
-                                      },
+                                      ),
                                     ),
                                   ),
-                                );
-                              }).toList(),
-                            ),
+                                  DataCell(SizedBox(width: 160, child: Text(feedback['TieuDe'] ?? '', style: const TextStyle(fontFamily: 'Inter')))),
+                                  DataCell(SizedBox(width: 250, child: Text(feedback['NoiDungGopY'] ?? '', style: const TextStyle(fontFamily: 'Inter')))),
+                                  DataCell(SizedBox(width: 250, child: Text(feedback['PhanHoi'] ?? '', style: const TextStyle(fontFamily: 'Inter', color: AppColors.greenDark)))),
+                                  DataCell(SizedBox(width: 100, child: Text(feedback['MaKH'] ?? '', style: const TextStyle(fontFamily: 'Inter')))),
+                                  DataCell(SizedBox(width: 100, child: Text(feedback['MaNV'] ?? '-', style: const TextStyle(fontFamily: 'Inter')))),
+                                  DataCell(
+                                    SizedBox(
+                                      width: 80,
+                                      child: InkWell(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => ReplyFeedbackScreen(feedbackItem: feedback),
+                                            ),
+                                          );
+                                        },
+                                        child: const Icon(Icons.reply, color: AppColors.mainOrange),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ),
 
                       const SizedBox(height: 16),
 
-                      // Phân trang
                       PaginationControls(
                         currentPage: 1,
-                        onFirstPressed: () {
-                          print("Go to first page");
-                        },
-                        onLastPressed: () {
-                          print("Go to last page");
-                        },
+                        onFirstPressed: () => print("Go to first page"),
+                        onLastPressed: () => print("Go to last page"),
                       ),
                     ],
                   ),

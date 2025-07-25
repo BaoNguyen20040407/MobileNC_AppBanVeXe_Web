@@ -30,7 +30,7 @@ class _AppBarProfileState extends State<AppBarProfile> {
 
   Future<void> _loadAvatar() async {
     final prefs = await SharedPreferences.getInstance();
-    final url = prefs.getString('avatarUrl'); // e.g. /uploads/abc.jpg
+    final url = prefs.getString('avatarUrl');
     final base64 = prefs.getString('image_base64');
 
     setState(() {

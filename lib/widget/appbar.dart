@@ -37,7 +37,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
 
   Future<void> _loadAvatar() async {
   final prefs = await SharedPreferences.getInstance();
-  final url = prefs.getString('avatarUrl'); // e.g. /uploads/1721883180023-avatar.jpg
+  final url = prefs.getString('avatarUrl'); 
   final base64 = prefs.getString('image_base64');
 
   print('📦 avatarUrl từ SharedPreferences: $url');
@@ -45,7 +45,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
   setState(() {
     if (url != null && url.isNotEmpty) {
       _imageUrl = '$baseURL$url';
-      print('🔗 Đường dẫn đầy đủ ảnh: $_imageUrl'); // 👈 In ra URL đầy đủ
+      print('🔗 Đường dẫn đầy đủ ảnh: $_imageUrl'); 
     }
     if (base64 != null && base64.isNotEmpty) {
       _avatarBytes = base64Decode(base64);

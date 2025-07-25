@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:giao_dien_1/view/profile/profile_screen.dart';
+import 'package:giao_dien_1/config/config.dart'; // chứa baseURL
 
 class AppBarProfile extends StatefulWidget implements PreferredSizeWidget {
   final String title;
@@ -19,7 +19,8 @@ class AppBarProfile extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _AppBarProfileState extends State<AppBarProfile> {
-  Uint8List? _avatar;
+  String? _imageUrl;
+  Uint8List? _avatarBytes;
 
   @override
   void initState() {
@@ -29,28 +30,23 @@ class _AppBarProfileState extends State<AppBarProfile> {
 
   Future<void> _loadAvatar() async {
     final prefs = await SharedPreferences.getInstance();
+    final url = prefs.getString('avatarUrl'); // e.g. /uploads/abc.jpg
     final base64 = prefs.getString('image_base64');
-    if (base64 != null && base64.isNotEmpty) {
-      try {
-        setState(() {
-          _avatar = base64Decode(base64);
-        });
-      } catch (_) {
-        setState(() {
-          _avatar = null;
-        });
+
+    setState(() {
+      if (url != null && url.isNotEmpty) {
+        _imageUrl = '$baseURL$url';
       }
-    } else {
-      setState(() {
-        _avatar = null;
-      });
-    }
+      if (base64 != null && base64.isNotEmpty) {
+        _avatarBytes = base64Decode(base64);
+      }
+    });
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _loadAvatar(); // Reload mỗi lần màn hình quay lại
+    _loadAvatar(); // Reload mỗi lần build lại
   }
 
   @override
@@ -61,13 +57,10 @@ class _AppBarProfileState extends State<AppBarProfile> {
       decoration: const BoxDecoration(
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(0)),
         image: DecorationImage(
-          image: AssetImage(
-            'assets/image/profile_appbar.png',
-          ), 
+          image: AssetImage('assets/image/profile_appbar.png'),
           fit: BoxFit.cover,
         ),
       ),
-
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -90,25 +83,56 @@ class _AppBarProfileState extends State<AppBarProfile> {
 
           // Avatar
           GestureDetector(
-          onTap: () async {
-            await Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const ProfileScreen()),
-            );
-            _loadAvatar(); // Load lại sau khi quay về
-          },
-
-            child: CircleAvatar(
-              radius: 16,
-              backgroundImage:
-                  _avatar != null
-                      ? MemoryImage(_avatar!)
-                      : const AssetImage('assets/image/personicon.png')
-                          as ImageProvider,
+            onTap: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ProfileScreen()),
+              );
+              _loadAvatar(); // Cập nhật lại sau khi quay về
+            },
+            child: ClipOval(
+              child: _buildAvatar(),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildAvatar() {
+    const placeholder = AssetImage('assets/image/personicon.png');
+
+    if (_avatarBytes != null) {
+      return Image.memory(
+        _avatarBytes!,
+        height: 32,
+        width: 32,
+        fit: BoxFit.cover,
+      );
+    }
+
+    if (_imageUrl != null &&
+        _imageUrl!.isNotEmpty &&
+        (_imageUrl!.startsWith("http") || _imageUrl!.startsWith("https"))) {
+      return Image.network(
+        _imageUrl!,
+        height: 32,
+        width: 32,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Image(
+          image: placeholder,
+          height: 32,
+          width: 32,
+          fit: BoxFit.cover,
+        ),
+      );
+    }
+
+    return Image(
+      image: placeholder,
+      height: 32,
+      width: 32,
+      fit: BoxFit.cover,
     );
   }
 }

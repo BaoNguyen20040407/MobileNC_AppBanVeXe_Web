@@ -5,6 +5,9 @@ import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/view/profile/edit_user_info.dart';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:giao_dien_1/config/config.dart';
+import 'package:http/http.dart' as http;
+
 
 class UserInfo extends StatefulWidget {
   const UserInfo({super.key});
@@ -34,23 +37,50 @@ class _UserInfoState extends State<UserInfo> {
 
   Future<void> _loadUserInfo() async {
   final prefs = await SharedPreferences.getInstance();
+  final username = prefs.getString('username');
+  if (username == null) return;
+
+  // 🟢 Gọi API để lấy thông tin chính
+  final url = Uri.parse('$baseURL/api/full-user/$username');
+  final response = await http.get(url);
+
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    if (data['success'] == true) {
+      final user = data['data'];
+      print('📦 Dữ liệu user trả về từ API: ${jsonEncode(user)}');
+
+      final imageUrl = user['URLHinhAnh'];
+      if (imageUrl != null && imageUrl.isNotEmpty) {
+        _avatarUrl = '$baseURL$imageUrl';
+      }
+
+      setState(() {
+        _userName = user['username'] ?? '';
+        _fullName = user['HoVaTen'] ?? '';
+        _phone = user['SDT'] ?? '';
+        _dob = user['NgaySinh'] ?? '';
+        _address = user['DiaChi'] ?? '';
+        _email = user['Email'] ?? '';
+      });
+    }
+  } else {
+    print('❌ Lỗi khi gọi API user-info: ${response.statusCode}');
+  }
+
+  // 🔵 Load thêm dữ liệu phụ từ SharedPreferences
   setState(() {
     final base64Image = prefs.getString('image_base64');
     if (base64Image != null && base64Image.isNotEmpty) {
       _avatarBytes = base64Decode(base64Image);
     }
 
-    _fullName = prefs.getString('full_name') ?? '';
-    _userName = prefs.getString('username') ?? '';
-    _phone = prefs.getString('phone') ?? '';
-    _dob = prefs.getString('dob') ?? '';
-    _address = prefs.getString('address') ?? '';
-    _email = prefs.getString('email') ?? '';
     _gender = prefs.getString('gender');
     _job = prefs.getString('job');
     _intro = prefs.getString('intro');
   });
 }
+
 
 
   @override
@@ -68,7 +98,9 @@ class _UserInfoState extends State<UserInfo> {
               radius: 48,
               backgroundImage: _avatarBytes != null
                 ? MemoryImage(_avatarBytes!)
-                : const AssetImage('assets/image/personicon.png') as ImageProvider,
+                : (_avatarUrl.isNotEmpty
+                    ? NetworkImage(_avatarUrl)
+                    : const AssetImage('assets/image/personicon.png')) as ImageProvider,
             ),
             const SizedBox(height: 8),
             Text(

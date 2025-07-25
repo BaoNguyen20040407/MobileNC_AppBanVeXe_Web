@@ -7,6 +7,9 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:giao_dien_1/config/config.dart';
+import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 
 class EditUserInfo extends StatefulWidget {
   const EditUserInfo({super.key});
@@ -42,44 +45,85 @@ class _EditUserInfoState extends State<EditUserInfo> {
   }
 
   Future<void> _loadUserInfo() async {
-    prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _usernameController.text = prefs.getString('username') ?? '';
-      _phoneController.text = prefs.getString('phone') ?? '';
-      _fullNameController.text = prefs.getString('full_name') ?? '';
-      _dobController.text = prefs.getString('dob') ?? '';
-      _addressController.text = prefs.getString('address') ?? '';
-      _emailController.text = prefs.getString('email') ?? '';
-      _introController.text = prefs.getString('intro') ?? '';
-      _gender = _genderOptions.contains(prefs.getString('gender')) ? prefs.getString('gender') : null;
-      _job = _jobOptions.contains(prefs.getString('job')) ? prefs.getString('job') : null;
-      final base64Image = prefs.getString('image_base64'); 
-        if (base64Image != null && base64Image.isNotEmpty) {
-          _avatarBytes = base64Decode(base64Image);          
+  prefs = await SharedPreferences.getInstance();
+  final username = prefs.getString('username');
+  if (username == null) return;
+
+  final url = Uri.parse('$baseURL/api/full-user/$username');
+  final response = await http.get(url);
+
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    if (data['success'] == true) {
+      final user = data['data'];
+
+      setState(() {
+        _usernameController.text = user['username'] ?? '';
+        _phoneController.text = user['SDT'] ?? '';
+        _fullNameController.text = user['HoVaTen'] ?? '';
+        _dobController.text = user['NgaySinh'] ?? '';
+        _addressController.text = user['DiaChi'] ?? '';
+        _emailController.text = user['Email'] ?? '';
+
+        final imageUrl = user['URLHinhAnh'];
+        if (imageUrl != null && imageUrl.isNotEmpty) {
+          _avatarUrl = '$baseURL$imageUrl';
         }
-    });
+      });
+    }
+  } else {
+    print('❌ Lỗi khi lấy thông tin user: ${response.statusCode}');
   }
 
+  // Dữ liệu phụ vẫn dùng SharedPreferences
+  setState(() {
+    final base64Image = prefs.getString('image_base64');
+    if (base64Image != null && base64Image.isNotEmpty) {
+      _avatarBytes = base64Decode(base64Image);
+    }
+    _gender = prefs.getString('gender');
+    _job = prefs.getString('job');
+    _introController.text = prefs.getString('intro') ?? '';
+  });
+}
+
   Future<void> _saveUserInfo() async {
-    await prefs.setString('username', _usernameController.text);
-    await prefs.setString('phone', _phoneController.text);
-    await prefs.setString('full_name', _fullNameController.text);
-    await prefs.setString('dob', _dobController.text);
-    await prefs.setString('address', _addressController.text);
-    await prefs.setString('email', _emailController.text);
+  final uri = Uri.parse('$baseURL/update-user/${_usernameController.text}');
+  final request = http.MultipartRequest('PUT', uri);
+
+  request.fields['HoVaTen'] = _fullNameController.text;
+  request.fields['NgaySinh'] = _dobController.text;
+  request.fields['DiaChi'] = _addressController.text;
+  request.fields['Email'] = _emailController.text;
+
+  if (_avatarBytes != null) {
+    request.files.add(http.MultipartFile.fromBytes(
+      'avatar',
+      _avatarBytes!,
+      filename: 'avatar.png',
+      contentType: MediaType('image', 'png'),
+    ));
+  }
+
+  final response = await request.send();
+
+  if (response.statusCode == 200) {
+    // 🔶 Lưu thông tin phụ vào SharedPreferences
     await prefs.setString('gender', _gender ?? '');
     await prefs.setString('job', _job ?? '');
     await prefs.setString('intro', _introController.text);
 
     if (context.mounted) {
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const EditSuccessScreen()),
-      ).then((_) {
-        Navigator.pop(context);
-      });
+        MaterialPageRoute(builder: (_) => const EditSuccessScreen()),
+      );
     }
+  } else {
+    print('❌ Cập nhật thất bại');
   }
+}
+
 
   Future<void> _pickAvatarImage() async {
   final picker = ImagePicker();
@@ -146,8 +190,10 @@ class _EditUserInfoState extends State<EditUserInfo> {
                   CircleAvatar(
                     radius: 48,
                     backgroundImage: _avatarBytes != null
-  ? MemoryImage(_avatarBytes!)
-  : const AssetImage('assets/image/personicon.png') as ImageProvider,
+                      ? MemoryImage(_avatarBytes!)
+                      : (_avatarUrl.isNotEmpty
+                          ? NetworkImage(_avatarUrl)
+                          : const AssetImage('assets/image/personicon.png')) as ImageProvider,
                   ),
                   Positioned(
                     bottom: 0,
@@ -367,52 +413,52 @@ class _EditUserInfoState extends State<EditUserInfo> {
   }
 
   Widget _buildOptionalDropdown({
-    required String label,
-    required List<String> items,
-    required String? value,
-    required void Function(String?) onChanged,
-    IconData? prefixIcon,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: DropdownButtonFormField<String>(
-        value: value,
-        isExpanded: true,
-        decoration: InputDecoration(
-          labelText: label,
-          filled: true,
-          fillColor: Colors.white,
-          hoverColor: Colors.transparent,
-          labelStyle: const TextStyle(color: AppColors.black),
-          prefixIcon: prefixIcon != null
-              ? Icon(prefixIcon, color: AppColors.black)
-              : null,
-          prefixIconConstraints: const BoxConstraints(minWidth: 48),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(6),
-            borderSide: const BorderSide(color: AppColors.mainOrange),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(6),
-            borderSide: const BorderSide(color: AppColors.mainOrange),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(6),
-            borderSide: const BorderSide(color: AppColors.mainOrange, width: 2),
-          ),
+  required String label,
+  required List<String> items,
+  required String? value,
+  required void Function(String?) onChanged,
+  IconData? prefixIcon,
+}) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 12),
+    child: DropdownButtonFormField<String>(
+      value: items.contains(value) ? value : null,
+      isExpanded: true,
+      decoration: InputDecoration(
+        labelText: label,
+        filled: true,
+        fillColor: Colors.white,
+        hoverColor: Colors.transparent,
+        labelStyle: const TextStyle(color: AppColors.black),
+        prefixIcon: prefixIcon != null
+            ? Icon(prefixIcon, color: AppColors.black)
+            : null,
+        prefixIconConstraints: const BoxConstraints(minWidth: 48),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(6),
+          borderSide: const BorderSide(color: AppColors.mainOrange),
         ),
-        icon: const Icon(Icons.arrow_drop_down, color: AppColors.mainOrange),
-        dropdownColor: Colors.white,
-        style: const TextStyle(color: Colors.black, fontSize: 16),
-        items: items
-            .map((item) => DropdownMenuItem<String>(
-                  value: item,
-                  child: Text(item),
-                ))
-            .toList(),
-        onChanged: onChanged,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(6),
+          borderSide: const BorderSide(color: AppColors.mainOrange),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(6),
+          borderSide: const BorderSide(color: AppColors.mainOrange, width: 2),
+        ),
       ),
-    );
-  }
+      icon: const Icon(Icons.arrow_drop_down, color: AppColors.mainOrange),
+      dropdownColor: Colors.white,
+      style: const TextStyle(color: Colors.black, fontSize: 16),
+      items: items
+          .map((item) => DropdownMenuItem<String>(
+                value: item,
+                child: Text(item),
+              ))
+          .toList(),
+      onChanged: onChanged,
+    ),
+  );
+}
 }

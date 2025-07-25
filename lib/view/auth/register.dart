@@ -146,6 +146,10 @@ Future<void> _submitData() async {
         'MaKH': maKH,
       }),
     );
+    final avatarUrl = responseData['avatarUrl'];
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('avatarUrl', avatarUrl);
+    print('🔵 Đã lưu avatarUrl vào SharedPreferences: $avatarUrl'); 
       try {
     final accResponseBody = jsonDecode(accountRes.body);
     print('✅ TAIKHOANKH Insert Response: $accResponseBody');

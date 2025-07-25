@@ -4,6 +4,7 @@ import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/view/profile/profile_screen.dart';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:giao_dien_1/config/config.dart';
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   final double height;
@@ -31,22 +32,27 @@ class _CustomAppBarState extends State<CustomAppBar> {
   @override
   void initState() {
     super.initState();
-    _loadImageUrl();
+    _loadAvatar();
   }
 
-  Future<void> _loadImageUrl() async {
+  Future<void> _loadAvatar() async {
   final prefs = await SharedPreferences.getInstance();
-  final url = prefs.getString('image_url');
+  final url = prefs.getString('avatarUrl'); // e.g. /uploads/1721883180023-avatar.jpg
   final base64 = prefs.getString('image_base64');
 
+  print('📦 avatarUrl từ SharedPreferences: $url');
+
   setState(() {
-    _imageUrl = url;
+    if (url != null && url.isNotEmpty) {
+      _imageUrl = '$baseURL$url';
+      print('🔗 Đường dẫn đầy đủ ảnh: $_imageUrl'); // 👈 In ra URL đầy đủ
+    }
     if (base64 != null && base64.isNotEmpty) {
       _avatarBytes = base64Decode(base64);
+      print('🧠 Đã giải mã base64 ảnh avatar');
     }
   });
 }
-
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +104,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
                     settings: const RouteSettings(name: '/profile'),
                   ),
                 );
-                _loadImageUrl(); // Load lại avatar sau khi quay về
+                _loadAvatar(); // Refresh lại avatar sau khi quay về
               },
               child: ClipOval(
                 child: _buildAvatar(),
@@ -110,34 +116,34 @@ class _CustomAppBarState extends State<CustomAppBar> {
   }
 
   Widget _buildAvatar() {
-  final placeholder = Image.asset(
-    "assets/image/personicon.png",
-    height: 40,
-    width: 40,
-    fit: BoxFit.cover,
-  );
-
-  if (_avatarBytes != null) {
-    return Image.memory(
-      _avatarBytes!,
+    final placeholder = Image.asset(
+      "assets/image/personicon.png",
       height: 40,
       width: 40,
       fit: BoxFit.cover,
     );
-  }
 
-  if (_imageUrl != null &&
-      _imageUrl!.isNotEmpty &&
-      (_imageUrl!.startsWith("http") || _imageUrl!.startsWith("https"))) {
-    return Image.network(
-      _imageUrl!,
-      height: 40,
-      width: 40,
-      fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) => placeholder,
-    );
-  }
+    if (_avatarBytes != null) {
+      return Image.memory(
+        _avatarBytes!,
+        height: 40,
+        width: 40,
+        fit: BoxFit.cover,
+      );
+    }
 
-  return placeholder;
-}
+    if (_imageUrl != null &&
+        _imageUrl!.isNotEmpty &&
+        (_imageUrl!.startsWith("http") || _imageUrl!.startsWith("https"))) {
+      return Image.network(
+        _imageUrl!,
+        height: 40,
+        width: 40,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => placeholder,
+      );
+    }
+
+    return placeholder;
+  }
 }

@@ -12,6 +12,8 @@ import 'dart:typed_data';
 import 'package:giao_dien_1/view/notification/notifications_screen.dart';
 import 'package:giao_dien_1/view/location/location.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:giao_dien_1/config/config.dart';
+import 'package:http/http.dart' as http;
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -33,22 +35,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadUserData() async {
-    final pref = await SharedPreferences.getInstance();
+  final prefs = await SharedPreferences.getInstance();
+  final username = prefs.getString('username');
+  if (username == null) return;
 
-    final url = pref.getString('image_url') ?? '';
-    final base64 = pref.getString('image_base64');
-    final username = pref.getString('username') ?? 'Người dùng';
-    final phone = pref.getString('phone') ?? 'Chưa có số';
+  final url = Uri.parse('$baseURL/user-info/$username');
+  final response = await http.get(url);
 
-    setState(() {
-      _url = url;
-      _userName = username;
-      _phone = phone;
-      _avatarBytes = (base64 != null && base64.isNotEmpty)
-          ? base64Decode(base64)
-          : null;
-    });
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    if (data['success']) {
+      final user = data['data'];
+      final imageUrl = user['URLHinhAnh'];
+      setState(() {
+        _userName = username;
+        _phone = user['SDT'] ?? 'Chưa có số';
+        _url = (imageUrl != null && imageUrl.isNotEmpty)
+            ? '$baseURL$imageUrl'
+            : '';
+      });
+    }
+  } else {
+    print('❌ Lỗi khi gọi API user-info: ${response.body}');
   }
+}
+
 
 
   @override
@@ -86,8 +97,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   },
                   child: CircleAvatar(
                     radius: 32,
-                      backgroundImage: _avatarBytes != null
-                        ? MemoryImage(_avatarBytes!)
+                      backgroundImage: _url.isNotEmpty
+                        ? NetworkImage(_url)
                         : const AssetImage('assets/image/personicon.png') as ImageProvider,
                   ),
                 ),

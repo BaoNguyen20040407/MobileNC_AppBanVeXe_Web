@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:giao_dien_1/view/admin/profile_admin/location_admin/location_admin.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/view/notification/notifications_screen.dart';
@@ -115,7 +116,13 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
                   "Địa chỉ của bạn",
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
-                    // TODO: Điều hướng
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => LocationAdminScreen(),
+                        settings: const RouteSettings(name: '/admin/locations'),
+                      ),
+                    );
                   },
                 ),
                 _buildMenuItem(

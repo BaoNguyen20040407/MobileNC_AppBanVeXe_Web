@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:giao_dien_1/config/default.dart';
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:giao_dien_1/view/admin/profile_admin/profile_admin.dart';
+import 'package:giao_dien_1/config/default.dart';
+import 'package:giao_dien_1/config/config.dart';
+import 'package:giao_dien_1/view/admin/profile_admin/profile/profile_admin.dart';
 
 class CustomAppBarAdmin extends StatefulWidget implements PreferredSizeWidget {
   final double height;
@@ -31,22 +32,23 @@ class _CustomAppBarAdminState extends State<CustomAppBarAdmin> {
   @override
   void initState() {
     super.initState();
-    _loadImageUrl();
+    _loadAvatar();
   }
 
-  Future<void> _loadImageUrl() async {
-  final prefs = await SharedPreferences.getInstance();
-  final url = prefs.getString('image_url');
-  final base64 = prefs.getString('image_base64');
+  Future<void> _loadAvatar() async {
+    final prefs = await SharedPreferences.getInstance();
+    final base64 = prefs.getString('image_base64');
+    final url = prefs.getString('avatarUrl'); // nên dùng key giống user
 
-  setState(() {
-    _imageUrl = url;
-    if (base64 != null && base64.isNotEmpty) {
-      _avatarBytes = base64Decode(base64);
-    }
-  });
-}
-
+    setState(() {
+      if (base64 != null && base64.isNotEmpty) {
+        _avatarBytes = base64Decode(base64);
+        _imageUrl = null;
+      } else if (url != null && url.isNotEmpty) {
+        _imageUrl = url.startsWith("http") ? url : '$baseURL$url';
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,11 +100,9 @@ class _CustomAppBarAdminState extends State<CustomAppBarAdmin> {
                     settings: const RouteSettings(name: '/profile_admin'),
                   ),
                 );
-                _loadImageUrl(); // Load lại avatar sau khi quay về
+                _loadAvatar(); // Refresh lại sau khi quay về
               },
-              child: ClipOval(
-                child: _buildAvatar(),
-              ),
+              child: ClipOval(child: _buildAvatar()),
             ),
         ],
       ),
@@ -110,34 +110,33 @@ class _CustomAppBarAdminState extends State<CustomAppBarAdmin> {
   }
 
   Widget _buildAvatar() {
-  final placeholder = Image.asset(
-    "assets/image/personicon.png",
-    height: 40,
-    width: 40,
-    fit: BoxFit.cover,
-  );
-
-  if (_avatarBytes != null) {
-    return Image.memory(
-      _avatarBytes!,
-      height: 40,
-      width: 40,
+    const double size = 40;
+    final placeholder = Image.asset(
+      "assets/image/personicon.png",
+      height: size,
+      width: size,
       fit: BoxFit.cover,
     );
-  }
 
-  if (_imageUrl != null &&
-      _imageUrl!.isNotEmpty &&
-      (_imageUrl!.startsWith("http") || _imageUrl!.startsWith("https"))) {
-    return Image.network(
-      _imageUrl!,
-      height: 40,
-      width: 40,
-      fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) => placeholder,
-    );
-  }
+    if (_avatarBytes != null) {
+      return Image.memory(
+        _avatarBytes!,
+        height: size,
+        width: size,
+        fit: BoxFit.cover,
+      );
+    }
 
-  return placeholder;
-}
+    if (_imageUrl != null && _imageUrl!.isNotEmpty) {
+      return Image.network(
+        _imageUrl!,
+        height: size,
+        width: size,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => placeholder,
+      );
+    }
+
+    return placeholder;
+  }
 }

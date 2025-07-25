@@ -1,22 +1,16 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:giao_dien_1/view/support_and_feedback/support/support_answer_page.dart';
-import 'package:giao_dien_1/view/support_and_feedback/support/support_loading.dart';
+import 'package:giao_dien_1/view/support_and_feedback/support/support_success.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 import 'package:giao_dien_1/widget/appbar_profile.dart';
 import 'package:giao_dien_1/config/default.dart';
-
-void main() {
-  runApp(SupportPageApp());
-}
-
-class SupportPageApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(home: SupportPage(), debugShowCheckedModeBanner: false);
-  }
-}
+import 'package:giao_dien_1/config/config.dart';
 
 class SupportPage extends StatefulWidget {
+  const SupportPage({super.key});
+
   @override
   State<SupportPage> createState() => _SupportPageState();
 }
@@ -24,47 +18,89 @@ class SupportPage extends StatefulWidget {
 class _SupportPageState extends State<SupportPage> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
-
-  List<String> _myQuestions = [];
-  Set<String> _readQuestions = {};
-
-  final List<String> _commonQuestions = [
-    'Làm sao để đổi vé?',
-    'Tôi quên mật khẩu?',
-    'Nhà xe có hỗ trợ đổi lịch?',
-    'Có thể hoàn tiền vé không?',
-    'Tôi không nhận được vé điện tử?',
-  ];
+  List<Map<String, dynamic>> _mySupports = [];
+  String? _maKH;
 
   @override
   void initState() {
     super.initState();
-    _loadSavedData();
+    _getMaKHAndLoadSupports();
   }
 
-  Future<void> _loadSavedData() async {
+  Future<void> _getMaKHAndLoadSupports() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _myQuestions = prefs.getStringList('my_questions') ?? [];
-      _readQuestions = (prefs.getStringList('read_questions') ?? []).toSet();
-    });
+    final username = prefs.getString('username');
+    if (username == null) return;
+
+    try {
+      final response = await http.get(Uri.parse('$baseURL/api/full-user/$username'));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        _maKH = data['data']['MaKH'];
+        if (_maKH != null) {
+          await _loadMySupports(_maKH!);
+        }
+      }
+    } catch (e) {
+      print('Lỗi lấy MaKH: $e');
+    }
   }
 
-  Future<void> _markAsRead(String question) async {
-    final prefs = await SharedPreferences.getInstance();
-    _readQuestions.add(question);
-    await prefs.setStringList('read_questions', _readQuestions.toList());
-    setState(() {});
+  Future<void> _loadMySupports(String maKH) async {
+    try {
+      final response = await http.get(Uri.parse('$baseURL/hotro/khachhang/$maKH'));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          _mySupports = List<Map<String, dynamic>>.from(data['data']);
+        });
+      }
+    } catch (e) {
+      print('Lỗi khi tải hỗ trợ: $e');
+    }
   }
 
-  Future<void> _addNewQuestion(String question) async {
-    final prefs = await SharedPreferences.getInstance();
-    _myQuestions.insert(0, question);
-    await prefs.setStringList('my_questions', _myQuestions);
-    setState(() {
-      _titleController.clear();
-      _contentController.clear();
-    });
+  Future<void> _addNewSupport(String title, String content) async {
+    if (_maKH == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Không tìm thấy mã khách hàng')),
+      );
+      return;
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse('$baseURL/hotro'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'TieuDe': title,
+          'CauHoi': content,
+          'MaKH': _maKH,
+        }),
+      );
+
+      final result = jsonDecode(response.body);
+      if (result['success']) {
+        await _loadMySupports(_maKH!);
+        setState(() {
+          _titleController.clear();
+          _contentController.clear();
+        });
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => SuccessPage()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gửi thất bại: ${result['message']}')),
+        );
+      }
+    } catch (e) {
+      print('Lỗi gửi hỗ trợ: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Có lỗi xảy ra')),
+      );
+    }
   }
 
   @override
@@ -73,15 +109,13 @@ class _SupportPageState extends State<SupportPage> {
       backgroundColor: AppColors.softOrangeBackground,
       appBar: AppBarProfile(title: 'HỖ TRỢ'),
       body: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(24, 32, 24, 32),
+        padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildSupportForm(),
-            SizedBox(height: 32),
-            _buildSection('CÂU HỎI PHỔ BIẾN', _commonQuestions, context, checkNew: true),
-            SizedBox(height: 16),
-            _buildSection('CÂU HỎI CỦA TÔI', _myQuestions, context),
+            const SizedBox(height: 32),
+            _buildSupportList(),
           ],
         ),
       ),
@@ -90,7 +124,7 @@ class _SupportPageState extends State<SupportPage> {
 
   Widget _buildSupportForm() {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
@@ -98,15 +132,15 @@ class _SupportPageState extends State<SupportPage> {
         boxShadow: [
           BoxShadow(
             color: AppColors.mainOrange,
-            offset: Offset(0, 0),
-            blurRadius: 0
+            offset: const Offset(0, 0),
+            blurRadius: 0,
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'HỖ TRỢ',
             style: TextStyle(
               fontSize: 17,
@@ -115,34 +149,37 @@ class _SupportPageState extends State<SupportPage> {
               fontFamily: 'Inter',
             ),
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           TextField(
             controller: _titleController,
             cursorColor: AppColors.mainOrange,
             decoration: _buildInputDecoration('Nhập tiêu đề...'),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           TextField(
             controller: _contentController,
             maxLines: 4,
             cursorColor: AppColors.mainOrange,
             decoration: _buildInputDecoration('Nhập nội dung câu hỏi...'),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Center(
             child: ElevatedButton(
               onPressed: () async {
-                String title = _titleController.text.trim();
-                if (title.isNotEmpty) {
-                  await _addNewQuestion(title);
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => LoadingPage()));
+                final title = _titleController.text.trim();
+                final content = _contentController.text.trim();
+                if (title.isNotEmpty && content.isNotEmpty) {
+                  await _addNewSupport(title, content);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Vui lòng điền đủ tiêu đề và nội dung')),
+                  );
                 }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.mainOrange,
                 padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                shadowColor: AppColors.mainOrange,
               ),
               child: const Text(
                 'Gửi',
@@ -163,28 +200,32 @@ class _SupportPageState extends State<SupportPage> {
   InputDecoration _buildInputDecoration(String hint) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: TextStyle(color: AppColors.greyLight, fontFamily: 'Inter', fontSize: 14),
+      hintStyle: const TextStyle(
+        color: AppColors.greyLight,
+        fontFamily: 'Inter',
+        fontSize: 14,
+      ),
       filled: true,
       fillColor: Colors.white,
       hoverColor: Colors.transparent,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: AppColors.greyLight),
+        borderSide: const BorderSide(color: AppColors.greyLight),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: AppColors.greyLight),
+        borderSide: const BorderSide(color: AppColors.greyLight),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: AppColors.greyLight),
+        borderSide: const BorderSide(color: AppColors.greyLight),
       ),
     );
   }
 
-  Widget _buildSection(String title, List<String> questions, BuildContext context, {bool checkNew = false}) {
+  Widget _buildSupportList() {
     return Container(
-      margin: EdgeInsets.only(bottom: 24),
+      margin: const EdgeInsets.only(bottom: 24),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -192,71 +233,57 @@ class _SupportPageState extends State<SupportPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Text(
-              title,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17, fontFamily: 'Inter'),
+              'CÂU HỎI CỦA TÔI',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 17,
+                fontFamily: 'Inter',
+              ),
             ),
           ),
-          ...questions.map((q) {
-            final isNew = checkNew && !_readQuestions.contains(q);
-            return _buildQuestionTile(context, q, isNew: isNew);
+          if (_mySupports.isEmpty)
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Text('Bạn chưa có yêu cầu nào.', style: TextStyle(fontFamily: 'Inter')),
+            ),
+          ..._mySupports.map((support) {
+            return Column(
+              children: [
+                InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => SupportAnswerPage(maHT: support['MaHT']),
+                      ),
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.help_outline, color: Colors.black),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            support['TieuDe'] ?? '',
+                            style: const TextStyle(fontSize: 14, fontFamily: 'Inter'),
+                          ),
+                        ),
+                        const Icon(Icons.arrow_forward_ios, size: 14),
+                      ],
+                    ),
+                  ),
+                ),
+                const Divider(height: 1, thickness: 0.5, color: Colors.black12),
+              ],
+            );
           }).toList(),
         ],
       ),
-    );
-  }
-
-  Widget _buildQuestionTile(BuildContext context, String question, {bool isNew = false}) {
-    return Column(
-      children: [
-        InkWell(
-          onTap: () async {
-            await _markAsRead(question);
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => SupportAnswerPage(question: question)),
-            );
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            child: Row(
-              children: [
-                Icon(Icons.help_outline, color: Colors.black),
-                SizedBox(width: 12),
-                Expanded(
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          question,
-                          style: TextStyle(fontFamily: 'Inter', fontSize: 14),
-                        ),
-                      ),
-                      if (isNew)
-                        Container(
-                          margin: EdgeInsets.only(left: 8),
-                          padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: AppColors.mainOrange,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            'NEW',
-                            style: TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                Icon(Icons.arrow_forward_ios, size: 14),
-              ],
-            ),
-          ),
-        ),
-        Divider(height: 1, thickness: 0.5, color: Colors.black12),
-      ],
     );
   }
 }

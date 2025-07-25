@@ -1,4 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+import 'package:giao_dien_1/config/config.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/widget/appbar_admin.dart';
 import 'package:giao_dien_1/widget/exit_button.dart';
@@ -16,19 +20,41 @@ class SupportListScreen extends StatefulWidget {
 
 class _SupportListScreenState extends State<SupportListScreen> {
   final TextEditingController searchController = TextEditingController();
-  String selectedColumn = 'MaHT'; 
+  String selectedColumn = 'MaHT';
   bool showSearchOptions = false;
 
-  final List<Map<String, String>> supports = [];
+  List<Map<String, dynamic>> supports = [];
 
+  @override
+  void initState() {
+    super.initState();
+    _fetchSupports();
+  }
+
+  Future<void> _fetchSupports() async {
+    try {
+      final response = await http.get(Uri.parse('$baseURL/hotro'));
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        if (json['success'] == true) {
+          setState(() {
+            supports = List<Map<String, dynamic>>.from(json['data']);
+          });
+        }
+      } else {
+        print('❌ Server lỗi khi lấy hỗ trợ');
+      }
+    } catch (e) {
+      print('❌ Lỗi kết nối khi gọi API hỗ trợ: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Lọc dữ liệu theo search (demo để sau bạn thêm thật)
     final filteredList = supports.where((item) {
       final searchLower = searchController.text.toLowerCase();
       if (searchLower.isEmpty) return true;
-      final field = (item[selectedColumn] ?? '').toLowerCase();
+      final field = (item[selectedColumn]?.toString() ?? '').toLowerCase();
       return field.contains(searchLower);
     }).toList();
 
@@ -67,12 +93,10 @@ class _SupportListScreenState extends State<SupportListScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Tìm kiếm
                       TextField(
                         controller: searchController,
                         decoration: InputDecoration(
                           hintText: 'Nhập từ khóa...',
-                          hintStyle: const TextStyle(fontFamily: 'Inter'),
                           suffixIcon: IconButton(
                             icon: const Icon(Icons.clear),
                             onPressed: () {
@@ -92,7 +116,6 @@ class _SupportListScreenState extends State<SupportListScreen> {
                         ),
                         onChanged: (_) => setState(() {}),
                       ),
-
                       const SizedBox(height: 16),
 
                       Row(
@@ -107,40 +130,19 @@ class _SupportListScreenState extends State<SupportListScreen> {
                       ),
 
                       if (showSearchOptions)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8), 
-                        child: Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            ChoiceChipSelector(
-                              label: 'Mã hỗ trợ',
-                              value: 'MaHT',
-                              selectedValue: selectedColumn,
-                              onSelected: (val) => setState(() => selectedColumn = val),
-                            ),
-                            ChoiceChipSelector(
-                              label: 'Tiêu đề',
-                              value: 'TieuDe',
-                              selectedValue: selectedColumn,
-                              onSelected: (val) => setState(() => selectedColumn = val),
-                            ),
-                            ChoiceChipSelector(
-                              label: 'Khách hàng',
-                              value: 'MaKH',
-                              selectedValue: selectedColumn,
-                              onSelected: (val) => setState(() => selectedColumn = val),
-                            ),
-                            ChoiceChipSelector(
-                              label: 'Nhân viên',
-                              value: 'MaNV',
-                              selectedValue: selectedColumn,
-                              onSelected: (val) => setState(() => selectedColumn = val),
-                            ),
-                          ],
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              ChoiceChipSelector(label: 'Mã hỗ trợ', value: 'MaHT', selectedValue: selectedColumn, onSelected: (val) => setState(() => selectedColumn = val)),
+                              ChoiceChipSelector(label: 'Tiêu đề', value: 'TieuDe', selectedValue: selectedColumn, onSelected: (val) => setState(() => selectedColumn = val)),
+                              ChoiceChipSelector(label: 'Khách hàng', value: 'MaKH', selectedValue: selectedColumn, onSelected: (val) => setState(() => selectedColumn = val)),
+                              ChoiceChipSelector(label: 'Nhân viên', value: 'MaNV', selectedValue: selectedColumn, onSelected: (val) => setState(() => selectedColumn = val)),
+                            ],
+                          ),
                         ),
-                      ),
-
 
                       const SizedBox(height: 8),
 
@@ -151,121 +153,107 @@ class _SupportListScreenState extends State<SupportListScreen> {
                           IconButton(
                             icon: const Icon(Icons.add_circle),
                             tooltip: 'Không thể thêm hỗ trợ trực tiếp',
-                            onPressed: null, // disable nút thêm
+                            onPressed: null,
                           ),
                         ],
                       ),
 
                       const SizedBox(height: 16),
 
-                      filteredList.isEmpty
-                          ? Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: AppColors.mainOrange),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: const Center(
-                                child: Text(
-                                  'Chưa có dữ liệu để hiển thị',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey,
-                                    fontFamily: 'Inter',
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            )
-                          : Column(
-                              children: filteredList.map((support) {
-                                return Card(
-                                  margin: const EdgeInsets.only(bottom: 8),
-                                  child: ListTile(
-                                    title: Text(
-                                      'Mã hỗ trợ: ${support['MaHT'] ?? ''}',
-                                      style: const TextStyle(fontWeight: FontWeight.w600),
-                                    ),
-                                    subtitle: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text('Tiêu đề: ${support['TieuDe'] ?? ''}'),
-                                        Text('Câu hỏi: ${support['CauHoi'] ?? ''}'),
-                                        if ((support['CauTraLoi'] ?? '').isNotEmpty)
-                                          Padding(
-                                            padding: const EdgeInsets.only(top: 4),
-                                            child: Text(
-                                              'Trả lời: ${support['CauTraLoi']}',
-                                              style: const TextStyle(color: AppColors.greenDark),
+                      Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.mainOrange),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: DataTable(
+                            headingRowColor: MaterialStateProperty.all(AppColors.softOrange),
+                            columnSpacing: 8,
+                            dataRowMinHeight: 44,
+                            dataRowMaxHeight: 52,
+                            columns: const [
+                              DataColumn(label: SizedBox(width: 80, child: Text('Mã HT', style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter')))),
+                              DataColumn(label: SizedBox(width: 160, child: Text('Tiêu đề', style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter')))),
+                              DataColumn(label: SizedBox(width: 250, child: Text('Câu hỏi', style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter')))),
+                              DataColumn(label: SizedBox(width: 250, child: Text('Trả lời', style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter')))),
+                              DataColumn(label: SizedBox(width: 100, child: Text('Mã KH', style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter')))),
+                              DataColumn(label: SizedBox(width: 100, child: Text('Mã NV', style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter')))),
+                              DataColumn(label: SizedBox(width: 80, child: Text('Phản hồi', style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter')))),
+                            ],
+                            rows: filteredList.map((support) {
+                              return DataRow(
+                                cells: [
+                                  DataCell(
+                                    SizedBox(
+                                      width: 80,
+                                      child: InkWell(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => ReplySupportScreen(supportItem: support),
                                             ),
+                                          );
+                                        },
+                                        child: Text(
+                                          support['MaHT'] ?? '',
+                                          style: const TextStyle(
+                                            fontFamily: 'Inter',
+                                            color: AppColors.black,
                                           ),
-                                        const SizedBox(height: 4),
-                                        Row(
-                                          children: [
-                                            const Icon(Icons.person, size: 12, color: AppColors.mainOrange),
-                                            const SizedBox(width: 4),
-                                            Text('Khách: ${support['MaKH'] ?? '-'}',
-                                                style: const TextStyle(fontSize: 12)),
-                                            const SizedBox(width: 16),
-                                            const Icon(Icons.badge, size: 12, color: AppColors.mainOrange),
-                                            const SizedBox(width: 4),
-                                            Text('NV: ${support['MaNV'] ?? '-'}',
-                                                style: const TextStyle(fontSize: 12)),
-                                          ],
                                         ),
-                                      ],
-                                    ),
-                                    trailing: IconButton(
-                                      icon: const Icon(Icons.reply, color: AppColors.mainOrange),
-                                      onPressed: () async {
-                                        final updated = await Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => ReplySupportScreen(supportItem: support),
-                                          ),
-                                        );
-
-                                        if (updated == true) {
-                                          // TODO: Gọi lại API / cập nhật lại danh sách
-                                          setState(() {
-                                            // Nếu dùng API thật, reload lại từ server
-                                            // Còn nếu dùng demo tạm, có thể chỉnh trực tiếp support['CauTraLoi'] trong danh sách nếu cần
-                                          });
-                                        }
-                                      },
+                                      ),
                                     ),
                                   ),
-                                );
-                              }).toList(),
-                            ),
+                                  DataCell(SizedBox(width: 160, child: Text(support['TieuDe'] ?? '', style: const TextStyle(fontFamily: 'Inter')))),
+                                  DataCell(SizedBox(width: 250, child: Text(support['CauHoi'] ?? '', style: const TextStyle(fontFamily: 'Inter')))),
+                                  DataCell(SizedBox(width: 250, child: Text(support['CauTraLoi'] ?? '', style: const TextStyle(fontFamily: 'Inter', color: AppColors.greenDark)))),
+                                  DataCell(SizedBox(width: 100, child: Text(support['MaKH'] ?? '', style: const TextStyle(fontFamily: 'Inter')))),
+                                  DataCell(SizedBox(width: 100, child: Text(support['MaNV'] ?? '-', style: const TextStyle(fontFamily: 'Inter')))),
+                                  DataCell(
+                                    SizedBox(
+                                      width: 80,
+                                      child: InkWell(
+                                        onTap: () async {
+                                          final updated = await Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => ReplySupportScreen(supportItem: support),
+                                            ),
+                                          );
+                                          if (updated == true) {
+                                            _fetchSupports(); // refresh lại sau khi phản hồi
+                                          }
+                                        },
+                                        child: const Icon(Icons.reply, color: AppColors.mainOrange),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ),
 
                       const SizedBox(height: 16),
 
-                      // Phân trang (tạm để giống)
                       PaginationControls(
                         currentPage: 1,
-                        onFirstPressed: () {
-                          print("Go to first page");
-                        },
-                        onLastPressed: () {
-                          print("Go to last page");
-                        },
+                        onFirstPressed: () => print("Go to first page"),
+                        onLastPressed: () => print("Go to last page"),
                       ),
                     ],
                   ),
                 ),
               ),
             ),
-
             const SizedBox(height: 32),
-
             ExitButton(
               onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => HomeAdmin()),
-                );
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomeAdmin()));
               },
             ),
           ],

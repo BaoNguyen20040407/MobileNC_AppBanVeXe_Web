@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:giao_dien_1/config/config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'reset_password_screen.dart';
 import 'package:giao_dien_1/config/default.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class ConfirmEmailScreen extends StatefulWidget {
   const ConfirmEmailScreen({super.key});
@@ -12,7 +15,7 @@ class ConfirmEmailScreen extends StatefulWidget {
 
 class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
   final TextEditingController emailController = TextEditingController();
-  String? _emailError;
+  String? _errorMessage;
 
   @override
   void dispose() {
@@ -20,38 +23,47 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
     super.dispose();
   }
 
-  Future<String?> _getRegisteredEmail() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('email');
+  void _handleConfirm() async {
+  final inputEmail = emailController.text.trim();
+
+  if (inputEmail.isEmpty || !inputEmail.contains('@')) {
+    setState(() {
+      _errorMessage = 'Vui lòng nhập email hợp lệ';
+    });
+    return;
   }
 
-  void _handleConfirm() async {
-    final inputEmail = emailController.text.trim();
-    final registeredEmail = await _getRegisteredEmail();
+  try {
+    final response = await http.post(
+      Uri.parse('$baseURL/api/check-email'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': inputEmail}),
+    );
 
-    setState(() {
-      _emailError = null;
-    });
+    final data = jsonDecode(response.body);
 
-    if (inputEmail.isEmpty) {
-      setState(() {
-        _emailError = "Vui lòng nhập Email.";
-      });
-    } else if (registeredEmail == null) {
-      setState(() {
-        _emailError = "Không tìm thấy thông tin đăng ký.";
-      });
-    } else if (inputEmail != registeredEmail) {
-      setState(() {
-        _emailError = "Email không trùng khớp với tài khoản đã đăng ký.";
-      });
-    } else {
+    if (response.statusCode == 200 && data['success'] == true) {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('email', inputEmail);
+      await prefs.setString('maKH', data['maKH']);
+
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => const ResetPasswordScreen()),
+        MaterialPageRoute(
+          builder: (context) => ResetPasswordScreen(email: inputEmail),
+        ),
       );
+    } else {
+      setState(() {
+        _errorMessage = 'Email không tồn tại trong hệ thống';
+      });
     }
+  } catch (e) {
+    setState(() {
+      _errorMessage = 'Đã xảy ra lỗi khi kiểm tra email';
+    });
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +101,7 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
               decoration: InputDecoration(
                 labelText: "Email",
                 hintText: "example@gmail.com",
-                errorText: _emailError,
+                errorText: _errorMessage,
                 errorStyle: const TextStyle(
                   color: Colors.red,
                   fontSize: 12,

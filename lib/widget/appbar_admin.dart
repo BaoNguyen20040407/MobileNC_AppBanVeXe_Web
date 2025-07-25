@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
-import 'dart:typed_data';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/config/config.dart';
 import 'package:giao_dien_1/view/admin/profile_admin/profile/profile_admin.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class CustomAppBarAdmin extends StatefulWidget implements PreferredSizeWidget {
   final double height;
@@ -26,28 +26,34 @@ class CustomAppBarAdmin extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _CustomAppBarAdminState extends State<CustomAppBarAdmin> {
-  String? _imageUrl;
-  Uint8List? _avatarBytes;
+  String? _avatarUrl;
 
   @override
   void initState() {
     super.initState();
-    _loadAvatar();
+    _loadAvatarFromApi();
   }
 
-  Future<void> _loadAvatar() async {
+  Future<void> _loadAvatarFromApi() async {
     final prefs = await SharedPreferences.getInstance();
-    final base64 = prefs.getString('image_base64');
-    final url = prefs.getString('avatarUrl'); // nên dùng key giống user
+    final username = prefs.getString('username');
+    if (username == null) return;
 
-    setState(() {
-      if (base64 != null && base64.isNotEmpty) {
-        _avatarBytes = base64Decode(base64);
-        _imageUrl = null;
-      } else if (url != null && url.isNotEmpty) {
-        _imageUrl = url.startsWith("http") ? url : '$baseURL$url';
+    final response = await http.get(Uri.parse('$baseURL/api/admin-info/$username'));
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['success']) {
+        final imagePath = data['data']['URLHinhAnh'];
+        if (imagePath != null && imagePath.isNotEmpty) {
+          setState(() {
+            _avatarUrl = '$baseURL$imagePath';
+          });
+        }
       }
-    });
+    } else {
+      print('❌ Lỗi lấy avatar admin: ${response.body}');
+    }
   }
 
   @override
@@ -100,9 +106,11 @@ class _CustomAppBarAdminState extends State<CustomAppBarAdmin> {
                     settings: const RouteSettings(name: '/profile_admin'),
                   ),
                 );
-                _loadAvatar(); // Refresh lại sau khi quay về
+                _loadAvatarFromApi(); // Reload sau khi sửa
               },
-              child: ClipOval(child: _buildAvatar()),
+              child: ClipOval(
+                child: _buildAvatar(),
+              ),
             ),
         ],
       ),
@@ -118,18 +126,9 @@ class _CustomAppBarAdminState extends State<CustomAppBarAdmin> {
       fit: BoxFit.cover,
     );
 
-    if (_avatarBytes != null) {
-      return Image.memory(
-        _avatarBytes!,
-        height: size,
-        width: size,
-        fit: BoxFit.cover,
-      );
-    }
-
-    if (_imageUrl != null && _imageUrl!.isNotEmpty) {
+    if (_avatarUrl != null && _avatarUrl!.isNotEmpty) {
       return Image.network(
-        _imageUrl!,
+        _avatarUrl!,
         height: size,
         width: size,
         fit: BoxFit.cover,

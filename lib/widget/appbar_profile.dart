@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:giao_dien_1/view/profile/profile_screen.dart';
 import 'package:giao_dien_1/config/config.dart'; // chứa baseURL
+import 'package:http/http.dart' as http;
 
 class AppBarProfile extends StatefulWidget implements PreferredSizeWidget {
   final String title;
@@ -19,34 +19,45 @@ class AppBarProfile extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _AppBarProfileState extends State<AppBarProfile> {
-  String? _imageUrl;
-  Uint8List? _avatarBytes;
+  String? _avatarUrl;
 
   @override
   void initState() {
     super.initState();
-    _loadAvatar();
+    _loadAvatarFromApi();
   }
 
-  Future<void> _loadAvatar() async {
+  Future<void> _loadAvatarFromApi() async {
     final prefs = await SharedPreferences.getInstance();
-    final url = prefs.getString('avatarUrl');
-    final base64 = prefs.getString('image_base64');
+    final username = prefs.getString('username');
+    if (username == null) return;
 
-    setState(() {
-      if (url != null && url.isNotEmpty) {
-        _imageUrl = '$baseURL$url';
+    try {
+      final url = Uri.parse('$baseURL/user-info/$username');
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success']) {
+          final imagePath = data['data']['URLHinhAnh'];
+          if (imagePath != null && imagePath.isNotEmpty) {
+            setState(() {
+              _avatarUrl = '$baseURL$imagePath';
+            });
+          }
+        }
+      } else {
+        print('⚠️ Lỗi khi gọi API avatar: ${response.body}');
       }
-      if (base64 != null && base64.isNotEmpty) {
-        _avatarBytes = base64Decode(base64);
-      }
-    });
+    } catch (e) {
+      print('❌ Exception khi gọi API avatar: $e');
+    }
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _loadAvatar(); // Reload mỗi lần build lại
+    _loadAvatarFromApi(); // Reload khi quay lại trang này
   }
 
   @override
@@ -88,7 +99,7 @@ class _AppBarProfileState extends State<AppBarProfile> {
                 context,
                 MaterialPageRoute(builder: (_) => const ProfileScreen()),
               );
-              _loadAvatar(); // Cập nhật lại sau khi quay về
+              _loadAvatarFromApi(); // Refresh sau khi quay lại
             },
             child: ClipOval(
               child: _buildAvatar(),
@@ -102,20 +113,11 @@ class _AppBarProfileState extends State<AppBarProfile> {
   Widget _buildAvatar() {
     const placeholder = AssetImage('assets/image/personicon.png');
 
-    if (_avatarBytes != null) {
-      return Image.memory(
-        _avatarBytes!,
-        height: 32,
-        width: 32,
-        fit: BoxFit.cover,
-      );
-    }
-
-    if (_imageUrl != null &&
-        _imageUrl!.isNotEmpty &&
-        (_imageUrl!.startsWith("http") || _imageUrl!.startsWith("https"))) {
+    if (_avatarUrl != null &&
+        _avatarUrl!.isNotEmpty &&
+        (_avatarUrl!.startsWith("http") || _avatarUrl!.startsWith("https"))) {
       return Image.network(
-        _imageUrl!,
+        _avatarUrl!,
         height: 32,
         width: 32,
         fit: BoxFit.cover,

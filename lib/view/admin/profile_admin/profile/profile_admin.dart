@@ -156,13 +156,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
                   "Thông báo",
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => NotificationsScreen(),
-                        settings: const RouteSettings(name: '/admin/notifications'),
-                      ),
-                    );
+                    
                   },
                 ),
                 _buildMenuItem(

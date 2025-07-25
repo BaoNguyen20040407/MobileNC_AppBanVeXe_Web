@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:giao_dien_1/config/config.dart';
 import 'package:giao_dien_1/view/admin/profile_admin/profile/profile_admin.dart';
+import 'package:http/http.dart' as http;
 
 class AppBarAdminProfile extends StatefulWidget implements PreferredSizeWidget {
   final String title;
@@ -19,36 +19,52 @@ class AppBarAdminProfile extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _AppBarAdminProfileState extends State<AppBarAdminProfile> {
-  String? _imageUrl;
-  Uint8List? _avatarBytes;
+  String? _avatarUrl;
 
   @override
   void initState() {
     super.initState();
-    _loadAvatar();
+    _loadAvatarFromApi();
   }
-
-  Future<void> _loadAvatar() async {
-  final prefs = await SharedPreferences.getInstance();
-  final url = prefs.getString('admin_avatarUrl');
-  final base64 = prefs.getString('admin_image_base64');
-
-  setState(() {
-    if (url != null && url.isNotEmpty) {
-      _imageUrl = '$baseURL$url';
-    }
-    if (base64 != null && base64.isNotEmpty) {
-      _avatarBytes = base64Decode(base64);
-    }
-  });
-}
-
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _loadAvatar(); // Reload mỗi lần quay lại
+    _loadAvatarFromApi(); // reload mỗi lần quay lại
   }
+
+  Future<void> _loadAvatarFromApi() async {
+  final prefs = await SharedPreferences.getInstance();
+  final username = prefs.getString('username');
+  print('👤 Username lưu trong prefs: $username');
+
+  if (username == null) return;
+
+  try {
+    final response = await http.get(Uri.parse('$baseURL/api/admin-info/$username'));
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['success']) {
+        final imagePath = data['data']['URLHinhAnh'];
+        if (imagePath != null && imagePath.isNotEmpty) {
+          setState(() {
+          _avatarUrl = imagePath.startsWith('http')
+              ? imagePath
+              : '$baseURL/$imagePath'.replaceAll('//', '/').replaceFirst(':/', '://');
+          });
+        }
+      } else {
+        print('❗ API trả về false: ${data['message']}');
+      }
+    } else {
+      print('❌ API lỗi HTTP: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('❌ Ngoại lệ: $e');
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -65,13 +81,10 @@ class _AppBarAdminProfileState extends State<AppBarAdminProfile> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Nút quay lại
           GestureDetector(
             onTap: widget.onBack ?? () => Navigator.pop(context),
             child: const Icon(Icons.arrow_back_ios, color: Colors.white),
           ),
-
-          // Tiêu đề
           Text(
             widget.title,
             style: const TextStyle(
@@ -81,15 +94,13 @@ class _AppBarAdminProfileState extends State<AppBarAdminProfile> {
               fontFamily: 'Inter',
             ),
           ),
-
-          // Avatar
           GestureDetector(
             onTap: () async {
               await Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const AdminProfileScreen()),
               );
-              _loadAvatar(); // Cập nhật sau khi quay lại
+              _loadAvatarFromApi(); // cập nhật lại avatar
             },
             child: ClipOval(
               child: _buildAvatar(),
@@ -101,39 +112,19 @@ class _AppBarAdminProfileState extends State<AppBarAdminProfile> {
   }
 
   Widget _buildAvatar() {
+    const double size = 32;
     const placeholder = AssetImage('assets/image/personicon.png');
 
-    if (_avatarBytes != null) {
-      return Image.memory(
-        _avatarBytes!,
-        height: 32,
-        width: 32,
-        fit: BoxFit.cover,
-      );
-    }
-
-    if (_imageUrl != null &&
-        _imageUrl!.isNotEmpty &&
-        (_imageUrl!.startsWith("http") || _imageUrl!.startsWith("https"))) {
+    if (_avatarUrl != null && _avatarUrl!.isNotEmpty) {
       return Image.network(
-        _imageUrl!,
-        height: 32,
-        width: 32,
+        _avatarUrl!,
+        height: size,
+        width: size,
         fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => Image(
-          image: placeholder,
-          height: 32,
-          width: 32,
-          fit: BoxFit.cover,
-        ),
+        errorBuilder: (_, __, ___) => Image(image: placeholder, height: size, width: size, fit: BoxFit.cover),
       );
     }
 
-    return Image(
-      image: placeholder,
-      height: 32,
-      width: 32,
-      fit: BoxFit.cover,
-    );
+    return Image(image: placeholder, height: size, width: size, fit: BoxFit.cover);
   }
 }

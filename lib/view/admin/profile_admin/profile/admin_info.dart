@@ -5,9 +5,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/config/config.dart';
-import 'package:giao_dien_1/widget/appbar_profile.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:giao_dien_1/widget/appbar_profile_admin.dart';
 
 class AdminInfo extends StatefulWidget {
   const AdminInfo({super.key});
@@ -59,14 +59,17 @@ class _AdminInfoState extends State<AdminInfo> {
           _chucVu = nv['ChucVu'] ?? '';
           _phongBan = nv['PhongBan'] ?? '';
           _username = nv['username'] ?? '';
+
           final imgPath = nv['URLHinhAnh'];
           if (imgPath != null && imgPath.isNotEmpty) {
             _avatarUrl = '$baseURL$imgPath';
-          }
-
-          final base64 = prefs.getString('image_base64');
-          if (base64 != null && base64.isNotEmpty) {
-            _avatarBytes = base64Decode(base64);
+            _avatarBytes = null; // ❗ Ưu tiên URL, bỏ local base64
+          } else {
+            // fallback: lấy từ local nếu không có ảnh trên server
+            final base64 = prefs.getString('image_base64');
+            if (base64 != null && base64.isNotEmpty) {
+              _avatarBytes = base64Decode(base64);
+            }
           }
         });
       }
@@ -120,7 +123,7 @@ class _AdminInfoState extends State<AdminInfo> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.softOrangeBackground,
-      appBar: AppBarProfile(title: 'THÔNG TIN NHÂN VIÊN'),
+      appBar: const AppBarAdminProfile(title: 'THÔNG TIN NHÂN VIÊN'),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Column(

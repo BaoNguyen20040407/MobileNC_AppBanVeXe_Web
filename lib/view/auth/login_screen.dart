@@ -90,19 +90,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       _passwordError = null;
                     });
 
-                    if (userNameInput == 'BaoNguyen04' &&
-                        passwordInput == 'BaoNguyen04') {
-                      print('🟢 Admin login detected');
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => HomeAdmin(),
-                          settings: const RouteSettings(name: '/home_admin'),
-                        ),
-                      );
-                      return;
-                    }
-
                     try {
                       final url = Uri.parse('$baseURL/login');
                       print('📡 Sending POST request to $url');

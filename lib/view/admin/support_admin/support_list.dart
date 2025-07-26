@@ -13,6 +13,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:giao_dien_1/widget/fliter_chip_with_input.dart';
 
 class SupportListScreen extends StatefulWidget {
   const SupportListScreen({super.key});
@@ -24,6 +25,13 @@ class SupportListScreen extends StatefulWidget {
 class _SupportListScreenState extends State<SupportListScreen> {
   final TextEditingController searchController = TextEditingController();
   String selectedColumn = 'MaHT';
+  String filterValue = '';
+  Map<String, String> filters = {
+  'MaHT': '',
+  'TieuDe': '',
+  'MaKH': '',
+  'MaNV': '',
+  };
   bool showSearchOptions = false;
 
   List<Map<String, dynamic>> supports = [];
@@ -52,59 +60,81 @@ class _SupportListScreenState extends State<SupportListScreen> {
     }
   }
 
+  Future<void> _filterSupports() async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseURL/hotro/loc'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'MaHT': filters['MaHT'] ?? '',
+          'TieuDe': filters['TieuDe'] ?? '',
+          'CauHoi': '',
+          'CauTraLoi': '',
+          'MaKH': filters['MaKH'] ?? '',
+          'MaNV': filters['MaNV'] ?? '',
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        if (json['success'] == true) {
+          setState(() {
+            supports = List<Map<String, dynamic>>.from(json['data']);
+          });
+        }
+      } else {
+        print('❌ Server trả về lỗi khi lọc hỗ trợ');
+      }
+    } catch (e) {
+      print('❌ Lỗi kết nối khi lọc hỗ trợ: $e');
+    }
+  }
+
   Future<void> exportSupportsToPDF(List<Map<String, dynamic>> data) async {
-  final pdf = pw.Document();
-  final fontData = await rootBundle.load('assets/font/inter_18pt_regular.ttf');
-  final ttf = pw.Font.ttf(fontData.buffer.asByteData());
+    final pdf = pw.Document();
+    final fontData = await rootBundle.load('assets/font/inter_18pt_regular.ttf');
+    final ttf = pw.Font.ttf(fontData.buffer.asByteData());
 
-  pdf.addPage(
-    pw.MultiPage(
-      pageFormat: PdfPageFormat.a4,
-      build: (pw.Context context) {
-        return [
-          pw.Text(
-            'Danh sách hỗ trợ',
-            style: pw.TextStyle(font: ttf, fontSize: 18, fontWeight: pw.FontWeight.bold),
-          ),
-          pw.SizedBox(height: 12),
-          pw.Table.fromTextArray(
-            headers: ['Mã HT', 'Tiêu đề', 'Câu hỏi', 'Trả lời', 'Mã KH', 'Mã NV'],
-            data: data.map((item) {
-              return [
-                item['MaHT'] ?? '',
-                item['TieuDe'] ?? '',
-                item['CauHoi'] ?? '',
-                item['CauTraLoi'] ?? '',
-                item['MaKH'] ?? '',
-                item['MaNV'] ?? '',
-              ];
-            }).toList(),
-            cellStyle: pw.TextStyle(font: ttf, fontSize: 10),
-            headerStyle: pw.TextStyle(font: ttf, fontSize: 12, fontWeight: pw.FontWeight.bold),
-            headerDecoration: pw.BoxDecoration(color: PdfColors.grey300),
-            border: pw.TableBorder.all(width: 0.5),
-            cellAlignment: pw.Alignment.centerLeft,
-          ),
-        ];
-      },
-    ),
-  );
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        build: (pw.Context context) {
+          return [
+            pw.Text(
+              'Danh sách hỗ trợ',
+              style: pw.TextStyle(font: ttf, fontSize: 18, fontWeight: pw.FontWeight.bold),
+            ),
+            pw.SizedBox(height: 12),
+            pw.Table.fromTextArray(
+              headers: ['Mã HT', 'Tiêu đề', 'Câu hỏi', 'Trả lời', 'Mã KH', 'Mã NV'],
+              data: data.map((item) {
+                return [
+                  item['MaHT'] ?? '',
+                  item['TieuDe'] ?? '',
+                  item['CauHoi'] ?? '',
+                  item['CauTraLoi'] ?? '',
+                  item['MaKH'] ?? '',
+                  item['MaNV'] ?? '',
+                ];
+              }).toList(),
+              cellStyle: pw.TextStyle(font: ttf, fontSize: 10),
+              headerStyle: pw.TextStyle(font: ttf, fontSize: 12, fontWeight: pw.FontWeight.bold),
+              headerDecoration: pw.BoxDecoration(color: PdfColors.grey300),
+              border: pw.TableBorder.all(width: 0.5),
+              cellAlignment: pw.Alignment.centerLeft,
+            ),
+          ];
+        },
+      ),
+    );
 
-  await Printing.layoutPdf(
-    onLayout: (PdfPageFormat format) async => pdf.save(),
-  );
-}
-
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => pdf.save(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final filteredList = supports.where((item) {
-      final searchLower = searchController.text.toLowerCase();
-      if (searchLower.isEmpty) return true;
-      final field = (item[selectedColumn]?.toString() ?? '').toLowerCase();
-      return field.contains(searchLower);
-    }).toList();
-
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: CustomAppBarAdmin(),
@@ -148,7 +178,7 @@ class _SupportListScreenState extends State<SupportListScreen> {
                             icon: const Icon(Icons.clear),
                             onPressed: () {
                               searchController.clear();
-                              setState(() {});
+                              _fetchSupports();
                             },
                           ),
                           enabledBorder: OutlineInputBorder(
@@ -161,7 +191,7 @@ class _SupportListScreenState extends State<SupportListScreen> {
                           ),
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         ),
-                        onChanged: (_) => setState(() {}),
+                        onChanged: (_) => _filterSupports(),
                       ),
                       const SizedBox(height: 16),
 
@@ -183,10 +213,19 @@ class _SupportListScreenState extends State<SupportListScreen> {
                             spacing: 8,
                             runSpacing: 8,
                             children: [
-                              ChoiceChipSelector(label: 'Mã hỗ trợ', value: 'MaHT', selectedValue: selectedColumn, onSelected: (val) => setState(() => selectedColumn = val)),
-                              ChoiceChipSelector(label: 'Tiêu đề', value: 'TieuDe', selectedValue: selectedColumn, onSelected: (val) => setState(() => selectedColumn = val)),
-                              ChoiceChipSelector(label: 'Khách hàng', value: 'MaKH', selectedValue: selectedColumn, onSelected: (val) => setState(() => selectedColumn = val)),
-                              ChoiceChipSelector(label: 'Nhân viên', value: 'MaNV', selectedValue: selectedColumn, onSelected: (val) => setState(() => selectedColumn = val)),
+                              FilterChipWithInputInline(
+                                filters: [
+                                  {'label': 'Mã hỗ trợ', 'value': 'MaHT'},
+                                  {'label': 'Tiêu đề', 'value': 'TieuDe'},
+                                  {'label': 'Khách hàng', 'value': 'MaKH'},
+                                  {'label': 'Nhân viên', 'value': 'MaNV'},
+                                ],
+                                filterValues: filters,
+                                onFilterChanged: (updated) {
+                                  setState(() => filters = updated);
+                                  _filterSupports(); // cập nhật dữ liệu luôn
+                                },
+                              ),
                             ],
                           ),
                         ),
@@ -196,13 +235,13 @@ class _SupportListScreenState extends State<SupportListScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Tổng số: ${filteredList.length}', style: const TextStyle(fontFamily: 'Inter')),
+                          Text('Tổng số: ${supports.length}', style: const TextStyle(fontFamily: 'Inter')),
                           Row(
                             children: [
                               IconButton(
                                 icon: const Icon(Icons.print),
                                 tooltip: 'Xuất PDF',
-                                onPressed: () => exportSupportsToPDF(filteredList),
+                                onPressed: () => exportSupportsToPDF(supports),
                               ),
                               const SizedBox(width: 8),
                               IconButton(
@@ -238,7 +277,7 @@ class _SupportListScreenState extends State<SupportListScreen> {
                               DataColumn(label: SizedBox(width: 100, child: Text('Mã NV', style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter')))),
                               DataColumn(label: SizedBox(width: 80, child: Text('Phản hồi', style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter')))),
                             ],
-                            rows: filteredList.map((support) {
+                            rows: supports.map((support) {
                               return DataRow(
                                 cells: [
                                   DataCell(

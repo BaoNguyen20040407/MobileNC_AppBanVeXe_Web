@@ -6,6 +6,11 @@ import 'package:giao_dien_1/view/admin/account/account.dart';
 import 'package:giao_dien_1/view/admin/account/account_admin/add_account_admin.dart';
 import 'package:giao_dien_1/widget/choice_chip_selector.dart';
 import 'package:giao_dien_1/widget/pagination_control.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
+import 'package:flutter/services.dart' show rootBundle;
+
 
 class AccountStaffList extends StatefulWidget {
   const AccountStaffList({super.key});
@@ -18,6 +23,59 @@ class _AccountStaffListState extends State<AccountStaffList> {
   final TextEditingController searchController = TextEditingController();
   String selectedColumn = 'MaTK';
   bool showSearchOptions = false;
+
+  Future<void> exportStaffAccountsToPDF(List<dynamic> accounts) async {
+  final pdf = pw.Document();
+
+  final fontData = await rootBundle.load('assets/font/inter_18pt_regular.ttf');
+  final ttf = pw.Font.ttf(fontData.buffer.asByteData());
+
+  pdf.addPage(
+    pw.Page(
+      build: (pw.Context context) {
+        return pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Text(
+              'Danh sách tài khoản nhân viên',
+              style: pw.TextStyle(
+                font: ttf,
+                fontSize: 18,
+                fontWeight: pw.FontWeight.bold,
+              ),
+            ),
+            pw.SizedBox(height: 12),
+            pw.Table.fromTextArray(
+              headers: ['Mã TK', 'Tên đăng nhập', 'Mật khẩu', 'Mã NV'],
+              data: accounts.map((tk) {
+                return [
+                  tk['MaTK'] ?? '',
+                  tk['TenDangNhapNV'] ?? '',
+                  tk['MatKhauNV'] ?? '',
+                  tk['MaNV'] ?? '',
+                ];
+              }).toList(),
+              cellStyle: pw.TextStyle(font: ttf, fontSize: 11),
+              headerStyle: pw.TextStyle(
+                font: ttf,
+                fontSize: 13,
+                fontWeight: pw.FontWeight.bold,
+              ),
+              headerDecoration: pw.BoxDecoration(color: PdfColors.grey300),
+              border: pw.TableBorder.all(width: 0.5),
+              cellAlignment: pw.Alignment.centerLeft,
+            ),
+          ],
+        );
+      },
+    ),
+  );
+
+  await Printing.layoutPdf(
+    onLayout: (PdfPageFormat format) async => pdf.save(),
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -46,9 +104,11 @@ class _AccountStaffListState extends State<AccountStaffList> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Center(
+                      const Align(
+                        alignment: Alignment.center,
                         child: Text(
-                          'DANH SÁCH TÀI KHOẢN NHÂN VIÊN',
+                          'DANH SÁCH TÀI KHOẢN\nNHÂN VIÊN',
+                          textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Colors.redAccent,
                             fontSize: 20,
@@ -149,7 +209,15 @@ class _AccountStaffListState extends State<AccountStaffList> {
                               IconButton(
                                 icon: const Icon(Icons.print),
                                 tooltip: 'Xuất PDF',
-                                onPressed: () {},
+                                onPressed: () {
+                                  if (filteredList.isEmpty) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Không có dữ liệu để xuất PDF')),
+                                    );
+                                    return;
+                                  }
+                                  exportStaffAccountsToPDF(filteredList);
+                                },
                               ),
                               const SizedBox(width: 8),
                               IconButton(

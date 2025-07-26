@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-
 import 'package:giao_dien_1/config/config.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/widget/appbar_admin.dart';
@@ -10,6 +9,10 @@ import 'package:giao_dien_1/widget/choice_chip_selector.dart';
 import 'package:giao_dien_1/view/admin/home_admin/homeadmin.dart';
 import 'package:giao_dien_1/view/admin/feedback_admin/reply_feedback.dart';
 import 'package:giao_dien_1/widget/pagination_control.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:printing/printing.dart';
 
 class FeedbackListScreen extends StatefulWidget {
   const FeedbackListScreen({super.key});
@@ -48,6 +51,57 @@ class _FeedbackListScreenState extends State<FeedbackListScreen> {
       print('❌ Lỗi kết nối khi gọi API góp ý: $e');
     }
   }
+
+  Future<void> exportFeedbackToPDF(List<Map<String, dynamic>> data) async {
+  final pdf = pw.Document();
+  final fontData = await rootBundle.load('assets/font/inter_18pt_regular.ttf');
+  final ttf = pw.Font.ttf(fontData.buffer.asByteData());
+
+  pdf.addPage(
+    pw.MultiPage(
+      pageFormat: PdfPageFormat.a4,
+      build: (pw.Context context) {
+        return [
+          pw.Text(
+            'Danh sách góp ý',
+            style: pw.TextStyle(
+              font: ttf,
+              fontSize: 18,
+              fontWeight: pw.FontWeight.bold,
+            ),
+          ),
+          pw.SizedBox(height: 12),
+          pw.Table.fromTextArray(
+            headers: ['Mã GY', 'Tiêu đề', 'Nội dung', 'Phản hồi', 'Mã KH', 'Mã NV'],
+            data: data.map((item) {
+              return [
+                item['MaGY'] ?? '',
+                item['TieuDe'] ?? '',
+                item['NoiDungGopY'] ?? '',
+                item['PhanHoi'] ?? '',
+                item['MaKH'] ?? '',
+                item['MaNV'] ?? '',
+              ];
+            }).toList(),
+            cellStyle: pw.TextStyle(font: ttf, fontSize: 10),
+            headerStyle: pw.TextStyle(
+              font: ttf,
+              fontSize: 12,
+              fontWeight: pw.FontWeight.bold,
+            ),
+            headerDecoration: pw.BoxDecoration(color: PdfColors.grey300),
+            border: pw.TableBorder.all(width: 0.5),
+            cellAlignment: pw.Alignment.centerLeft,
+          ),
+        ];
+      },
+    ),
+  );
+
+  await Printing.layoutPdf(
+    onLayout: (PdfPageFormat format) async => pdf.save(),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -172,14 +226,32 @@ class _FeedbackListScreenState extends State<FeedbackListScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Tổng số: ${filteredList.length}', style: const TextStyle(fontFamily: 'Inter')),
-                          IconButton(
-                            icon: const Icon(Icons.add_circle),
-                            tooltip: 'Không thể thêm góp ý trực tiếp',
-                            onPressed: null,
+                          Text(
+                            'Tổng số: ${filteredList.length}',
+                            style: const TextStyle(fontFamily: 'Inter'),
+                          ),
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.print),
+                                tooltip: 'Xuất PDF góp ý',
+                                onPressed: () async {
+                                  await exportFeedbackToPDF(filteredList);
+                                },
+                              ),
+                              const SizedBox(width: 8),
+                              Tooltip(
+                                message: 'Không thể thêm góp ý trực tiếp',
+                                child: IconButton(
+                                  icon: const Icon(Icons.add_circle, color: Colors.grey),
+                                  onPressed: null,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
+
 
                       const SizedBox(height: 16),
 

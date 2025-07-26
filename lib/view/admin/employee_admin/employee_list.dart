@@ -5,6 +5,10 @@ import 'package:giao_dien_1/widget/exit_button.dart';
 import 'package:giao_dien_1/view/admin/home_admin/manage_people.dart';
 import 'package:giao_dien_1/view/admin/employee_admin/add_employee.dart';
 import 'package:giao_dien_1/widget/pagination_control.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:printing/printing.dart';
 
 class EmployeeListScreen extends StatefulWidget {
   const EmployeeListScreen({super.key});
@@ -17,6 +21,66 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
   final TextEditingController searchController = TextEditingController();
   String selectedColumn = 'MaNV';
   bool showSearchOptions = false;
+
+  Future<void> exportEmployeesToPDF(List<dynamic> employees) async {
+  final pdf = pw.Document();
+
+  // Load font Inter
+  final fontData = await rootBundle.load('assets/font/inter_18pt_regular.ttf');
+  final ttf = pw.Font.ttf(fontData.buffer.asByteData());
+
+  pdf.addPage(
+    pw.Page(
+      build: (pw.Context context) {
+        return pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Text('Danh sách nhân viên',
+                style: pw.TextStyle(font: ttf, fontSize: 18, fontWeight: pw.FontWeight.bold)),
+            pw.SizedBox(height: 12),
+            pw.Table.fromTextArray(
+              headers: [
+                'Mã NV',
+                'Họ và tên',
+                'Ngày sinh',
+                'Địa chỉ',
+                'Email',
+                'SĐT',
+                'Ngày vào',
+                'Chức vụ',
+                'Phòng ban',
+              ],
+              data: employees.map((nv) {
+                return [
+                  nv['MaNV'] ?? '',
+                  nv['HoVaTen'] ?? '',
+                  nv['NgaySinh'] ?? '',
+                  nv['DiaChi'] ?? '',
+                  nv['Email'] ?? '',
+                  nv['SDT'] ?? '',
+                  nv['NgayVaoLam'] ?? '',
+                  nv['ChucVu'] ?? '',
+                  nv['PhongBan'] ?? '',
+                ];
+              }).toList(),
+              cellStyle: pw.TextStyle(font: ttf, fontSize: 10),
+              headerStyle: pw.TextStyle(
+                font: ttf,
+                fontSize: 12,
+                fontWeight: pw.FontWeight.bold,
+              ),
+              headerDecoration: pw.BoxDecoration(color: PdfColors.grey300),
+              border: pw.TableBorder.all(width: 0.5),
+              cellAlignment: pw.Alignment.centerLeft,
+            ),
+          ],
+        );
+      },
+    ),
+  );
+
+  await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdf.save());
+}
 
   @override
   Widget build(BuildContext context) {
@@ -116,23 +180,35 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Tổng số: ${filteredList.length}', style: const TextStyle(fontFamily: 'Inter')),
-                          IconButton(
-                            icon: const Icon(Icons.add_circle),
-                            tooltip: 'Thêm khách hàng',
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const AddEmployeeScreen(),
-                                  settings: RouteSettings(name: '/add_employee'),
-                                ),
-                              );
-                            },
+                          Text(
+                            'Tổng số: ${filteredList.length}',
+                            style: const TextStyle(fontFamily: 'Inter'),
+                          ),
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.print),
+                                tooltip: 'Xuất PDF',
+                                onPressed: () => exportEmployeesToPDF(filteredList), // Gọi hàm xuất PDF
+                              ),
+                              const SizedBox(width: 8),
+                              IconButton(
+                                icon: const Icon(Icons.add_circle),
+                                tooltip: 'Thêm nhân viên',
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const AddEmployeeScreen(),
+                                      settings: const RouteSettings(name: '/add_employee'),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
                           ),
                         ],
                       ),
-
                       const SizedBox(height: 16),
 
                       Container(

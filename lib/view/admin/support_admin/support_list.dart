@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-
 import 'package:giao_dien_1/config/config.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/widget/appbar_admin.dart';
@@ -10,6 +9,10 @@ import 'package:giao_dien_1/widget/choice_chip_selector.dart';
 import 'package:giao_dien_1/view/admin/home_admin/homeadmin.dart';
 import 'package:giao_dien_1/view/admin/support_admin/reply_support.dart';
 import 'package:giao_dien_1/widget/pagination_control.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:pdf/pdf.dart';
+import 'package:printing/printing.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 class SupportListScreen extends StatefulWidget {
   const SupportListScreen({super.key});
@@ -48,6 +51,50 @@ class _SupportListScreenState extends State<SupportListScreen> {
       print('❌ Lỗi kết nối khi gọi API hỗ trợ: $e');
     }
   }
+
+  Future<void> exportSupportsToPDF(List<Map<String, dynamic>> data) async {
+  final pdf = pw.Document();
+  final fontData = await rootBundle.load('assets/font/inter_18pt_regular.ttf');
+  final ttf = pw.Font.ttf(fontData.buffer.asByteData());
+
+  pdf.addPage(
+    pw.MultiPage(
+      pageFormat: PdfPageFormat.a4,
+      build: (pw.Context context) {
+        return [
+          pw.Text(
+            'Danh sách hỗ trợ',
+            style: pw.TextStyle(font: ttf, fontSize: 18, fontWeight: pw.FontWeight.bold),
+          ),
+          pw.SizedBox(height: 12),
+          pw.Table.fromTextArray(
+            headers: ['Mã HT', 'Tiêu đề', 'Câu hỏi', 'Trả lời', 'Mã KH', 'Mã NV'],
+            data: data.map((item) {
+              return [
+                item['MaHT'] ?? '',
+                item['TieuDe'] ?? '',
+                item['CauHoi'] ?? '',
+                item['CauTraLoi'] ?? '',
+                item['MaKH'] ?? '',
+                item['MaNV'] ?? '',
+              ];
+            }).toList(),
+            cellStyle: pw.TextStyle(font: ttf, fontSize: 10),
+            headerStyle: pw.TextStyle(font: ttf, fontSize: 12, fontWeight: pw.FontWeight.bold),
+            headerDecoration: pw.BoxDecoration(color: PdfColors.grey300),
+            border: pw.TableBorder.all(width: 0.5),
+            cellAlignment: pw.Alignment.centerLeft,
+          ),
+        ];
+      },
+    ),
+  );
+
+  await Printing.layoutPdf(
+    onLayout: (PdfPageFormat format) async => pdf.save(),
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -150,14 +197,23 @@ class _SupportListScreenState extends State<SupportListScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('Tổng số: ${filteredList.length}', style: const TextStyle(fontFamily: 'Inter')),
-                          IconButton(
-                            icon: const Icon(Icons.add_circle),
-                            tooltip: 'Không thể thêm hỗ trợ trực tiếp',
-                            onPressed: null,
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.print),
+                                tooltip: 'Xuất PDF',
+                                onPressed: () => exportSupportsToPDF(filteredList),
+                              ),
+                              const SizedBox(width: 8),
+                              IconButton(
+                                icon: const Icon(Icons.add_circle),
+                                tooltip: 'Không thể thêm hỗ trợ trực tiếp',
+                                onPressed: null,
+                              ),
+                            ],
                           ),
                         ],
                       ),
-
                       const SizedBox(height: 16),
 
                       Container(

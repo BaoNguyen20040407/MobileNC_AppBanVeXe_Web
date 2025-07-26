@@ -13,7 +13,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:giao_dien_1/widget/fliter_chip_with_input.dart';
+import 'package:giao_dien_1/widget/filter_chip_with_input.dart';
 
 class SupportListScreen extends StatefulWidget {
   const SupportListScreen({super.key});

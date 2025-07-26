@@ -13,6 +13,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:printing/printing.dart';
+import 'package:giao_dien_1/widget/filter_chip_with_input.dart';
 
 class FeedbackListScreen extends StatefulWidget {
   const FeedbackListScreen({super.key});
@@ -24,6 +25,12 @@ class FeedbackListScreen extends StatefulWidget {
 class _FeedbackListScreenState extends State<FeedbackListScreen> {
   final TextEditingController searchController = TextEditingController();
   String selectedColumn = 'MaGY';
+  String filterValue = '';
+  Map<String, String> filters = {
+    'MaGY': '',
+    'MaKH': '',
+    'MaNV': '',
+  };
   bool showSearchOptions = false;
 
   List<Map<String, dynamic>> feedbacks = [];
@@ -102,16 +109,37 @@ class _FeedbackListScreenState extends State<FeedbackListScreen> {
     onLayout: (PdfPageFormat format) async => pdf.save(),
   );
 }
+  Future<void> _filterFeedbacks() async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseURL/gopy/loc'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'MaGY': filters['MaGY'] ?? '',
+          'TieuDe': filters['TieuDe'] ?? '',
+          'MaKH': filters['MaKH'] ?? '',
+          'MaNV': filters['MaNV'] ?? '',
+        })
+      );
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        if (json['success'] == true) {
+          setState(() {
+            feedbacks = List<Map<String, dynamic>>.from(json['data']);
+          });
+        }
+      }
+      else {
+        print('❌ Server trả về lỗi khi lọc hỗ trợ');
+      }
+    }
+    catch (e) {
+      print('❌ Lỗi kết nối khi lọc hỗ trợ: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final filteredList = feedbacks.where((item) {
-      final searchLower = searchController.text.toLowerCase();
-      if (searchLower.isEmpty) return true;
-      final field = (item[selectedColumn]?.toString() ?? '').toLowerCase();
-      return field.contains(searchLower);
-    }).toList();
-
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: CustomAppBarAdmin(),
@@ -157,7 +185,7 @@ class _FeedbackListScreenState extends State<FeedbackListScreen> {
                             icon: const Icon(Icons.clear),
                             onPressed: () {
                               searchController.clear();
-                              setState(() {});
+                              _fetchFeedbacks();
                             },
                           ),
                           enabledBorder: OutlineInputBorder(
@@ -170,7 +198,7 @@ class _FeedbackListScreenState extends State<FeedbackListScreen> {
                           ),
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         ),
-                        onChanged: (_) => setState(() {}),
+                        onChanged: (_) => _filterFeedbacks()
                       ),
 
                       const SizedBox(height: 16),
@@ -193,29 +221,18 @@ class _FeedbackListScreenState extends State<FeedbackListScreen> {
                             spacing: 8,
                             runSpacing: 8,
                             children: [
-                              ChoiceChipSelector(
-                                label: 'Mã góp ý',
-                                value: 'MaGY',
-                                selectedValue: selectedColumn,
-                                onSelected: (val) => setState(() => selectedColumn = val),
-                              ),
-                              ChoiceChipSelector(
-                                label: 'Tiêu đề',
-                                value: 'TieuDe',
-                                selectedValue: selectedColumn,
-                                onSelected: (val) => setState(() => selectedColumn = val),
-                              ),
-                              ChoiceChipSelector(
-                                label: 'Khách hàng',
-                                value: 'MaKH',
-                                selectedValue: selectedColumn,
-                                onSelected: (val) => setState(() => selectedColumn = val),
-                              ),
-                              ChoiceChipSelector(
-                                label: 'Nhân viên',
-                                value: 'MaNV',
-                                selectedValue: selectedColumn,
-                                onSelected: (val) => setState(() => selectedColumn = val),
+                              FilterChipWithInputInline(
+                                filters: [
+                                  {'label': 'Mã góp ý', 'value': 'MaGY'},
+                                  {'label': 'Tiêu đề', 'value': 'TieuDe'},
+                                  {'label': 'Mã khách hàng', 'value': 'MaKH'},
+                                  {'label': 'Mã nhân viên', 'value': 'MaNV'},
+                                ], 
+                                filterValues: filters, 
+                                onFilterChanged: (updated) {
+                                  setState(() => filters = updated);
+                                  _filterFeedbacks(); 
+                                },
                               ),
                             ],
                           ),
@@ -227,7 +244,7 @@ class _FeedbackListScreenState extends State<FeedbackListScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Tổng số: ${filteredList.length}',
+                            'Tổng số: ${feedbacks.length}',
                             style: const TextStyle(fontFamily: 'Inter'),
                           ),
                           Row(
@@ -236,7 +253,7 @@ class _FeedbackListScreenState extends State<FeedbackListScreen> {
                                 icon: const Icon(Icons.print),
                                 tooltip: 'Xuất PDF góp ý',
                                 onPressed: () async {
-                                  await exportFeedbackToPDF(filteredList);
+                                  await exportFeedbackToPDF(feedbacks);
                                 },
                               ),
                               const SizedBox(width: 8),
@@ -312,7 +329,7 @@ class _FeedbackListScreenState extends State<FeedbackListScreen> {
                                 ),
                               ),
                             ],
-                            rows: filteredList.map((feedback) {
+                            rows: feedbacks.map((feedback) {
                               return DataRow(
                                 cells: [
                                   DataCell(

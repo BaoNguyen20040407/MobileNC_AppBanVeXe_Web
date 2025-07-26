@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/widget/exit_button.dart';
@@ -11,8 +12,8 @@ import 'package:printing/printing.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:giao_dien_1/view/admin/home_admin/manage_station.dart';
 import 'package:giao_dien_1/config/config.dart';
-import 'package:giao_dien_1/widget/choice_chip_selector.dart';
 import 'package:giao_dien_1/widget/pagination_control.dart';
+import 'package:giao_dien_1/widget/filter_chip_with_input.dart';
 
 class StationList extends StatefulWidget {
   const StationList({super.key});
@@ -22,360 +23,399 @@ class StationList extends StatefulWidget {
 }
 
 class _StationListState extends State<StationList> {
-  List<dynamic> stationList = [];
-  final TextEditingController searchController = TextEditingController();
-  String selectedColumn = 'MaBX'; // Mặc định tìm theo Mã BX
+  List<Map<String, dynamic>> stationList = [];
+  List<Map<String, dynamic>> filteredList = [];
   bool showSearchOptions = false;
+
+  final TextEditingController searchController = TextEditingController();
+  Map<String, String> filters = {
+    'MaBX': '',
+    'TenBX': '',
+    'DiaChi': '',
+    'TinhThanh': '',
+  };
+
+  Timer? _debounce;
 
   @override
   void initState() {
     super.initState();
     fetchStations();
+
+    searchController.addListener(() {
+      if (_debounce?.isActive ?? false) _debounce!.cancel();
+      _debounce = Timer(const Duration(milliseconds: 300), () {
+        _filterStations();
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    _debounce?.cancel();
+    super.dispose();
   }
 
   Future<void> fetchStations() async {
-    final response = await http.get(Uri.parse('$baseURL/benxe'));
+    try {
+      final response = await http.get(Uri.parse('$baseURL/benxe'));
 
-    if (response.statusCode == 200) {
-      setState(() {
-        stationList = jsonDecode(response.body);
-      });
-    } else {
-      print('Lỗi khi lấy dữ liệu');
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonList = jsonDecode(response.body);
+        final List<Map<String, dynamic>> parsedList =
+            List<Map<String, dynamic>>.from(jsonList.map((e) => Map<String, dynamic>.from(e)));
+
+        setState(() {
+          stationList = parsedList;
+          _filterStations(); // Lọc lần đầu sau khi fetch
+        });
+
+        print('✅ Fetch thành công: ${stationList.length} bến xe');
+      } else {
+        print('❌ Lỗi khi fetch bến xe: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('❌ Lỗi kết nối: $e');
     }
   }
 
-  Future<void> exportToPDF(List<dynamic> data) async {
-  final pdf = pw.Document();
+  void _filterStations() {
+  String keyword = searchController.text.trim().toLowerCase();
 
-  final fontData = await rootBundle.load('assets/font/inter_18pt_regular.ttf');
-  final ttf = pw.Font.ttf(fontData.buffer.asByteData());
+  setState(() {
+    filteredList = stationList.where((station) {
+      // 1. Kiểm tra keyword search chung (nếu có)
+      final matchesSearch = keyword.isEmpty
+          ? true
+          : station.values.any((value) =>
+              value != null &&
+              value.toString().toLowerCase().contains(keyword));
 
-  pdf.addPage(
-    pw.Page(
-      build: (pw.Context context) {
-        return pw.Table.fromTextArray(
-          headers: ['Mã BX', 'Tên Bến Xe', 'Tỉnh/Thành'],
-          data: data.map((station) {
-            return [
-              station['MaBX'] ?? '',
-              station['TenBX'] ?? '',
-              station['TinhThanh'] ?? '',
-            ];
-          }).toList(),
-          cellStyle: pw.TextStyle(font: ttf, fontSize: 12),
-          headerStyle: pw.TextStyle(font: ttf, fontSize: 14, fontWeight: pw.FontWeight.bold),
-        );
-      },
-    ),
-  );
+      // 2. Kiểm tra từng filter chi tiết
+      final matchesFilters = filters.entries.every((entry) {
+        final key = entry.key;
+        final filterValue = entry.value.trim().toLowerCase();
 
-  await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+        if (filterValue.isEmpty) return true;
+
+        final fieldValue = station[key]?.toString().toLowerCase() ?? '';
+
+        // Dùng startsWith để lọc chính xác hơn
+        return fieldValue.startsWith(filterValue);
+      });
+
+      // 3. Kết hợp cả 2 điều kiện
+      return matchesSearch && matchesFilters;
+    }).toList();
+  });
 }
 
+  Future<void> exportToPDF(List<Map<String, dynamic>> data) async {
+    final pdf = pw.Document();
+    final fontData = await rootBundle.load('assets/font/inter_18pt_regular.ttf');
+    final ttf = pw.Font.ttf(fontData.buffer.asByteData());
+
+    pdf.addPage(
+      pw.Page(
+        build: (pw.Context context) {
+          return pw.Table.fromTextArray(
+            headers: ['Mã BX', 'Tên BX', 'Tỉnh/Thành'],
+            data: data.map((station) {
+              return [
+                station['MaBX'] ?? '',
+                station['TenBX'] ?? '',
+                station['TinhThanh'] ?? '',
+              ];
+            }).toList(),
+            cellStyle: pw.TextStyle(font: ttf, fontSize: 12),
+            headerStyle: pw.TextStyle(font: ttf, fontSize: 14, fontWeight: pw.FontWeight.bold),
+          );
+        },
+      ),
+    );
+
+    await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+  }
+
   @override
-Widget build(BuildContext context) {
-  List<dynamic> filteredList = stationList.where((station) {
-    final value = (station[selectedColumn] ?? '').toString().toLowerCase();
-    final keyword = searchController.text.toLowerCase();
-    return value.contains(keyword);
-  }).toList();
-
-  return Scaffold(
-    backgroundColor: AppColors.white,
-    appBar: CustomAppBarAdmin(),
-    body: SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 32, 16, 32),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // ✅ KHUNG CHÍNH
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              border: Border.all(color: AppColors.mainOrange, width: 1),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              color: Colors.white,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Center(
-                      child: Text(
-                        'DANH SÁCH BẾN XE',
-                        style: TextStyle(
-                          color: Colors.redAccent,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Inter',
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.white,
+      appBar: CustomAppBarAdmin(),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(16, 32, 16, 32),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // KHUNG CHÍNH
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                border: Border.all(color: AppColors.mainOrange, width: 1),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                color: Colors.white,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Center(
+                        child: Text(
+                          'DANH SÁCH BẾN XE',
+                          style: TextStyle(
+                            color: Colors.redAccent,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Inter',
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
+                      const SizedBox(height: 16),
 
-                    // Tìm kiếm
-                    TextField(
-                      controller: searchController,
-                      decoration: InputDecoration(
-                        hintText: 'Nhập từ khóa...',
-                        hintStyle: const TextStyle(fontFamily: 'Inter'),
-                        suffixIcon: IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            searchController.clear();
-                            setState(() {});
-                          },
+                      // Tìm kiếm
+                      TextField(
+                        controller: searchController,
+                        decoration: InputDecoration(
+                          hintText: 'Nhập từ khóa...',
+                          hintStyle: const TextStyle(fontFamily: 'Inter'),
+                          suffixIcon: IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                searchController.clear();
+                                _filterStations();
+                              }),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(color: AppColors.mainOrange, width: 1.5),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(color: AppColors.mainOrange, width: 2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(color: AppColors.mainOrange, width: 1.5),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(color: AppColors.mainOrange, width: 2),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       ),
-                      onChanged: (_) => setState(() {}),
-                    ),
 
-                    const SizedBox(height: 16),
+                      const SizedBox(height: 16),
 
-                    // Bộ lọc
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text("Tìm kiếm theo: ", style: TextStyle(fontFamily: 'Inter')),
-                        IconButton(
-                          icon: Icon(showSearchOptions ? Icons.expand_less : Icons.expand_more),
-                          onPressed: () {
-                            setState(() {
-                              showSearchOptions = !showSearchOptions;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                    if (showSearchOptions)
-                      Column(
+                      //Bộ lọc
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const SizedBox(height: 8),
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: [
-                                ChoiceChipSelector(
-                                  label: 'Mã BX',
-                                  value: 'MaBX',
-                                  selectedValue: selectedColumn,
-                                  onSelected: (val) => setState(() => selectedColumn = val),
-                                ),
-                                const SizedBox(width: 8),
-                                ChoiceChipSelector(
-                                  label: 'Tên bến xe',
-                                  value: 'TenBX',
-                                  selectedValue: selectedColumn,
-                                  onSelected: (val) => setState(() => selectedColumn = val),
-                                ),
-                                const SizedBox(width: 8),
-                                ChoiceChipSelector(
-                                  label: 'Địa chỉ',
-                                  value: 'DiaChi',
-                                  selectedValue: selectedColumn,
-                                  onSelected: (val) => setState(() => selectedColumn = val),
-                                ),
-                                const SizedBox(width: 8),
-                                ChoiceChipSelector(
-                                  label: 'Tỉnh/Thành',
-                                  value: 'TinhThanh',
-                                  selectedValue: selectedColumn,
-                                  onSelected: (val) => setState(() => selectedColumn = val),
-                                ),
-                              ],
-                            ),
+                          const Text("Tìm kiếm theo:", style: TextStyle(fontFamily: 'Inter')),
+                          IconButton(
+                            icon: Icon(showSearchOptions ? Icons.expand_less : Icons.expand_more),
+                            onPressed: () {
+                              setState(() {
+                                showSearchOptions = !showSearchOptions;
+                                print('showSearchOptions: $showSearchOptions'); // debug
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                      if (showSearchOptions)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: FilterChipWithInputInline(
+                            filters: [
+                              {'label': 'Mã BX', 'value': 'MaBX'},
+                              {'label': 'Tên BX', 'value': 'TenBX'},
+                              {'label': 'Địa chỉ', 'value': 'DiaChi'},
+                              {'label': 'Tỉnh/Thành', 'value': 'TinhThanh'},
+                            ],
+                            filterValues: filters,
+                            onFilterChanged: (updated) {
+                              setState(() => filters = updated);
+                              _filterStations();
+                            },
+                          ),
+                        ),
+                      const SizedBox(height: 8),
+
+                      // Tổng số + icon
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Tổng số: ${filteredList.length}',
+                              style: const TextStyle(fontFamily: 'Inter')),
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.print),
+                                tooltip: 'Xuất PDF',
+                                onPressed: () => exportToPDF(filteredList),
+                              ),
+                              const SizedBox(width: 8),
+                              IconButton(
+                                icon: const Icon(Icons.add_circle),
+                                tooltip: 'Thêm bến xe',
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => const AddStation()),
+                                  );
+                                },
+                              ),
+                            ],
                           ),
                         ],
                       ),
 
-                    const SizedBox(height: 8),
+                      const SizedBox(height: 16),
 
-                    // Tổng số + icon
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Tổng số: ${filteredList.length}', style: const TextStyle(fontFamily: 'Inter')),
-                        Row(
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.print),
-                              tooltip: 'Xuất PDF',
-                              onPressed: () => exportToPDF(filteredList),
-                            ),
-                            const SizedBox(width: 8),
-                            IconButton(
-                              icon: const Icon(Icons.add_circle),
-                              tooltip: 'Thêm bến xe',
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => const AddStation()),
-                                );
-                              },
-                            ),
-                          ],
+                      // Bảng dữ liệu
+                      Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.mainOrange),
+                          borderRadius: BorderRadius.circular(6),
                         ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Bảng dữ liệu
-                    Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.mainOrange),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: DataTable(
-                          headingRowColor: MaterialStateProperty.all(AppColors.softOrange),
-                          columnSpacing: 8,
-                          dataRowMinHeight: 40,
-                          dataRowMaxHeight: 48,
-                          columns: const [
-                            DataColumn(
-                              label: SizedBox(
-                                width: 80,
-                                child: Text(
-                                  'Mã BX',
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: DataTable(
+                            headingRowColor: MaterialStateProperty.all(AppColors.softOrange),
+                            columnSpacing: 8,
+                            dataRowMinHeight: 40,
+                            dataRowMaxHeight: 48,
+                            columns: const [
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 80,
+                                  child: Text(
+                                    'Mã BX',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                  ),
                                 ),
                               ),
-                            ),
-                            DataColumn(
-                              label: SizedBox(
-                                width: 160,
-                                child: Text(
-                                  'Tên Bến xe',
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 160,
+                                  child: Text(
+                                    'Tên Bến xe',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                  ),
                                 ),
                               ),
-                            ),
-                            DataColumn(
-                              label: SizedBox(
-                                width: 250,
-                                child: Text(
-                                  'Địa chỉ',
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 250,
+                                  child: Text(
+                                    'Địa chỉ',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                  ),
                                 ),
                               ),
-                            ),
-                            DataColumn(
-                              label: SizedBox(
-                                width: 120,
-                                child: Text(
-                                  'Tỉnh/Thành',
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 120,
+                                  child: Text(
+                                    'Tỉnh/Thành',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
-                          rows: filteredList.map((station) {
-                            return DataRow(
-                              cells: [
-                                DataCell(
-                                  SizedBox(
-                                    width: 80,
-                                    child: InkWell(
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(builder: (context) => EditStation(station: station)),
-                                        );
-                                      },
+                            ],
+                            rows: filteredList.map((station) {
+                              return DataRow(
+                                cells: [
+                                  DataCell(
+                                    SizedBox(
+                                      width: 80,
+                                      child: InkWell(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    EditStation(station: station)),
+                                          );
+                                        },
+                                        child: Text(
+                                          station['MaBX'] ?? '',
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(fontFamily: 'Inter'),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    SizedBox(
+                                      width: 160,
                                       child: Text(
-                                        station['MaBX'] ?? '',
+                                        station['TenBX'] ?? '',
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(fontFamily: 'Inter'),
                                       ),
                                     ),
                                   ),
-                                ),
-                                DataCell(
-                                  SizedBox(
-                                    width: 160,
-                                    child: Text(
-                                      station['TenBX'] ?? '',
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(fontFamily: 'Inter'),
+                                  DataCell(
+                                    SizedBox(
+                                      width: 250,
+                                      child: Text(
+                                        station['DiaChi'] ?? '',
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(fontFamily: 'Inter'),
+                                      ),
                                     ),
                                   ),
-                                ),
-                                DataCell(
-                                  SizedBox(
-                                    width: 250,
-                                    child: Text(
-                                      station['DiaChi'] ?? '',
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(fontFamily: 'Inter'),
+                                  DataCell(
+                                    SizedBox(
+                                      width: 120,
+                                      child: Text(
+                                        station['TinhThanh'] ?? '',
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(fontFamily: 'Inter'),
+                                      ),
                                     ),
                                   ),
-                                ),
-                                DataCell(
-                                  SizedBox(
-                                    width: 120,
-                                    child: Text(
-                                      station['TinhThanh'] ?? '',
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(fontFamily: 'Inter'),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            );
-                          }).toList(),
+                                ],
+                              );
+                            }).toList(),
+                          ),
                         ),
                       ),
-                    ),
 
+                      const SizedBox(height: 16),
 
-                    const SizedBox(height: 16),
-
-                    // Phân trang
-                    PaginationControls(
-                      currentPage: 1,
-                      onFirstPressed: () {
-                        print("Go to first page");
-                      },
-                      onLastPressed: () {
-                        print("Go to last page");
-                      },
-                    ),
-                  ],
+                      // Phân trang (demo, chưa có logic thật)
+                      PaginationControls(
+                        currentPage: 1,
+                        onFirstPressed: () {
+                          print("Go to first page");
+                        },
+                        onLastPressed: () {
+                          print("Go to last page");
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
 
-          // ✅ EXIT BUTTON Ở NGOÀI KHUNG
-          const SizedBox(height: 32),
-          ExitButton(
-            onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => ManageStationScreen()),
-              );
-            },
-          ),
-        ],
+            // EXIT BUTTON Ở NGOÀI KHUNG
+            const SizedBox(height: 32),
+            ExitButton(
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => ManageStationScreen()),
+                );
+              },
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 }

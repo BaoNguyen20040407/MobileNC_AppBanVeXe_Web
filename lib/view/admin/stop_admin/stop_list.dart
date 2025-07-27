@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/widget/exit_button.dart';
 import 'package:giao_dien_1/widget/appbar_admin.dart';
+import 'package:giao_dien_1/widget/filter_chip_with_input.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:pdf/widgets.dart' as pw;
@@ -13,6 +14,7 @@ import 'package:giao_dien_1/view/admin/stop_admin/add_stop.dart';
 import 'package:giao_dien_1/view/admin/stop_admin/edit_stop.dart';
 import 'package:giao_dien_1/config/config.dart';
 import 'package:giao_dien_1/widget/pagination_control.dart';
+import 'dart:async';
 
 class StopList extends StatefulWidget {
   const StopList({super.key});
@@ -22,28 +24,82 @@ class StopList extends StatefulWidget {
 }
 
 class _StopListState extends State<StopList> {
-  List<dynamic> transferList = [];
+  List<Map<String, dynamic>> transferList = [];
+  List<Map<String, dynamic>> filteredList = [];
   final TextEditingController searchController = TextEditingController();
   String selectedColumn = 'MaCX';
+  Timer? _debounce;
   bool showSearchOptions = false;
+
+  Map<String, String> filters = {
+    'MaCX': '',
+    'ThuTu': '',
+    'DiemDung': '',
+    'ThoiGianDen': '',
+    'ThoiGianDi': '',
+  };
 
   @override
   void initState() {
     super.initState();
     fetchTransfers();
+    searchController.addListener(() {
+      if (_debounce?.isActive ?? false) _debounce!.cancel();
+      _debounce = Timer(const Duration(milliseconds: 300), () {
+        filters[selectedColumn] = searchController.text.trim();
+        fetchTransfers();
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    _debounce?.cancel();
+    super.dispose();
   }
 
   Future<void> fetchTransfers() async {
-    final response = await http.get(Uri.parse('$baseURL/trungchuyen'));
+  final payload = <String, dynamic>{};
 
-    if (response.statusCode == 200) {
-      setState(() {
-        transferList = jsonDecode(response.body);
-      });
-    } else {
-      print('Lỗi khi lấy dữ liệu');
+  filters.forEach((k, v) {
+    if (v.trim().isNotEmpty) {
+      if (k == 'ThuTu') {
+        final number = int.tryParse(v.trim());
+        if (number != null) payload[k] = number;
+      } else {
+        payload[k] = v.trim();
+      }
     }
+  });
+
+  try {
+    final resp = await http.post(
+      Uri.parse('$baseURL/trungchuyen/loc'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(payload),
+    );
+
+    if (resp.statusCode == 200) {
+      final jsonResp = jsonDecode(resp.body);
+      if (jsonResp['success'] == true) {
+        final list = List<Map<String, dynamic>>.from(
+          (jsonResp['data'] as List).map((e) => Map<String, dynamic>.from(e)),
+        );
+        setState(() {
+          transferList = list;
+          filteredList = list;
+        });
+      } else {
+        print('Lỗi dữ liệu trả về: ${jsonResp['message']}');
+      }
+    } else {
+      print('Lỗi kết nối API: ${resp.statusCode}');
+    }
+  } catch (e) {
+    print('Lỗi ngoại lệ fetchTransfers: $e');
   }
+}
 
   Future<void> exportToPDF(List<dynamic> data) async {
     final pdf = pw.Document();
@@ -77,12 +133,6 @@ class _StopListState extends State<StopList> {
 
   @override
   Widget build(BuildContext context) {
-    List<dynamic> filteredList = transferList.where((item) {
-      final value = (item[selectedColumn] ?? '').toString().toLowerCase();
-      final keyword = searchController.text.toLowerCase();
-      return value.contains(keyword);
-    }).toList();
-
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: CustomAppBarAdmin(),
@@ -128,7 +178,8 @@ class _StopListState extends State<StopList> {
                             icon: const Icon(Icons.clear),
                             onPressed: () {
                               searchController.clear();
-                              setState(() {});
+                              filters[selectedColumn] = '';
+                              fetchTransfers();
                             },
                           ),
                           enabledBorder: OutlineInputBorder(
@@ -141,57 +192,43 @@ class _StopListState extends State<StopList> {
                           ),
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         ),
-                        onChanged: (_) => setState(() {}),
+                      onChanged: (value) {
+                        filters[selectedColumn] = value.trim();
+                      },
+
                       ),
                       const SizedBox(height: 16),
                       // Bộ lọc
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text("Tìm kiếm theo: ", style: TextStyle(fontFamily: 'Inter')),
-                          IconButton(
-                            icon: Icon(showSearchOptions ? Icons.expand_less : Icons.expand_more),
-                            onPressed: () {
-                              setState(() {
-                                showSearchOptions = !showSearchOptions;
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                      if (showSearchOptions)
-                        Column(
-                          children: [
-                            const SizedBox(height: 8),
-                            SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                children: [
-                                  ChoiceChipSelector(
-                                    label: 'Mã CX',
-                                    value: 'MaCX',
-                                    selectedValue: selectedColumn,
-                                    onSelected: (val) => setState(() => selectedColumn = val),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  ChoiceChipSelector(
-                                    label: 'Thứ tự',
-                                    value: 'ThuTu',
-                                    selectedValue: selectedColumn,
-                                    onSelected: (val) => setState(() => selectedColumn = val),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  ChoiceChipSelector(
-                                    label: 'Điểm dừng',
-                                    value: 'DiemDung',
-                                    selectedValue: selectedColumn,
-                                    onSelected: (val) => setState(() => selectedColumn = val),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text("Tìm kiếm theo:", style: TextStyle(fontFamily: 'Inter')),
+                        IconButton(
+                          icon: Icon(showSearchOptions
+                              ? Icons.expand_less
+                              : Icons.expand_more),
+                          onPressed: () {
+                            setState(() => showSearchOptions = !showSearchOptions);
+                          },
                         ),
+                      ],
+                    ),
+                      if (showSearchOptions)
+                        FilterChipWithInputInline(
+                          filters: [
+                            {'label': 'Mã CX', 'value': 'MaCX'},
+                            {'label': 'Thứ tự', 'value': 'ThuTu'},
+                            {'label': 'Điểm dừng', 'value': 'DiemDung'},
+                            {'label': 'Thời gian đến', 'value': 'ThoiGianDen'},
+                            {'label': 'Thời gian đi', 'value': 'ThoiGianDi'},
+                          ],
+                          filterValues: filters, 
+                          onFilterChanged: (upd){
+                            setState(() {
+                              filters = upd;
+                              fetchTransfers();
+                            });
+                          }),
                       const SizedBox(height: 8),
                       // Tổng số + nút
                       Row(
@@ -233,62 +270,96 @@ class _StopListState extends State<StopList> {
                           child: DataTable(
                             headingRowColor: MaterialStateProperty.all(AppColors.softOrange),
                             columnSpacing: 8,
-                            dataRowMinHeight: 40,
-                            dataRowMaxHeight: 48,
                             columns: const [
                               DataColumn(
                                 label: SizedBox(
-                                  width: 80, 
+                                  width: 80,
                                   child: Text(
-                                    'Mã CX', 
-                                    style: TextStyle(
-                                      fontFamily: 'Inter', 
-                                      fontWeight: FontWeight.bold
-                                    ),
-                                  )
-                                )
+                                    'Mã CX',
+                                    style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.bold),
+                                  ),
+                                ),
                               ),
                               DataColumn(
                                 label: SizedBox(
-                                  width: 80, 
+                                  width: 60,
                                   child: Text(
-                                    'Thứ tự', 
-                                    style: TextStyle(
-                                      fontFamily: 'Inter', 
-                                      fontWeight: FontWeight.bold
-                                    )
-                                  )
-                                )
+                                    'Thứ tự',
+                                    style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.bold),
+                                  ),
+                                ),
                               ),
                               DataColumn(
                                 label: SizedBox(
-                                  width: 200, 
+                                  width: 220,
                                   child: Text(
-                                    'Điểm dừng', 
-                                    style: TextStyle(
-                                      fontFamily: 'Inter', 
-                                      fontWeight: FontWeight.bold
-                                    )
-                                  )
-                                )
+                                    'Điểm dừng',
+                                    style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 140,
+                                  child: Text(
+                                    'Thời gian đến',
+                                    style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 140,
+                                  child: Text(
+                                    'Thời gian đi',
+                                    style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.bold),
+                                  ),
+                                ),
                               ),
                             ],
                             rows: filteredList.map((item) {
                               return DataRow(
                                 cells: [
                                   DataCell(
-                                    InkWell(
-                                      onTap: () {
-                                       Navigator.push(
-                                          context,
-                                          MaterialPageRoute(builder: (context) => EditStop(stop: item)),
-                                        );
-                                      },
-                                      child: Text(item['MaCX'] ?? ''),
+                                    SizedBox(
+                                      width: 80,
+                                      child: InkWell(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => EditStop(stop: item),
+                                            ),
+                                          );
+                                        },
+                                        child: Text(item['MaCX'] ?? ''),
+                                      ),
                                     ),
                                   ),
-                                  DataCell(Text(item['ThuTu'].toString())),
-                                  DataCell(Text(item['DiemDung'] ?? '')),
+                                  DataCell(
+                                    SizedBox(
+                                      width: 60,
+                                      child: Text(item['ThuTu']?.toString() ?? ''),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    SizedBox(
+                                      width: 220,
+                                      child: Text(item['DiemDung'] ?? ''),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    SizedBox(
+                                      width: 140,
+                                      child: Text(item['ThoiGianDen'] ?? ''),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    SizedBox(
+                                      width: 140,
+                                      child: Text(item['ThoiGianDi'] ?? ''),
+                                    ),
+                                  ),
                                 ],
                               );
                             }).toList(),

@@ -3,6 +3,7 @@ import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/view/admin/home_admin/manage_trip.dart';
 import 'package:giao_dien_1/widget/exit_button.dart';
 import 'package:giao_dien_1/widget/appbar_admin.dart';
+import 'package:giao_dien_1/widget/filter_chip_with_input.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:giao_dien_1/view/admin/assignment_admin/add_assignment.dart';
@@ -13,6 +14,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:giao_dien_1/config/config.dart';
 import 'package:giao_dien_1/widget/choice_chip_selector.dart';
 import 'package:giao_dien_1/widget/pagination_control.dart';
+import 'dart:async';
 
 class AssignmentList extends StatefulWidget {
   const AssignmentList({super.key});
@@ -22,27 +24,76 @@ class AssignmentList extends StatefulWidget {
 }
 
 class _AssignmentListState extends State<AssignmentList> {
-  List<dynamic> assignmentList = [];
+  List<Map<String, dynamic>> assignmentList = [];
+  List<Map<String, dynamic>> filteredList = [];
   final TextEditingController searchController = TextEditingController();
   String selectedColumn = 'MaCX';
+  Timer? _debounce;
   bool showSearchOptions = false;
+
+  Map<String, String> filters = {
+    'MaCX': '',
+    'MaNV': '',
+    'ViTri': '',
+    'NgayPhanCong': '',
+  };
 
   @override
   void initState() {
     super.initState();
     fetchAssignments();
+    searchController.addListener(() {
+      if (_debounce?.isActive ?? false) _debounce!.cancel();
+      _debounce = Timer(const Duration(milliseconds: 300), () {
+        filters[selectedColumn] = searchController.text.trim();
+        fetchAssignments();
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    _debounce?.cancel();
+    super.dispose();
   }
 
   Future<void> fetchAssignments() async {
-    final response = await http.get(Uri.parse('$baseURL/phancong'));
-    if (response.statusCode == 200) {
+  final payload = <String, dynamic>{};
+
+  filters.forEach((k, v) {
+    if (v.trim().isNotEmpty) {
+      if (k == 'NgayPhanCong') {
+        payload[k] = v.trim(); // giữ dạng chuỗi yyyy-MM-dd
+      } else {
+        payload[k] = v.trim();
+      }
+    }
+  });
+
+  final resp = await http.post(
+    Uri.parse('$baseURL/phancong/loc'),
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode(payload),
+  );
+
+  if (resp.statusCode == 200) {
+    final jsonResp = jsonDecode(resp.body);
+    if (jsonResp['success'] == true) {
+      final list = List<Map<String, dynamic>>.from(
+        (jsonResp['data'] as List).map((e) => Map<String, dynamic>.from(e)),
+      );
       setState(() {
-        assignmentList = jsonDecode(response.body);
+        assignmentList = list;
+        filteredList = list;
       });
     } else {
-      print('Lỗi khi lấy dữ liệu');
+      print('Lỗi server: ${jsonResp['message']}');
     }
+  } else {
+    print('Lỗi API phancong/loc: ${resp.statusCode}');
   }
+}
 
   Future<void> exportToPDF(List<dynamic> data) async {
     final pdf = pw.Document();
@@ -74,12 +125,6 @@ class _AssignmentListState extends State<AssignmentList> {
 
   @override
   Widget build(BuildContext context) {
-    List<dynamic> filteredList = assignmentList.where((item) {
-      final value = (item[selectedColumn] ?? '').toString().toLowerCase();
-      final keyword = searchController.text.toLowerCase();
-      return value.contains(keyword);
-    }).toList();
-
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: CustomAppBarAdmin(),
@@ -124,7 +169,8 @@ class _AssignmentListState extends State<AssignmentList> {
                             icon: const Icon(Icons.clear),
                             onPressed: () {
                               searchController.clear();
-                              setState(() {});
+                              filters[selectedColumn] = '';
+                              fetchAssignments();
                             },
                           ),
                           enabledBorder: OutlineInputBorder(
@@ -137,56 +183,40 @@ class _AssignmentListState extends State<AssignmentList> {
                           ),
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         ),
-                        onChanged: (_) => setState(() {}),
+                        onChanged: (value) {
+                          filters[selectedColumn] = value.trim();
+                        },
                       ),
                       const SizedBox(height: 16),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text("Tìm kiếm theo: ", style: TextStyle(fontFamily: 'Inter')),
-                          IconButton(
-                            icon: Icon(showSearchOptions ? Icons.expand_less : Icons.expand_more),
-                            onPressed: () {
-                              setState(() {
-                                showSearchOptions = !showSearchOptions;
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                      if (showSearchOptions)
-                        Column(
-                          children: [
-                            const SizedBox(height: 8),
-                            SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                children: [
-                                  ChoiceChipSelector(
-                                    label: 'Mã CX',
-                                    value: 'MaCX',
-                                    selectedValue: selectedColumn,
-                                    onSelected: (val) => setState(() => selectedColumn = val),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  ChoiceChipSelector(
-                                    label: 'Mã NV',
-                                    value: 'MaNV',
-                                    selectedValue: selectedColumn,
-                                    onSelected: (val) => setState(() => selectedColumn = val),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  ChoiceChipSelector(
-                                    label: 'Vị trí',
-                                    value: 'ViTri',
-                                    selectedValue: selectedColumn,
-                                    onSelected: (val) => setState(() => selectedColumn = val),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text("Tìm kiếm theo:", style: TextStyle(fontFamily: 'Inter')),
+                        IconButton(
+                          icon: Icon(showSearchOptions
+                              ? Icons.expand_less
+                              : Icons.expand_more),
+                          onPressed: () {
+                            setState(() => showSearchOptions = !showSearchOptions);
+                          },
                         ),
+                      ],
+                    ),
+                      if (showSearchOptions)
+                        FilterChipWithInputInline(
+                          filters: [
+                            {'label': 'Mã CX', 'value': 'MaCX'},
+                            {'label': 'Mã NV', 'value': 'MaNV'},
+                            {'label': 'Vị trí', 'value': 'ViTri'},
+                            {'label': 'Ngày phân công', 'value': 'NgayPhanCong'},
+                          ], 
+                          filterValues: filters, 
+                          onFilterChanged: (upd) {
+                            setState(() {
+                              filters = upd;
+                              fetchAssignments();
+                            });
+                          }),
                       const SizedBox(height: 8),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -226,8 +256,6 @@ class _AssignmentListState extends State<AssignmentList> {
                           child: DataTable(
                             headingRowColor: MaterialStateProperty.all(AppColors.softOrange),
                             columnSpacing: 8,
-                            dataRowMinHeight: 40,
-                            dataRowMaxHeight: 48,
                             columns: const [
                               DataColumn(
                                 label: SizedBox(
@@ -247,23 +275,52 @@ class _AssignmentListState extends State<AssignmentList> {
                                   child: Text('Vị trí', style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter')),
                                 ),
                               ),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 160,
+                                  child: Text('Ngày phân công', style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter')),
+                                ),
+                              ),
                             ],
                             rows: filteredList.map((item) {
                               return DataRow(
                                 cells: [
                                   DataCell(
-                                    InkWell(
-                                      onTap: () {
-                                       Navigator.push(
-                                          context,
-                                          MaterialPageRoute(builder: (context) => EditAssignment(assignment: item)),
-                                        );
-                                      },
-                                      child: Text(item['MaCX'] ?? ''),
+                                    SizedBox(
+                                      width: 80,
+                                      child: InkWell(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => EditAssignment(assignment: item),
+                                            ),
+                                          );
+                                        },
+                                        child: Text(item['MaCX'] ?? ''),
+                                      ),
                                     ),
                                   ),
-                                  DataCell(Text(item['MaNV'] ?? '')),
-                                  DataCell(Text(item['ViTri'] ?? '')),
+                                  DataCell(
+                                    SizedBox(
+                                      width: 80,
+                                      child: Text(item['MaNV'] ?? ''),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    SizedBox(
+                                      width: 200,
+                                      child: Text(item['ViTri'] ?? ''),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    SizedBox(
+                                      width: 160,
+                                      child: Text(
+                                        (item['NgayPhanCong'] ?? '').toString().split('T').first, // YYYY-MM-DD
+                                      ),
+                                    ),
+                                  ),
                                 ],
                               );
                             }).toList(),

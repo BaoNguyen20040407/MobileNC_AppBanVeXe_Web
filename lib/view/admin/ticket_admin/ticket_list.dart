@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/view/admin/home_admin/homeadmin.dart';
+import 'package:giao_dien_1/view/admin/ticket_admin/edit_ticket.dart';
 import 'package:giao_dien_1/widget/appbar_admin.dart';
 import 'package:giao_dien_1/widget/exit_button.dart';
-import 'package:giao_dien_1/widget/choice_chip_selector.dart';
+import 'package:giao_dien_1/widget/filter_chip_with_input.dart';
 import 'package:giao_dien_1/widget/pagination_control.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'dart:async';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:giao_dien_1/config/config.dart';
 
 class TicketListScreen extends StatefulWidget {
   const TicketListScreen({super.key});
@@ -21,9 +26,85 @@ class _TicketListScreenState extends State<TicketListScreen> {
   final TextEditingController searchController = TextEditingController();
   String selectedColumn = 'MaVe';
   bool showSearchOptions = false;
+  Timer? _debounce;
 
-  // Giả lập danh sách vé, sau này thay bằng API call
-  final List<Map<String, dynamic>> filteredList = [];
+  List<Map<String, dynamic>> ticketList = [];
+  List<Map<String, dynamic>> filteredList = [];
+
+  Map<String, String> filters = {
+    'MaVe': '',
+    'LoaiVe': '',
+    'ViTriGheNgoi': '',
+    'GiaVe': '',
+    'TrangThai': '',
+    'HinhThucThanhToan': '',
+    'MaCX': '',
+    'MaKH': '',
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    fetchTickets();
+    searchController.addListener(() {
+      if (_debounce?.isActive ?? false) _debounce!.cancel();
+      _debounce = Timer(const Duration(milliseconds: 300), () {
+        filters[selectedColumn] = searchController.text.trim();
+        fetchTickets();
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    _debounce?.cancel();
+    super.dispose();
+  }
+
+  Future<void> fetchTickets() async {
+  final payload = <String, dynamic>{};
+  
+  filters.forEach((key, value) {
+    final trimmed = value.trim();
+    if (trimmed.isNotEmpty) {
+      // Các trường cần ép kiểu số
+      if (key == 'GiaVe') {
+        final number = double.tryParse(trimmed);
+        if (number != null) payload[key] = number;
+      } else {
+        payload[key] = trimmed;
+      }
+    }
+  });
+
+  try {
+    final resp = await http.post(
+      Uri.parse('$baseURL/ve/loc'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(payload),
+    );
+
+    if (resp.statusCode == 200) {
+      final jsonResp = jsonDecode(resp.body);
+      if (jsonResp['success'] == true) {
+        final list = List<Map<String, dynamic>>.from(
+          (jsonResp['data'] as List).map((e) => Map<String, dynamic>.from(e)),
+        );
+        setState(() {
+          ticketList = list;
+          filteredList = list;
+        });
+      } else {
+        print('❌ Lỗi từ server: ${jsonResp['message']}');
+      }
+    } else {
+      print('❌ Lỗi HTTP khi gọi /ve/loc: ${resp.statusCode}');
+    }
+  } catch (e) {
+    print('❌ Exception khi fetchTickets: $e');
+  }
+}
 
   Future<void> exportTicketsToPDF(List<dynamic> tickets) async {
   final pdf = pw.Document();
@@ -114,9 +195,9 @@ class _TicketListScreenState extends State<TicketListScreen> {
                             icon: const Icon(Icons.clear),
                             onPressed: () {
                               searchController.clear();
-                              setState(() {});
-                            },
-                          ),
+                              filters[selectedColumn] = '';
+                              fetchTickets();
+                            }),
                           enabledBorder: OutlineInputBorder(
                             borderSide: const BorderSide(color: AppColors.mainOrange, width: 1.5),
                             borderRadius: BorderRadius.circular(12),
@@ -127,7 +208,9 @@ class _TicketListScreenState extends State<TicketListScreen> {
                           ),
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         ),
-                        onChanged: (_) => setState(() {}),
+                        onChanged: (value) {
+                          filters[selectedColumn] = value.trim();
+                        },
                       ),
 
                       const SizedBox(height: 16),
@@ -138,51 +221,34 @@ class _TicketListScreenState extends State<TicketListScreen> {
                         children: [
                           const Text("Tìm kiếm theo:", style: TextStyle(fontFamily: 'Inter')),
                           IconButton(
-                            icon: Icon(showSearchOptions ? Icons.expand_less : Icons.expand_more),
-                            onPressed: () => setState(() => showSearchOptions = !showSearchOptions),
+                            icon: Icon(showSearchOptions
+                                ? Icons.expand_less
+                                : Icons.expand_more),
+                            onPressed: () {
+                              setState(() => showSearchOptions = !showSearchOptions);
+                            },
                           ),
                         ],
                       ),
-
                       if (showSearchOptions)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Wrap(
-                            spacing: 8,
-                            children: [
-                              ChoiceChipSelector(
-                                label: 'Mã vé',
-                                value: 'MaVe',
-                                selectedValue: selectedColumn,
-                                onSelected: (val) => setState(() => selectedColumn = val),
-                              ),
-                              ChoiceChipSelector(
-                                label: 'Loại vé',
-                                value: 'LoaiVe',
-                                selectedValue: selectedColumn,
-                                onSelected: (val) => setState(() => selectedColumn = val),
-                              ),
-                              ChoiceChipSelector(
-                                label: 'Vị trí ghế',
-                                value: 'ViTriGheNgoi',
-                                selectedValue: selectedColumn,
-                                onSelected: (val) => setState(() => selectedColumn = val),
-                              ),
-                              ChoiceChipSelector(
-                                label: 'Trạng thái',
-                                value: 'TrangThai',
-                                selectedValue: selectedColumn,
-                                onSelected: (val) => setState(() => selectedColumn = val),
-                              ),
-                              ChoiceChipSelector(
-                                label: 'Thanh toán',
-                                value: 'HinhThucThanhToan',
-                                selectedValue: selectedColumn,
-                                onSelected: (val) => setState(() => selectedColumn = val),
-                              ),
-                            ],
-                          ),
-                        ),
+                        FilterChipWithInputInline(
+                          filters: [
+                            {'label': 'Mã vé', 'value': 'MaVe'},
+                            {'label': 'Loại vé', 'value': 'LoaiVe'},
+                            {'label': 'Vị trí ghế ngồi', 'value': 'ViTriGheNgoi'},
+                            {'label': 'Giá vé', 'value': 'GiaVe'},
+                            {'label': 'Trạng thái', 'value': 'TrangThai'},
+                            {'label': 'Hình thức thanh toán', 'value': 'HinhThucThanhToan'},
+                            {'label': 'Mã CX', 'value': 'MaCX'},
+                            {'label': 'Mã NV', 'value': 'MaNV'},
+                          ], 
+                          filterValues: filters, 
+                          onFilterChanged: (upd) {
+                            setState(() {
+                              filters = upd;
+                              fetchTickets();
+                            });
+                          }),
 
                       const SizedBox(height: 8),
 
@@ -218,41 +284,153 @@ class _TicketListScreenState extends State<TicketListScreen> {
                       const SizedBox(height: 16),
 
                       // Dữ liệu hoặc thông báo trống
-                      filteredList.isEmpty
-                          ? Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: AppColors.mainOrange),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: const Center(
-                                child: Text(
-                                  'Chưa có dữ liệu để hiển thị',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey,
-                                    fontFamily: 'Inter',
-                                    fontWeight: FontWeight.w500,
+                      Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.mainOrange),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: DataTable(
+                            headingRowColor: MaterialStateProperty.all(AppColors.softOrange),
+                            columnSpacing: 8,
+                            columns: const [
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 100,
+                                  child: Text(
+                                    'Mã vé',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
                                   ),
                                 ),
                               ),
-                            )
-                          : ListView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: filteredList.length,
-                              itemBuilder: (context, index) {
-                                final ve = filteredList[index];
-                                return ListTile(
-                                  title: Text('Mã vé: ${ve['MaVe']}', style: const TextStyle(fontFamily: 'Inter')),
-                                  subtitle: Text('Ghế: ${ve['ViTriGheNgoi']} - ${ve['LoaiVe']}'),
-                                  trailing: Text('${ve['GiaVe']}đ'),
-                                );
-                              },
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 100,
+                                  child: Text(
+                                    'Loại vé',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                  ),
+                                ),
+                              ),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 100,
+                                  child: Text(
+                                    'Ghế ngồi',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                  ),
+                                ),
+                              ),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 100,
+                                  child: Text(
+                                    'Giá vé',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                  ),
+                                ),
+                              ),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 120,
+                                  child: Text(
+                                    'Trạng thái',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                  ),
+                                ),
+                              ),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 130,
+                                  child: Text(
+                                    'Thanh toán',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                  ),
+                                ),
+                              ),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 100,
+                                  child: Text(
+                                    'Mã CX',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                  ),
+                                ),
+                              ),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 100,
+                                  child: Text(
+                                    'Mã KH',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                  ),
+                                ),
+                              ),
+                            ],
+                            rows: filteredList.map((ve) {
+                        return DataRow(
+                          cells: [
+                            DataCell(
+                              SizedBox(
+                                width: 100,
+                                child: InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => EditTicket(ticket: ve),
+                                      ),
+                                    ).then((_) => fetchTickets());
+                                  },
+                                  child: Text(
+                                    ve['MaVe'] ?? '',
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(fontFamily: 'Inter'),
+                                  ),
+                                ),
+                              ),
                             ),
+                            DataCell(SizedBox(
+                              width: 100,
+                              child: Text(ve['LoaiVe'] ?? '', overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: 'Inter')),
+                            )),
+                            DataCell(SizedBox(
+                              width: 100,
+                              child: Text(ve['ViTriGheNgoi'] ?? '', overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: 'Inter')),
+                            )),
+                            DataCell(SizedBox(
+                              width: 100,
+                              child: Text(
+                                ve['GiaVe'] != null ? '${ve['GiaVe'].toStringAsFixed(0)}đ' : '',
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontFamily: 'Inter'),
+                              ),
+                            )),
+                            DataCell(SizedBox(
+                              width: 120,
+                              child: Text(ve['TrangThai'] ?? '', overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: 'Inter')),
+                            )),
+                            DataCell(SizedBox(
+                              width: 130,
+                              child: Text(ve['HinhThucThanhToan'] ?? '', overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: 'Inter')),
+                            )),
+                            DataCell(SizedBox(
+                              width: 100,
+                              child: Text(ve['MaCX'] ?? '', overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: 'Inter')),
+                            )),
+                            DataCell(SizedBox(
+                              width: 100,
+                              child: Text(ve['MaKH'] ?? '', overflow: TextOverflow.ellipsis, style: const TextStyle(fontFamily: 'Inter')),
+                            )),
+                          ],
+                        );
+                      }).toList(),
 
-                      const SizedBox(height: 16),
+                          ),
+                        ),
+                      ),
 
                       // Phân trang
                       PaginationControls(

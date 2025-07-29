@@ -176,7 +176,7 @@ class _TicketLast7DaysPageState extends State<TicketLast7DaysPage> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (_) => TicketDetails(),
+                                        builder: (_) => TicketDetails(maVe: ticket.maVe),
                                       ),
                                     );
                                   },

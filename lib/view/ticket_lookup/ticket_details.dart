@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:giao_dien_1/config/config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:giao_dien_1/config/default.dart';
@@ -12,9 +13,12 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:barcode/barcode.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 
 class TicketDetails extends StatefulWidget {
-  const TicketDetails({super.key});
+  final String maVe;
+
+  const TicketDetails({super.key, required this.maVe});
 
   @override
   State<TicketDetails> createState() => _TicketDetailsState();
@@ -32,6 +36,18 @@ class _TicketDetailsState extends State<TicketDetails> {
   List<String> _selectedSeats = [];
   String _diemDi = '';
   String _diemDen = '';
+  String _phuongThucThanhToan = '';
+  String _trangThaiThanhToan = '';
+
+  String formatDate(String rawDate) {
+  try {
+    final parsedDate = DateTime.parse(rawDate);
+    final formatter = DateFormat('dd/MM/yyyy'); // định dạng ngày/tháng/năm
+    return formatter.format(parsedDate);
+  } catch (e) {
+    return rawDate; // Nếu lỗi thì trả về nguyên bản
+  }
+}
 
   @override
   void initState() {
@@ -41,9 +57,38 @@ class _TicketDetailsState extends State<TicketDetails> {
 
 
   Future<void> _loadAndProcessData() async {
-  await _loadUserData();         // Load dữ liệu từ SharedPreferences
-  await _saveTicketToPrefs();    // Lưu lại vé
+  final url = Uri.parse('$baseURL/api/ve/${widget.maVe}');
+
+  try {
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+
+      setState(() {
+        _name = data['HoTen'] ?? '';
+        _phone = data['DienThoai'] ?? '';
+        _email = data['Email'] ?? '';
+        _pickupPoint = 'BX Nam Hải - TP. HCM'; // Tuỳ chỉnh nếu API có
+        _dropoffPoint = data['DiemDen'] ?? '';
+        _ngayDi = data['NgayDi'] ?? '';
+        _startTime = data['GioDi'] ?? '';
+        _totalPrice = data['GiaVe'] ?? 0;
+        _selectedSeats = [data['ViTriGheNgoi'] ?? ''];
+        _diemDi = data['DiemDi'] ?? '';
+        _diemDen = data['DiemDen'] ?? '';
+        _phuongThucThanhToan = data['HinhThucThanhToan'] ?? '---';
+        _trangThaiThanhToan = data['TrangThai'] ?? '---';
+      });
+
+    } else {
+      debugPrint('Lỗi API: ${response.statusCode}');
+    }
+  } catch (e) {
+    debugPrint('Lỗi gọi API: $e');
+  }
 }
+
 
   Future<void> _saveTicketToPrefs() async {
   if (_selectedSeats.isEmpty) return;
@@ -51,6 +96,7 @@ class _TicketDetailsState extends State<TicketDetails> {
   final prefs = await SharedPreferences.getInstance();
 
   final ticket = Ticket(
+  maVe: _selectedSeats.first,
   seatCode: _selectedSeats.first,
   fullName: _name,
   phone: _phone,
@@ -133,7 +179,7 @@ Future<void> _exportTicketToPDF() async {
             pw.SizedBox(height: 8),
             pw.Text('Tuyến: $_diemDi - $_diemDen', style: pw.TextStyle(font: ttf)),
             pw.SizedBox(height: 8),
-            pw.Text('Thời gian: $_startTime $_ngayDi', style: pw.TextStyle(font: ttf)),
+            pw.Text('Thời gian: $_startTime ${formatDate(_ngayDi)}', style: pw.TextStyle(font: ttf)),
             pw.SizedBox(height: 8),
             pw.RichText(
               text: pw.TextSpan(
@@ -157,9 +203,9 @@ Future<void> _exportTicketToPDF() async {
             pw.SizedBox(height: 8),
             pw.Text('Giá vé: ${formatCurrency(_totalPrice)}', style: pw.TextStyle(font: ttf)),
             pw.SizedBox(height: 8),
-            pw.Text('PTTT: Momo', style: pw.TextStyle(font: ttf)),
+            pw.Text('PTTT: $_phuongThucThanhToan', style: pw.TextStyle(font: ttf)),
             pw.SizedBox(height: 8),
-            pw.Text('Trạng thái: Thanh toán thành công', style: pw.TextStyle(font: ttf)),
+            pw.Text('Trạng thái: $_trangThaiThanhToan', style: pw.TextStyle(font: ttf)),
             pw.SizedBox(height: 24),
 
             // QR code căn giữa
@@ -307,7 +353,7 @@ Future<void> _exportTicketToPDF() async {
                 ),
                 const SizedBox(height: 8),
                 infoRow('Tuyến xe:', '$_diemDi - $_diemDen'),
-                infoRow('Thời gian:', '$_startTime $_ngayDi'),
+                infoRow('Thời gian:', '$_startTime ${formatDate(_ngayDi)}'),
                 infoRow('Số ghế:', _selectedSeats.join(', ')),
                 infoRow('Điểm lên xe:', 'BX Nam Hải - TP. HCM'),
                 infoRow('Giá vé:', formatCurrency(_totalPrice)),
@@ -328,10 +374,10 @@ Future<void> _exportTicketToPDF() async {
                 ),
                 const SizedBox(height: 8),
                 infoRow('Giá vé:', formatCurrency(_totalPrice)),
-                infoRow('PTTT:', 'Momo'),
+                infoRow('PTTT:', _phuongThucThanhToan),
                 const SizedBox(height: 4),
                 Row(
-                  children: const [
+                  children: [
                     SizedBox(
                       width: 120,
                       child: Text(
@@ -346,7 +392,7 @@ Future<void> _exportTicketToPDF() async {
                       child: Align(
                         alignment: Alignment.centerRight,
                         child: Text(
-                          'Thanh toán thành công',
+                          _trangThaiThanhToan,
                           style: TextStyle(
                             color: AppColors.greenDark,
                             fontFamily: 'Inter',

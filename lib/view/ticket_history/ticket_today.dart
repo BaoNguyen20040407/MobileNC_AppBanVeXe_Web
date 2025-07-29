@@ -172,7 +172,7 @@ class _TicketTodayPageState extends State<TicketTodayPage> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (_) => TicketDetails(),
+                                        builder: (_) => TicketDetails(maVe: ticket.maVe),
                                       ),
                                     );
                                   },

@@ -1,6 +1,7 @@
 import 'package:intl/intl.dart';
 
 class Ticket {
+  final String maVe;
   final String seatCode;
   final String fullName;
   final String phone;
@@ -12,6 +13,7 @@ class Ticket {
   final String pickupPoint;
 
   Ticket({
+    required this.maVe,
     required this.seatCode,
     required this.fullName,
     required this.phone,
@@ -41,6 +43,7 @@ class Ticket {
     final time = thoiGianDi != null ? DateFormat('HH:mm').format(thoiGianDi) : '';
 
     return Ticket(
+      maVe: json['MaVe'] ?? '',
       seatCode: json['ViTriGheNgoi'] ?? '',
       fullName: json['HoTen'] ?? 'Không rõ',
       phone: json['SoDienThoai'] ?? '',

@@ -169,7 +169,7 @@ class _TicketAllPageState extends State<TicketAllPage> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (_) => const TicketDetails(), // TODO: truyền ticket nếu cần
+                                        builder: (_) => TicketDetails(maVe: ticket.maVe), // TODO: truyền ticket nếu cần
                                       ),
                                     );
                                   },

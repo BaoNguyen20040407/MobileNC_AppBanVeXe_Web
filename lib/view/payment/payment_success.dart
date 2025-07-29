@@ -26,6 +26,9 @@ class _PaymentSuccessState extends State<PaymentSuccess> {
   int _totalPrice = 0;
   List<String> _selectedSeats = [];
 
+  // ✅ Thêm biến maVe
+  String _maVe = '';
+
   @override
   void initState() {
     super.initState();
@@ -45,6 +48,9 @@ class _PaymentSuccessState extends State<PaymentSuccess> {
       _startTime = prefs.getString('startTime') ?? '';
       _totalPrice = prefs.getInt('totalPrice') ?? 0;
       _selectedSeats = prefs.getStringList('selectedSeats') ?? [];
+
+      // ✅ Lấy maVe từ SharedPreferences
+      _maVe = prefs.getString('maVe') ?? '';
     });
 
     await _sendEmailTicket();
@@ -131,10 +137,17 @@ class _PaymentSuccessState extends State<PaymentSuccess> {
               const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: () {
+                  if (_maVe.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Không tìm thấy mã vé!')),
+                    );
+                    return;
+                  }
+
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const TicketDetails(),
+                      builder: (_) => TicketDetails(maVe: _maVe),
                       settings: const RouteSettings(name: '/ticket_details'),
                     ),
                   );
@@ -154,7 +167,7 @@ class _PaymentSuccessState extends State<PaymentSuccess> {
                     fontFamily: 'Inter',
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),

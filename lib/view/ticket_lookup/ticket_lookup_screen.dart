@@ -250,7 +250,7 @@ class _TicketLookupScreenState extends State<TicketLookupScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => TicketDetails(),
+                    builder: (_) => TicketDetails(maVe: ticket.maVe),
                     settings: const RouteSettings(name: '/ticket_details'),
                   ),
                 );

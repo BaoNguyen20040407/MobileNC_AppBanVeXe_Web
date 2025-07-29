@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:intl/intl.dart';
 import 'package:giao_dien_1/view/ticket_lookup/ticket_details.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/widget/appbar.dart';
 import 'package:giao_dien_1/widget/footer.dart';
 import 'package:giao_dien_1/model/ticket.dart';
-import 'dart:convert';
-import 'package:intl/intl.dart';
 import 'package:giao_dien_1/widget/ticket_info.dart';
+import 'package:giao_dien_1/config/config.dart';
 
 class TicketLookupScreen extends StatefulWidget {
   const TicketLookupScreen({super.key});
@@ -22,63 +23,50 @@ class _TicketLookupScreenState extends State<TicketLookupScreen> {
 
   List<Ticket> _foundTickets = [];
   bool _isSearched = false;
-
-  String formatCurrency(int value) {
-  return NumberFormat("#,###", "vi_VN").format(value);
-}
-
-  @override
-  void initState() {
-    super.initState();
-    _loadPhone();
-    _phoneController.addListener(_savePhone);
-  }
-
-  Future<void> _loadPhone() async {
-    final prefs = await SharedPreferences.getInstance();
-    final phone = prefs.getString('phone') ?? '';
-    setState(() {
-      _phoneController.text = phone;
-    });
-  }
-
-  Future<void> _savePhone() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('phone', _phoneController.text.trim());
-  }
+  bool _isLoading = false;
 
   Future<void> _findTicket() async {
-  final prefs = await SharedPreferences.getInstance();
-  final phone = _phoneController.text.trim();
-  final code = _ticketCodeController.text.trim();
-  final keys = prefs.getKeys();
+    final phone = _phoneController.text.trim();
+    final code = _ticketCodeController.text.trim();
 
-  List<Ticket> matchedTickets = [];
-
-  for (final key in keys) {
-    if (key.startsWith('ticket_${phone}_')) {
-      if (code.isEmpty || key.contains('_$code')) {
-        final ticketJson = prefs.getString(key);
-        if (ticketJson != null) {
-          matchedTickets.add(Ticket.fromJson(jsonDecode(ticketJson)));
-        }
-      }
+    if (phone.isEmpty || code.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng nhập đầy đủ số điện thoại và mã vé.')),
+      );
+      return;
     }
-  }
 
-  setState(() {
-    _isSearched = true;
-    _foundTickets = matchedTickets;
-  });
-}
+    setState(() {
+      _isSearched = true;
+      _isLoading = true;
+      _foundTickets = [];
+    });
 
+    try {
+      final url = Uri.parse('$baseURL/api/tim-ve?phone=$phone&code=$code');
+      final response = await http.get(url);
 
-  @override
-  void dispose() {
-    _phoneController.removeListener(_savePhone);
-    _phoneController.dispose();
-    _ticketCodeController.dispose();
-    super.dispose();
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+
+      setState(() {
+        _foundTickets = data.map((e) => Ticket.fromJson(e)).toList().reversed.toList();
+      });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Không tìm thấy vé. Mã lỗi: ${response.statusCode}')),
+        );
+      }
+    } catch (e) {
+      print('❌ Lỗi khi gọi API: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Lỗi kết nối tới máy chủ.')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -123,16 +111,19 @@ class _TicketLookupScreenState extends State<TicketLookupScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Ô nhập số điện thoại
                   TextField(
                     controller: _phoneController,
                     keyboardType: TextInputType.phone,
                     decoration: InputDecoration(
                       prefixIcon: Icon(Icons.phone, color: AppColors.mainOrange),
+                      hintText: 'Nhập số điện thoại', hintStyle: TextStyle(
+                        color: AppColors.grey600,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: 'Inter',
+                        fontSize: 14,
+                      ),
                       filled: true,
                       fillColor: Colors.white,
-                      hoverColor: Colors.transparent,
-                      focusColor: Colors.transparent,
                       contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                       border: UnderlineInputBorder(
                         borderSide: BorderSide(color: AppColors.grey400),
@@ -147,8 +138,6 @@ class _TicketLookupScreenState extends State<TicketLookupScreen> {
                     cursorColor: AppColors.mainOrange,
                     style: TextStyle(fontSize: 16, color: AppColors.black87),
                   ),
-
-                  // Ô nhập mã vé
                   TextField(
                     controller: _ticketCodeController,
                     decoration: InputDecoration(
@@ -156,8 +145,6 @@ class _TicketLookupScreenState extends State<TicketLookupScreen> {
                       hintText: 'Nhập mã vé',
                       filled: true,
                       fillColor: Colors.white,
-                      hoverColor: Colors.transparent,
-                      focusColor: Colors.transparent,
                       hintStyle: TextStyle(
                         color: AppColors.grey600,
                         fontWeight: FontWeight.w500,
@@ -179,11 +166,9 @@ class _TicketLookupScreenState extends State<TicketLookupScreen> {
                     style: TextStyle(fontSize: 16, color: AppColors.black87),
                   ),
                   const SizedBox(height: 16),
-
-                  // Nút tìm vé (chưa xử lý)
                   Center(
                     child: ElevatedButton(
-                      onPressed: _findTicket,
+                      onPressed: _isLoading ? null : _findTicket,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.mainOrange,
                         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
@@ -192,25 +177,26 @@ class _TicketLookupScreenState extends State<TicketLookupScreen> {
                         ),
                         shadowColor: AppColors.mainOrange,
                       ),
-                      child: const Text(
-                        'Tìm vé',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          fontFamily: 'Inter',
-                        ),
-                      ),
+                      child: _isLoading
+                          ? CircularProgressIndicator(color: Colors.white)
+                          : const Text(
+                              'Tìm vé',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                fontFamily: 'Inter',
+                              ),
+                            ),
                     ),
                   ),
                 ],
               ),
             ),
-
             const SizedBox(height: 32),
             if (_foundTickets.isNotEmpty)
               ..._foundTickets.map((ticket) => _buildTicketCard(ticket)).toList()
-            else if (_isSearched)
+            else if (_isSearched && !_isLoading)
               const Padding(
                 padding: EdgeInsets.only(top: 16),
                 child: Text(
@@ -223,29 +209,12 @@ class _TicketLookupScreenState extends State<TicketLookupScreen> {
                 ),
               )
             else ...[
-              Image.asset(
-                'assets/image/lookup_illustration.png',
-                height: 150,
-              ),
+              Image.asset('assets/image/lookup_illustration.png', height: 150),
               const SizedBox(height: 10),
-              const Text(
-                'NHÀ XE NAM HẢI',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.red,
-                  fontSize: 20,
-                  fontFamily: 'Inter',
-                ),
-              ),
-              const Text(
-                'NHỮNG CHUYẾN ĐI AN TOÀN',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.red,
-                  fontSize: 20,
-                  fontFamily: 'Inter',
-                ),
-              ),
+              const Text('NHÀ XE NAM HẢI',
+                  style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.red, fontSize: 20, fontFamily: 'Inter')),
+              const Text('NHỮNG CHUYẾN ĐI AN TOÀN',
+                  style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.red, fontSize: 20, fontFamily: 'Inter')),
             ],
           ],
         ),
@@ -255,97 +224,57 @@ class _TicketLookupScreenState extends State<TicketLookupScreen> {
   }
 
   Widget _buildTicketCard(Ticket ticket) {
-  return Container(
-    margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-    padding: const EdgeInsets.all(12),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      border: Border.all(color: AppColors.mainOrange, width: 5),
-      borderRadius: BorderRadius.circular(16),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.grey.withOpacity(0.3),
-          spreadRadius: 1,
-          blurRadius: 6,
-          offset: const Offset(0, 3),
-        ),
-      ],
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TicketInfoWidget(ticket: ticket),
-
-        // Nút "Xem chi tiết vé"
-        Center(
-          child: ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => TicketDetails(),
-                  settings: const RouteSettings(name: '/ticket_details'),
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: AppColors.mainOrange, width: 5),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.3),
+            spreadRadius: 1,
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TicketInfoWidget(ticket: ticket),
+          Center(
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => TicketDetails(),
+                    settings: const RouteSettings(name: '/ticket_details'),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.mainOrange,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.mainOrange,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
               ),
-            ),
-            child: const Text(
-              'Xem chi tiết vé',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-                fontFamily: 'Inter',
+              child: const Text(
+                'Xem chi tiết vé',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  fontFamily: 'Inter',
+                ),
               ),
             ),
           ),
-        ),
-      ],
-    ),
-  );
-}
-
-
-Widget _infoRow(String label, String value) {
-  return Padding(
-    padding: const EdgeInsets.only(bottom: 4),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ConstrainedBox(
-          constraints: const BoxConstraints(minWidth: 80, maxWidth: 100), // nhỏ hơn trước
-          child: Text(
-            '$label:',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-              fontFamily: 'Inter',
-              color: Colors.black87,
-            ),
-            softWrap: false,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        const SizedBox(width: 4), // giảm khoảng cách giữa tiêu đề và nội dung
-        Expanded(
-          child: Text(
-            value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontFamily: 'Inter',
-              color: Colors.black,
-            ),
-            softWrap: true,
-          ),
-        ),
-      ],
-    ),
-  );
-}
+        ],
+      ),
+    );
+  }
 }

@@ -79,14 +79,14 @@ class TicketInfoWidget extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _infoRow('Tuyến xe', '$diemDi - $diemDen'),
+              _infoRow('Tuyến xe', '$diemDi $diemDen'),
               const SizedBox(height: 4),
               _infoRow('Thời gian', '${ticket.time} ${ticket.date}'),
               const SizedBox(height: 4),
               _infoRow('Điểm lên xe', ticket.pickupPoint),
               const SizedBox(height: 4,),
               _infoRow('Giá vé', '${formatCurrency(ticket.totalPrice)} VND'),
-              const SizedBox(height: 16),
+              const SizedBox(height: 4),
             ],
           ),
         ),

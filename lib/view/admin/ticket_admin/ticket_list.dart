@@ -87,6 +87,7 @@ class _TicketListScreenState extends State<TicketListScreen> {
 
     if (resp.statusCode == 200) {
       final jsonResp = jsonDecode(resp.body);
+      print('📦 Vé từ API: ${jsonEncode(jsonResp['data'])}');
       if (jsonResp['success'] == true) {
         final list = List<Map<String, dynamic>>.from(
           (jsonResp['data'] as List).map((e) => Map<String, dynamic>.from(e)),

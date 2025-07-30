@@ -39,15 +39,16 @@ class _PaymentSuccessState extends State<PaymentSuccess> {
     final prefs = await SharedPreferences.getInstance();
 
     setState(() {
-      _name = prefs.getString('full_name') ?? '';
+      _name = prefs.getString('full_name') ?? '';      // 👈 Cần key 'full_name'
       _phone = prefs.getString('phone') ?? '';
       _email = prefs.getString('email') ?? '';
-      _diemDi = prefs.getString('diemDi') ?? '';
-      _diemDen = prefs.getString('diemDen') ?? '';
+      _diemDi = prefs.getString('diemDi') ?? '';       // 👈 Cần key 'diemDi'
+      _diemDen = prefs.getString('diemDen') ?? '';     // 👈 Cần key 'diemDen'
       _ngayDi = prefs.getString('ngayDi') ?? '';
       _startTime = prefs.getString('startTime') ?? '';
       _totalPrice = prefs.getInt('totalPrice') ?? 0;
       _selectedSeats = prefs.getStringList('selectedSeats') ?? [];
+      _maVe = prefs.getString('maVe') ?? '';
 
       // ✅ Lấy maVe từ SharedPreferences
       _maVe = prefs.getString('maVe') ?? '';

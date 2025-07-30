@@ -33,7 +33,7 @@ class Trip {
       loaiChuyen: json['LoaiHinhChuyenDi'] ?? '',
       diemDi: json['DiemDi'] ?? '',
       diemDen: json['DiemDen'] ?? '',
-      gioBatDau: json['gioDi'] ?? '',
+      gioBatDau: json['ThoiGianDi'] ?? '',
       gioKetThuc: json['gioVe'] ?? '',
       soChoConLai: 0, // Không có trong JSON
       giaVe: json['GiaVe'] != null ? int.tryParse(json['GiaVe'].toString()) ?? 0 : 0,

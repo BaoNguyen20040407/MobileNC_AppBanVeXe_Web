@@ -47,6 +47,9 @@ int remainingSeconds = 15 * 60; // 15 phút
   int _totalPrice = 0;
   String _diemDi = '';
   String _diemDen = '';
+  String fullname = '';
+  String phoneNumber = '';
+  String email = '';
   Timer? _countdownTimer;
 
   String formatCurrency(int amount) {
@@ -54,21 +57,103 @@ int remainingSeconds = 15 * 60; // 15 phút
   return '${formatter.format(amount)} VNĐ';
   }
 
-  Future<void> _loadUser() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _name = prefs.getString('full_name') ?? '';
-      _phone = prefs.getString('phone') ?? '';
-      _email = prefs.getString('email') ?? '';
-      _pickupPoint = prefs.getString('pickupPoint') ?? '';
-      _dropoffPoint = prefs.getString('dropoffPoint') ?? '';
-      _ngayDi = prefs.getString('ngayDi') ?? '';
-      _startTime = prefs.getString('startTime') ?? '';
-      _totalPrice = prefs.getInt('totalPrice') ?? 0;
-      _diemDi = prefs.getString('diemDi') ?? '';
-      _diemDen = prefs.getString('diemDen') ?? '';
-    });
+  Future<void> fetchCustomerInfo() async {
+  final prefs = await SharedPreferences.getInstance();
+  final customerId = prefs.getString('makh'); // ✅ phải lấy 'makh' chứ không phải 'username'
+
+  if (customerId == null || customerId.isEmpty) {
+    debugPrint('❌ Không tìm thấy MaKH trong SharedPreferences');
+    return;
   }
+
+  try {
+    final url = '$baseURL/khachhang/$customerId';
+    debugPrint('🔍 Đang gọi API: $url');
+
+    final response = await http.get(Uri.parse(url));
+    debugPrint("📥 Kết quả API: ${response.body}");
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['success'] == true) {
+        final khachHang = data['data'];
+        debugPrint("✅ Dữ liệu khách hàng: $khachHang");
+
+        setState(() {
+          fullname = khachHang['HoVaTen'] ?? '';
+          phoneNumber = khachHang['SDT'] ?? '';
+          email = khachHang['Email'] ?? '';
+        });
+
+        // ✅ Lưu vào SharedPreferences để PaymentSuccess lấy ra
+        await prefs.setString('full_name', fullname);
+        await prefs.setString('phone', phoneNumber);
+        await prefs.setString('email', email);
+      } else {
+        debugPrint("⚠️ API trả về success = false");
+      }
+    } else {
+      debugPrint("❌ API lỗi: statusCode = ${response.statusCode}");
+    }
+  } catch (e) {
+    debugPrint("❌ Lỗi khi lấy thông tin khách hàng: $e");
+  }
+}
+
+Future<void> loadTripInfo() async {
+  final prefs = await SharedPreferences.getInstance();
+  final maCX = prefs.getString('maCX');
+
+  if (maCX == null || maCX.isEmpty) {
+    debugPrint('⚠️ Không có mã chuyến xe trong SharedPreferences');
+    return;
+  }
+
+  try {
+    final response = await http.get(Uri.parse('$baseURL/chuyenxe/$maCX'));
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      if (json['success'] == true) {
+        final trip = json['data'];
+
+        setState(() {
+          _diemDi = trip['DiemDi'] ?? '';
+          _diemDen = trip['DiemDen'] ?? '';
+
+          final gioDiRaw = trip['ThoiGianDi'] ?? '';
+          try {
+            final dt = DateTime.parse(gioDiRaw); // Dạng ISO 8601
+            _ngayDi = DateFormat('dd/MM/yyyy').format(dt);
+            _startTime = DateFormat('HH:mm').format(dt);
+          } catch (e) {
+            debugPrint('❌ Lỗi phân tích thời gian: $e');
+            _ngayDi = '';
+            _startTime = '';
+          }
+        });
+
+        debugPrint('✅ Đã load chuyến xe: $_diemDi - $_diemDen lúc $_ngayDi $_startTime');
+      } else {
+        debugPrint('❌ API chuyến xe trả về success = false');
+      }
+    } else {
+      debugPrint('❌ Lỗi API chuyến xe: ${response.statusCode}');
+    }
+  } catch (e) {
+    debugPrint('❌ Lỗi khi load chuyến xe: $e');
+  }
+}
+
+Future<void> loadTotalPrice() async {
+  final prefs = await SharedPreferences.getInstance();
+  final total = prefs.getInt('totalPrice') ?? 0;
+
+  setState(() {
+    _totalPrice = total;
+  });
+
+  debugPrint('✅ Tổng tiền từ SharedPreferences: $_totalPrice');
+}
 
 Future<void> _handleConfirmPayment() async {
   final prefs = await SharedPreferences.getInstance();
@@ -104,21 +189,32 @@ Future<void> _handleConfirmPayment() async {
   );
 
  if (response.statusCode == 200) {
-    final data = jsonDecode(response.body);
+  final data = jsonDecode(response.body);
 
-    // ✅ Điều hướng đến trang chờ thanh toán sau khi lưu thành công
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => WaitPayment(),
-        settings: const RouteSettings(name: '/wait_payment'),
-      ),
-    );
-  } else {
-    print('Lỗi khi đặt vé: ${response.body}');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Đặt vé thất bại. Vui lòng thử lại.")),
-    );
+  // Kiểm tra xem backend trả về mã vé thực sự chưa
+  if (data['maVe'] != null && data['maVe'] is String) {
+  final maVe = data['maVe'];
+  await prefs.setString('maVe', maVe);
+  debugPrint('✅ Lưu mã vé: $maVe');
+
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => WaitPayment(),
+      settings: const RouteSettings(name: '/wait_payment'),
+    ),
+  );
+} else {
+  debugPrint('❌ Không lấy được MaVe từ response: ${data}');
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text("Không lấy được mã vé. Vui lòng thử lại.")),
+  );
+}
+} else {
+  print('Lỗi khi đặt vé: ${response.body}');
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text("Đặt vé thất bại. Vui lòng thử lại.")),
+  );
 }
 }
 
@@ -126,7 +222,9 @@ Future<void> _handleConfirmPayment() async {
   void initState() {
     super.initState();
     startCountdown();
-    _loadUser();
+    fetchCustomerInfo();
+    loadTripInfo();
+    loadTotalPrice();
   }
 
   @override
@@ -361,11 +459,11 @@ Future<void> _handleConfirmPayment() async {
                     ),
                     SizedBox(height: 8),
 
-                    buildInfoRow('Họ tên', _name, isBold: true),
+                    buildInfoRow('Họ tên', fullname, isBold: true),
                     SizedBox(height: 8),
-                    buildInfoRow('Số điện thoại', _phone),
+                    buildInfoRow('Số điện thoại', phoneNumber),
                     SizedBox(height: 8),
-                    buildInfoRow('Email', _email),
+                    buildInfoRow('Email', email),
                     SizedBox(height: 8),
                   ],
                 ),

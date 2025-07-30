@@ -7,6 +7,9 @@ import 'package:giao_dien_1/widget/appbar.dart';
 import 'package:giao_dien_1/widget/footer.dart';
 import 'package:intl/intl.dart';
 import 'package:giao_dien_1/view/main/homepage.dart';
+import 'package:http/http.dart' as http;
+import 'package:giao_dien_1/config/config.dart';
+import 'package:giao_dien_1/model/trip.dart';
 
 void main() => runApp(MaterialApp(home: TicketBookingPage()));
 
@@ -40,6 +43,7 @@ class _TicketBookingPageState extends State<TicketBookingPage> {
 
   DateTime? parsedStartTime;
   String suggestArriveTime = '';
+  Trip? selectedTrip;
 
 
   @override
@@ -47,7 +51,8 @@ class _TicketBookingPageState extends State<TicketBookingPage> {
     super.initState();
     seatMap['A4'] = SeatState.sold;
     seatMap['A17'] = SeatState.sold;
-    loadPreferences();
+    fetchCustomerInfo();
+    loadDataFromPrefsAndServer(); // chỉ cần 1 hàm này
   }
 
   String formatCurrency(int amount) {
@@ -55,53 +60,100 @@ class _TicketBookingPageState extends State<TicketBookingPage> {
   return '${formatter.format(amount)} VND';
   }
 
-  void loadPreferences() async {
+Future<void> fetchCustomerInfo() async {
   final prefs = await SharedPreferences.getInstance();
+  final customerId = prefs.getString('makh'); // ✅ phải lấy 'makh' chứ không phải 'username'
 
-  final tempSeatPrice = prefs.getInt('seatPrice') ?? 120000;
-  final tempPickupPoint = prefs.getString('pickupPoint') ?? pickupPoint;
-  final tempDropoffPoint = prefs.getString('dropoffPoint') ?? dropoffPoint;
-  final tempPickupTime = prefs.getString('pickupTime') ?? pickupTime;
-  final tempStartTime = prefs.getString('startTime') ?? startTime;
-  final tempDiemDi = prefs.getString('diemDi') ?? '';
-  final tempDiemDen = prefs.getString('diemDen') ?? '';
-  final tempNgayDi = prefs.getString('ngayDi') ?? '';
-  final tempFullname = prefs.getString('full_name') ?? '';
-  final tempPhone = prefs.getString('phone') ?? '';
-  final tempEmail = prefs.getString('email') ?? '';
-  
-  DateTime? parsedTime;
-  String suggestTime;
+  if (customerId == null || customerId.isEmpty) {
+    debugPrint('❌ Không tìm thấy MaKH trong SharedPreferences');
+    return;
+  }
 
-  if (tempStartTime.trim().isNotEmpty && tempNgayDi.trim().isNotEmpty) {
-  final isoTime = _convertToIsoFormat('$tempStartTime $tempNgayDi');
-  parsedTime = DateTime.parse(isoTime);
-  final suggest = parsedTime.subtract(const Duration(hours: 1, minutes: 30));
-  suggestTime = '${_formatTime(suggest)} ${_formatDate(suggest)}';
-} else {
-  parsedTime = null;
-  suggestTime = tempPickupTime; // dùng giờ đón mặc định
+  try {
+    final url = '$baseURL/khachhang/$customerId';
+    debugPrint('🔍 Đang gọi API: $url');
+
+    final response = await http.get(Uri.parse(url));
+    debugPrint("📥 Kết quả API: ${response.body}");
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['success'] == true) {
+        final khachHang = data['data'];
+        debugPrint("✅ Dữ liệu khách hàng: $khachHang");
+
+        setState(() {
+          fullname = khachHang['HoVaTen'] ?? '';
+          phoneNumber = khachHang['SDT'] ?? '';
+          email = khachHang['Email'] ?? '';
+        });
+      } else {
+        debugPrint("⚠️ API trả về success = false");
+      }
+    } else {
+      debugPrint("❌ API lỗi: statusCode = ${response.statusCode}");
+    }
+  } catch (e) {
+    debugPrint("❌ Lỗi khi lấy thông tin khách hàng: $e");
+  }
 }
 
+Future<void> loadDataFromPrefsAndServer() async {
+  final prefs = await SharedPreferences.getInstance();
+  final maCX = prefs.getString('maCX');
 
-  setState(() {
-    seatPrice = tempSeatPrice;
-    pickupPoint = tempPickupPoint;
-    dropoffPoint = tempDropoffPoint;
-    pickupTime = tempPickupTime;
-    startTime = tempStartTime;
-    diemDi = tempDiemDi;
-    diemDen = tempDiemDen;
-    ngayDi = tempNgayDi;
-    fullname = tempFullname;
-    phoneNumber = tempPhone;
-    email = tempEmail;
-    parsedStartTime = parsedTime;
-    suggestArriveTime = suggestTime;
-  });
+  if (maCX == null || maCX.isEmpty) {
+    debugPrint('⚠️ Không tìm thấy maCX trong SharedPreferences');
+    return;
+  }
+
+  try {
+    final url = '$baseURL/chuyenxe/$maCX';
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+
+      if (json['success'] == true) {
+        final data = json['data'];
+
+        setState(() {
+          selectedTrip = Trip.fromJson(data);
+          diemDi = selectedTrip?.diemDi ?? '';
+          diemDen = selectedTrip?.diemDen ?? '';
+
+          try {
+            final raw = selectedTrip!.gioBatDau;
+            debugPrint('🔍 Thời gian gốc từ server: $raw');
+
+            final dt = DateTime.parse(raw).toLocal(); // ✅ sửa tại đây
+
+            startTime = DateFormat('HH:mm').format(dt);
+            ngayDi = DateFormat('dd/MM/yyyy').format(dt);
+            suggestArriveTime = DateFormat('HH:mm').format(dt.subtract(Duration(minutes: 30)));
+          } catch (e) {
+            debugPrint('❌ Lỗi phân tích thời gian: ${selectedTrip?.gioBatDau} - $e');
+            startTime = '';
+            ngayDi = '';
+            suggestArriveTime = 'trước 30 phút';
+          }
+
+          debugPrint('✅ Chuyến xe đã load: ${selectedTrip!.diemDi} - ${selectedTrip!.diemDen} lúc ${selectedTrip!.gioBatDau}');
+        });
+      } else {
+        debugPrint('❌ API trả về success = false');
+      }
+    } else {
+      debugPrint('❌ Lỗi lấy thông tin chuyến xe: ${response.statusCode}');
+    }
+  } catch (e) {
+    debugPrint('❌ Lỗi khi load chuyến xe: $e');
+  }
 }
 
 Future<void> handleBookingAndNavigate(BuildContext context) async {
+  updateTotalPrice(); // ← THÊM DÒNG NÀY
+
   showDialog(
     context: context,
     barrierDismissible: false,
@@ -117,7 +169,7 @@ Future<void> handleBookingAndNavigate(BuildContext context) async {
     await prefs.setString('ngayDi', ngayDi);
     await prefs.setStringList('selectedSeats', selectedSeats);
     await prefs.setInt('seatPrice', seatPrice);
-    await prefs.setInt('totalPrice', totalPrice);
+    await prefs.setInt('totalPrice', totalPrice); // ⬅ đúng giá trị đã cập nhật
     await prefs.setString('route', '$diemDi - $diemDen'); 
 
     await Future.delayed(const Duration(milliseconds: 200)); // tránh gắt khung hình
@@ -134,7 +186,6 @@ Future<void> handleBookingAndNavigate(BuildContext context) async {
     );
   }
 }
-
 
 
   String _convertToIsoFormat(String original) {
@@ -417,7 +468,7 @@ Future<void> handleBookingAndNavigate(BuildContext context) async {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    "(*): Quý khách vui lòng có mặt tại bến lúc $suggestArriveTime",
+                    "(*): Quý khách vui lòng có mặt tại bến lúc $suggestArriveTime $ngayDi",
                     style: TextStyle(fontSize: 14, fontFamily: 'Inter'),
                   ),
                   SizedBox(height: 8),

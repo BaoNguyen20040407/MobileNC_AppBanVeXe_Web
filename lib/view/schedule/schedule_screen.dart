@@ -53,39 +53,36 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     }
   }
 
-  void _searchRoutes() async {
-  String start = startController.text.trim();
-  String end = endController.text.trim();
+  void _searchRoutes() {
+  String start = startController.text.trim().toLowerCase();
+  String end = endController.text.trim().toLowerCase();
 
-    setState(() {
-      hasSearched = true;
+  setState(() {
+    hasSearched = true;
 
-      if (start.isEmpty && end.isEmpty) {
-        filteredTrips = [];
-        return;
-      }
-      if (start.isEmpty) {
-      filteredTrips = allTrips.where((trip) {
-        return trip['DiemDen'].toString().toLowerCase().contains(end);
-      }).toList();
-      }
-      if (end.isEmpty) {
-      filteredTrips = allTrips.where((trip) {
-        return trip['DiemDi'].toString().toLowerCase().contains(start);
-      }).toList();
-      }
-      filteredTrips = allTrips.where((trip) {
-        return trip['DiemDi'].toString().toLowerCase().contains(start) &&
-               trip['DiemDen'].toString().toLowerCase().contains(end);
-      }).toList();
-      
-    });
-  }
+    if (start.isEmpty && end.isEmpty) {
+      filteredTrips = [];
+    } else if (start.isNotEmpty && end.isNotEmpty) {
+      filteredTrips = allTrips.where((trip) =>
+        trip['DiemDi'].toString().toLowerCase().contains(start) &&
+        trip['DiemDen'].toString().toLowerCase().contains(end)
+      ).toList();
+    } else if (start.isNotEmpty) {
+      filteredTrips = allTrips.where((trip) =>
+        trip['DiemDi'].toString().toLowerCase().contains(start)
+      ).toList();
+    } else {
+      filteredTrips = allTrips.where((trip) =>
+        trip['DiemDen'].toString().toLowerCase().contains(end)
+      ).toList();
+    }
+  });
+}
 
-String formatDate(String dateTimeString) {
+String formatTime(String dateTimeString) {
   try {
-    final dt = DateTime.parse(dateTimeString);
-    return DateFormat('dd/MM/yyyy').format(dt);
+    final dt = DateTime.parse(dateTimeString).toLocal(); // thêm toLocal()
+    return DateFormat('HH:mm').format(dt);
   } catch (e) {
     return dateTimeString; // fallback nếu lỗi
   }
@@ -305,7 +302,7 @@ String formatDate(String dateTimeString) {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Image.asset('assets/image/bus_trip_illustration.png', width: 110, fit: BoxFit.cover),
+            Image.asset('assets/image/bus1.jpg', width: 110, fit: BoxFit.cover),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(12),
@@ -324,34 +321,35 @@ String formatDate(String dateTimeString) {
                     const SizedBox(height: 8),
                     _tripInfoRow('Loại xe:', trip['LoaiHinhChuyenDi']),
                     const SizedBox(height: 8),
-                    _tripInfoRow('Thời gian hành trình:', '${formatDate(trip['ThoiGianDi'])} - ${formatDate(trip['ThoiGianVe'])}',),
+                    _tripInfoRow('Thời gian hành trình:', '${formatTime(trip['ThoiGianDi'])} - ${formatTime(trip['ThoiGianVe'])}'),
                     const Spacer(),
                     const SizedBox(height: 8),
                     Align(
                       alignment: Alignment.centerRight,
                       child: ElevatedButton(
                         onPressed: () async {
-                          final prefs = await SharedPreferences.getInstance();
+                            final prefs = await SharedPreferences.getInstance();
 
-                          await prefs.setString('diemDi', trip['DiemDi']);
-                          await prefs.setString('diemDen', trip['DiemDen']);
-                          await prefs.setInt('seatPrice', double.parse(trip['GiaVe'].toString()).toInt());
-                          DateTime thoiGianDi = DateTime.parse(trip['ThoiGianDi']);
-                          String formattedStartTime = '${thoiGianDi.hour.toString().padLeft(2, '0')}:${thoiGianDi.minute.toString().padLeft(2, '0')}';
+                            await prefs.setString('diemDi', trip['DiemDi']);
+                            await prefs.setString('diemDen', trip['DiemDen']);
+                            await prefs.setInt('seatPrice', double.parse(trip['GiaVe'].toString()).toInt());
 
-                          await prefs.setString('startTime', formattedStartTime);
+                            // ✅ Format thời gian và ngày đi từ dữ liệu chuyến xe
+                            DateTime thoiGianDi = DateTime.parse(trip['ThoiGianDi']);
+                            String formattedStartTime = DateFormat('HH:mm').format(thoiGianDi);
+                            String formattedNgayDi = DateFormat('dd/MM/yyyy').format(thoiGianDi);
 
-                          final now = DateTime.now();
-                          final formattedToday = '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
-                          await prefs.setString('ngayDi', formattedToday);
-                          await prefs.setString('maCX', trip['MaCX']);
-                          await prefs.setString('loaiVe', trip['LoaiHinhChuyenDi']);
+                            await prefs.setString('startTime', formattedStartTime);
+                            await prefs.setString('ngayDi', formattedNgayDi);
+                            await prefs.setString('maCX', trip['MaCX']);
+                            await prefs.setString('loaiVe', trip['LoaiHinhChuyenDi']);
 
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => TicketBookingPage()),
-                          );
-                        },
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => TicketBookingPage()),
+                            );
+                          },
+
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.softOrange,
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),

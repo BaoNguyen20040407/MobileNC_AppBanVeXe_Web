@@ -13,6 +13,25 @@ class TicketInfoWidget extends StatelessWidget {
     return format.format(amount).replaceAll('\u00A0', '');
   }
 
+  String _add7HoursToTime(String rawTime) {
+  try {
+    // Giả sử `rawTime` là định dạng "HH:mm"
+    final parts = rawTime.split(':');
+    if (parts.length != 2) return rawTime;
+
+    final hour = int.parse(parts[0]);
+    final minute = int.parse(parts[1]);
+
+    final originalTime = DateTime(0, 1, 1, hour, minute);
+    final adjustedTime = originalTime.add(const Duration(hours: 7));
+
+    final formatted = DateFormat('HH:mm').format(adjustedTime);
+    return formatted;
+  } catch (e) {
+    return rawTime;
+  }
+}
+
   Widget _infoRow(String label, String value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -81,7 +100,7 @@ class TicketInfoWidget extends StatelessWidget {
             children: [
               _infoRow('Tuyến xe', '$diemDi $diemDen'),
               const SizedBox(height: 4),
-              _infoRow('Thời gian', '${ticket.time} ${ticket.date}'),
+              _infoRow('Thời gian', '${_add7HoursToTime(ticket.time)} ${ticket.date}'),
               const SizedBox(height: 4),
               _infoRow('Điểm lên xe', ticket.pickupPoint),
               const SizedBox(height: 4,),

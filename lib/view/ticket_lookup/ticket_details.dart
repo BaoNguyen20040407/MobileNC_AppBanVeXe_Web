@@ -38,6 +38,7 @@ class _TicketDetailsState extends State<TicketDetails> {
   String _diemDen = '';
   String _phuongThucThanhToan = '';
   String _trangThaiThanhToan = '';
+  String _maVe = '';
 
   String formatDate(String rawDate) {
   try {
@@ -79,6 +80,7 @@ class _TicketDetailsState extends State<TicketDetails> {
         _diemDen = data['DiemDen'] ?? '';
         _phuongThucThanhToan = data['HinhThucThanhToan'] ?? '---';
         _trangThaiThanhToan = data['TrangThai'] ?? '---';
+        _maVe = data['MaVe'] ?? widget.maVe;
       });
 
     } else {
@@ -294,7 +296,7 @@ Future<void> _exportTicketToPDF() async {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Vé ${_selectedSeats.isNotEmpty ? _selectedSeats.first : ''}',
+                  'Mã vé: $_maVe',
                   style: const TextStyle(
                     color: AppColors.greenDark, 
                     fontWeight: FontWeight.bold, 

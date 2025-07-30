@@ -7,6 +7,8 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:giao_dien_1/model/trip.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:giao_dien_1/view/ticket_booking/ticket_booking.dart';
+import 'package:http/http.dart' as http;
+import 'package:giao_dien_1/config/config.dart'; 
 
 // ... các import giữ nguyên
 
@@ -23,15 +25,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   @override
   void initState() {
     super.initState();
-    _loadTrips();
-  }
-
-  Future<void> _loadTrips() async {
-    final String response = await rootBundle.loadString('assets/data/trips.json');
-    final List<dynamic> data = json.decode(response);
-    setState(() {
-      allTrips = data.map((json) => Trip.fromJson(json)).toList();
-    });
   }
 
   List<Trip> filteredTrips = [];
@@ -39,24 +32,36 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   final TextEditingController endController = TextEditingController();
   bool hasSearched = false;
 
-  void _searchRoutes() {
-    String start = startController.text.toLowerCase().trim();
-    String end = endController.text.toLowerCase().trim();
+  void _searchRoutes() async {
+  String start = startController.text.trim();
+  String end = endController.text.trim();
 
-    setState(() {
-      hasSearched = true;
+  setState(() {
+    hasSearched = true;
+    filteredTrips = []; // clear trước khi fetch
+  });
 
-      if (start.isEmpty && end.isEmpty) {
-        filteredTrips = [];
-        return;
-      }
+  if (start.isEmpty && end.isEmpty) return;
 
-      filteredTrips = allTrips.where((trip) {
-        return trip.diemDi.toLowerCase().contains(start) ||
-               trip.diemDen.toLowerCase().contains(end);
-      }).toList();
-    });
+  try {
+    final uri = Uri.parse('$baseURL/api/lichtrinh?diemDi=$start&diemDen=$end');
+
+    final response = await http.get(uri);
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      setState(() {
+        filteredTrips = data.map((json) => Trip.fromJson(json)).toList();
+        print('Dữ liệu JSON: ${response.body}');
+      });
+    } else {
+      print('Lỗi API: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Lỗi gọi API: $e');
   }
+}
+
 
   @override
   Widget build(BuildContext context) {

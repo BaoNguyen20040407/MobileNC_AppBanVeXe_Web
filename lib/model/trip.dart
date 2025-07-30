@@ -22,27 +22,25 @@ class Trip {
     required this.soChoConLai,
     required this.giaVe,
     required this.loaiGhe,
-    required this.image,
+    this.image = 'assets/image/bus1.jpg',
     required this.ngayDi,
     this.trungChuyen,
   });
 
   factory Trip.fromJson(Map<String, dynamic> json) {
     return Trip(
-      id: json['id'],
-      loaiChuyen: json['loaiChuyen'],
-      diemDi: json['diemDi'],
-      diemDen: json['diemDen'],
-      gioBatDau: json['gioBatDau'],
-      gioKetThuc: json['gioKetThuc'],
-      soChoConLai: json['soChoConLai'],
-      giaVe: json['giaVe'],
-      loaiGhe: json['loaiGhe'],
-      image: json['image'],
-      ngayDi: json['ngayDi'],
-      trungChuyen: json['trungChuyen'] != null 
-        ? TrungChuyen.fromJson(json['trungChuyen']) 
-        : null
+      id: 0, // Không có trong JSON nên gán mặc định
+      loaiChuyen: json['LoaiHinhChuyenDi'] ?? '',
+      diemDi: json['DiemDi'] ?? '',
+      diemDen: json['DiemDen'] ?? '',
+      gioBatDau: json['gioDi'] ?? '',
+      gioKetThuc: json['gioVe'] ?? '',
+      soChoConLai: 0, // Không có trong JSON
+      giaVe: json['GiaVe'] != null ? int.tryParse(json['GiaVe'].toString()) ?? 0 : 0,
+      loaiGhe: json['LoaiHinhChuyenDi'] ?? '',
+      ngayDi: '', // Không có trong JSON
+      image: 'assets/image/bus1.jpg',
+      trungChuyen: null, // Không có trong JSON
     );
   }
 }

@@ -53,9 +53,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     }
   }
 
-  void _searchRoutes() {
-    String start = startController.text.toLowerCase().trim();
-    String end = endController.text.toLowerCase().trim();
+  void _searchRoutes() async {
+  String start = startController.text.trim();
+  String end = endController.text.trim();
 
     setState(() {
       hasSearched = true;

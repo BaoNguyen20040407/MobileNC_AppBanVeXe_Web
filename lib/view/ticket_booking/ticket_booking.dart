@@ -52,7 +52,7 @@ class _TicketBookingPageState extends State<TicketBookingPage> {
     seatMap['A4'] = SeatState.sold;
     seatMap['A17'] = SeatState.sold;
     fetchCustomerInfo();
-    loadDataFromPrefsAndServer(); // chỉ cần 1 hàm này
+    loadDataFromPrefsOnly(); // chỉ cần 1 hàm này
   }
 
   String formatCurrency(int amount) {
@@ -98,58 +98,27 @@ Future<void> fetchCustomerInfo() async {
   }
 }
 
-Future<void> loadDataFromPrefsAndServer() async {
+Future<void> loadDataFromPrefsOnly() async {
   final prefs = await SharedPreferences.getInstance();
-  final maCX = prefs.getString('maCX');
 
-  if (maCX == null || maCX.isEmpty) {
-    debugPrint('⚠️ Không tìm thấy maCX trong SharedPreferences');
-    return;
-  }
+  setState(() {
+    diemDi = prefs.getString('diemDi') ?? '';
+    diemDen = prefs.getString('diemDen') ?? '';
+    startTime = prefs.getString('startTime') ?? '';
+    ngayDi = prefs.getString('ngayDi') ?? '';
+    seatPrice = prefs.getInt('seatPrice') ?? 0;
 
-  try {
-    final url = '$baseURL/chuyenxe/$maCX';
-    final response = await http.get(Uri.parse(url));
-
-    if (response.statusCode == 200) {
-      final json = jsonDecode(response.body);
-
-      if (json['success'] == true) {
-        final data = json['data'];
-
-        setState(() {
-          selectedTrip = Trip.fromJson(data);
-          diemDi = selectedTrip?.diemDi ?? '';
-          diemDen = selectedTrip?.diemDen ?? '';
-
-          try {
-            final raw = selectedTrip!.gioBatDau;
-            debugPrint('🔍 Thời gian gốc từ server: $raw');
-
-            final dt = DateTime.parse(raw).toLocal(); // ✅ sửa tại đây
-
-            startTime = DateFormat('HH:mm').format(dt);
-            ngayDi = DateFormat('dd/MM/yyyy').format(dt);
-            suggestArriveTime = DateFormat('HH:mm').format(dt.subtract(Duration(minutes: 30)));
-          } catch (e) {
-            debugPrint('❌ Lỗi phân tích thời gian: ${selectedTrip?.gioBatDau} - $e');
-            startTime = '';
-            ngayDi = '';
-            suggestArriveTime = 'trước 30 phút';
-          }
-
-          debugPrint('✅ Chuyến xe đã load: ${selectedTrip!.diemDi} - ${selectedTrip!.diemDen} lúc ${selectedTrip!.gioBatDau}');
-        });
-      } else {
-        debugPrint('❌ API trả về success = false');
-      }
-    } else {
-      debugPrint('❌ Lỗi lấy thông tin chuyến xe: ${response.statusCode}');
+    try {
+      final dt = DateFormat('HH:mm dd/MM/yyyy').parse('$startTime $ngayDi');
+      suggestArriveTime = DateFormat('HH:mm').format(dt.subtract(Duration(minutes: 30)));
+    } catch (e) {
+      suggestArriveTime = 'trước 30 phút';
     }
-  } catch (e) {
-    debugPrint('❌ Lỗi khi load chuyến xe: $e');
-  }
+
+    debugPrint("✅ Load thành công từ SharedPrefs: $diemDi - $diemDen lúc $startTime $ngayDi");
+  });
 }
+
 
 Future<void> handleBookingAndNavigate(BuildContext context) async {
   updateTotalPrice(); // ← THÊM DÒNG NÀY

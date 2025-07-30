@@ -19,6 +19,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:giao_dien_1/view/ticket_booking/ticket_booking.dart';
 import 'package:http/http.dart' as http;
 import 'package:giao_dien_1/config/config.dart';
+import 'package:intl/intl.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
   @override
@@ -128,11 +131,62 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
- Future<List<Trip>> loadTripsFromJson() async {
-    final String response = await rootBundle.loadString('assets/data/trips.json');
-    final List<dynamic> data = json.decode(response);
-    return data.map((e) => Trip.fromJson(e)).toList();
-  } 
+Future<List<Trip>> fetchTripsFromAPI({
+  required String diemDi,
+  required String diemDen,
+  required String ngayDi,
+  required int soVe,
+}) async {
+  try {
+    final apiDate = DateFormat('yyyy-MM-dd').format(
+      DateFormat('dd/MM/yyyy').parse(ngayDi),
+    );
+
+    final response = await http.get(Uri.parse(
+      '$baseURL/lochuyenxe?diemDi=$diemDi&diemDen=$diemDen&ngayDi=$apiDate',
+    ));
+
+    print('📥 API trả về: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final List<dynamic> dataList = jsonDecode(response.body);
+
+      final List<Trip> trips = dataList.map((json) {
+        final thoiGianDi = DateTime.tryParse(json['ThoiGianDi'] ?? '')?.toLocal();
+        final thoiGianVe = DateTime.tryParse(json['ThoiGianVe'] ?? '')?.toLocal();
+
+        return Trip(
+          id: 0,
+          loaiChuyen: json['LoaiHinhChuyenDi'] ?? '',
+          diemDi: json['DiemDi'] ?? '',
+          diemDen: json['DiemDen'] ?? '',
+          gioBatDau: thoiGianDi != null
+              ? DateFormat('HH:mm').format(thoiGianDi)
+              : '',
+          gioKetThuc: thoiGianVe != null
+              ? DateFormat('HH:mm').format(thoiGianVe)
+              : '',
+          soChoConLai: json['SoChoNgoi'] ?? 0,
+          giaVe: int.tryParse(json['GiaVe'].toString()) ?? 0,
+          loaiGhe: json['LoaiHinhChuyenDi'] ?? '',
+          ngayDi: thoiGianDi != null
+              ? DateFormat('dd/MM/yyyy').format(thoiGianDi)
+              : '',
+          image: 'assets/image/bus1.jpg',
+          trungChuyen: null,
+        );
+      }).where((trip) => trip.soChoConLai >= soVe).toList();
+
+      return trips;
+    } else {
+      debugPrint('❌ API lỗi: ${response.statusCode}');
+      return [];
+    }
+  } catch (e) {
+    debugPrint('❌ Lỗi khi fetch trips: $e');
+    return [];
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -153,24 +207,30 @@ class _HomePageState extends State<HomePage> {
                 dobController: _dobController,
                 selectDateCallback: _selectDate,
                 onSearch: (diemDi, diemDen, ngayDi, soVe) async {
-                  final trips = await loadTripsFromJson();
+                  final trips = await fetchTripsFromAPI(
+                    diemDi: diemDi,
+                    diemDen: diemDen,
+                    ngayDi: ngayDi,
+                    soVe: soVe,
+                  );
 
-                  final ketQua = trips.where((trip) =>
+                  final filtered = trips.where((trip) =>
                     trip.diemDi.trim().toLowerCase() == diemDi.trim().toLowerCase() &&
                     trip.diemDen.trim().toLowerCase() == diemDen.trim().toLowerCase() &&
                     trip.ngayDi.trim() == ngayDi.trim() &&
                     trip.soChoConLai >= soVe
                   ).toList();
 
-                  print('==> Tổng số chuyến phù hợp: ${ketQua.length}');
+                  debugPrint('==> Tổng số chuyến phù hợp: ${filtered.length}');
 
                   setState(() {
-                    _filteredTrips = ketQua;
+                    _filteredTrips = filtered; // ✅ Dùng danh sách đã lọc!
                     _showSearchResults = true;
                   });
 
                   _applyFilters(_currentFilters);
-                },
+                }
+
               ),
               const SizedBox(height: 16),
 
@@ -200,17 +260,22 @@ class _HomePageState extends State<HomePage> {
                             TripCard(
                               trip: trip,
                               onTap: () async {
-                                debugPrint("Trip tapped: ${trip.diemDi} - ${trip.diemDen}");
+                                debugPrint("📍 Đã chọn chuyến: ${trip.diemDi} -> ${trip.diemDen} | ${trip.ngayDi}");
 
                                 final prefs = await SharedPreferences.getInstance();
+                                final parsedStartTime = DateTime.tryParse(trip.gioBatDau);
+                                final pickupTime = parsedStartTime != null
+                                    ? DateFormat('HH:mm').format(parsedStartTime)
+                                    : trip.gioBatDau;
                                 await prefs.setString('pickupPoint', trip.diemDi);
                                 await prefs.setString('dropoffPoint', trip.diemDen);
-                                await prefs.setString('pickupTime', trip.gioBatDau);
-                                await prefs.setString('startTime', trip.gioBatDau);
+                                await prefs.setString('pickupTime', pickupTime); // giờ
+                                await prefs.setString('startTime', pickupTime);  // giờ
                                 await prefs.setString('diemDi', trip.diemDi);
                                 await prefs.setString('diemDen', trip.diemDen);
-                                await prefs.setString('ngayDi', trip.ngayDi);
+                                await prefs.setString('ngayDi', trip.ngayDi); // dạng dd/MM/yyyy
                                 await prefs.setInt('seatPrice', trip.giaVe);
+
 
                                 Navigator.push(
                                   context,

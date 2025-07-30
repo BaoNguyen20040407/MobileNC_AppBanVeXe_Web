@@ -1,11 +1,15 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/widget/appbar_admin.dart';
 import 'package:giao_dien_1/widget/exit_button.dart';
 import 'package:giao_dien_1/widget/input_field.dart';
 import 'package:intl/intl.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:giao_dien_1/view/admin/customer_admin/add_customer_success.dart';
 import 'package:giao_dien_1/widget/create_button.dart';
+import 'package:http/http.dart' as http;
 
 class AddCustomerScreen extends StatefulWidget {
   const AddCustomerScreen({super.key});
@@ -21,7 +25,9 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _imageUrlController = TextEditingController();
+
+  File? _selectedImage;
+  String? _imageUrlError;
 
   void _selectDate() async {
     DateTime? picked = await showDatePicker(
@@ -38,20 +44,75 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
     }
   }
 
-  void _handleSubmit() {
-    print('Mã KH: ${_idController.text}');
-    print('Họ tên: ${_nameController.text}');
-    print('Ngày sinh: ${_dobController.text}');
-    print('Địa chỉ: ${_addressController.text}');
-    print('Email: ${_emailController.text}');
-    print('SĐT: ${_phoneController.text}');
-    print('URL ảnh: ${_imageUrlController.text}');
-    // TODO: Gọi API thêm khách hàng
+  Future<void> _pickImage() async {
+    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
 
-    Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => const AddCustomerSuccess()),
-  );
+    if (picked != null) {
+      setState(() {
+        _selectedImage = File(picked.path);
+        _imageUrlError = null;
+      });
+    }
+  }
+
+  void _handleSubmit() async {
+    if (_selectedImage == null) {
+      setState(() => _imageUrlError = 'Vui lòng chọn ảnh đại diện.');
+      return;
+    }
+
+    final bytes = await _selectedImage!.readAsBytes();
+    final base64Image = base64Encode(bytes);
+
+    final customerData = {
+      'MaKH': _idController.text.trim(),
+      'HoVaTen': _nameController.text.trim(),
+      'NgaySinh': _dobController.text.trim(),
+      'DiaChi': _addressController.text.trim(),
+      'Email': _emailController.text.trim(),
+      'SDT': _phoneController.text.trim(),
+      'URLHinhAnh': base64Image,
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse('http://10.0.2.2:3000/add-khachhang'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(customerData),
+      );
+
+      if (response.statusCode == 200) {
+        print("✅ Customer added: ${response.body}");
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const AddCustomerSuccess()),
+        );
+      } else {
+        print("❌ Failed to add customer: ${response.body}");
+        _showErrorDialog(
+          "Thêm khách hàng thất bại: ${json.decode(response.body)['message']}",
+        );
+      }
+    } catch (e) {
+      print("❌ Exception: $e");
+      _showErrorDialog("Lỗi khi kết nối đến server.");
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("Lỗi"),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -134,20 +195,77 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
               ),
               const SizedBox(height: 16),
 
-              CustomInputField(
-                controller: _imageUrlController,
-                labelText: "URL hình ảnh",
-                prefixIcon: Icons.image,
-                keyboardType: TextInputType.url,
-                showToggleVisibility: false,
+              // Image Picker UI
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Ảnh đại diện",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        GestureDetector(
+                          onTap: _pickImage,
+                          child: Container(
+                            width: 100,
+                            height: 100,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: _selectedImage != null
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.file(
+                                      _selectedImage!,
+                                      fit: BoxFit.cover,
+                                      width: 100,
+                                      height: 100,
+                                    ),
+                                  )
+                                : const Icon(
+                                    Icons.add_a_photo,
+                                    size: 40,
+                                  ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Text(
+                            _selectedImage != null
+                                ? 'Đã chọn hình ảnh'
+                                : 'Chọn một hình ảnh từ thiết bị',
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (_imageUrlError != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4.0),
+                        child: Text(
+                          _imageUrlError!,
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
               const SizedBox(height: 32),
 
               Row(
                 children: [
-                  Expanded(
-                    child: CreateButton(onPressed: _handleSubmit),
-                  ),
+                  Expanded(child: CreateButton(onPressed: _handleSubmit)),
                   const SizedBox(width: 16),
                   const Expanded(child: ExitButton()),
                 ],

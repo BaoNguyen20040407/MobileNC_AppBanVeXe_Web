@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/widget/appbar_admin.dart';
 import 'package:giao_dien_1/widget/exit_button.dart';
@@ -14,21 +16,67 @@ class AddEmployeeAccountScreen extends StatefulWidget {
 }
 
 class _AddEmployeeAccountScreenState extends State<AddEmployeeAccountScreen> {
-  final TextEditingController _idController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _idController = TextEditingController(); // MaTK
+  final TextEditingController _usernameController = TextEditingController(); // TenDangNhapNV
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _employeeIdController = TextEditingController();
+  final TextEditingController _employeeIdController = TextEditingController(); // MaNV
 
-  void _handleSubmit() {
-    print('Mã tài khoản: ${_idController.text}');
-    print('Email: ${_emailController.text}');
-    print('Password: ${_passwordController.text}');
-    print('Mã nhân viên: ${_employeeIdController.text}');
-    // TODO: Gọi API thêm tài khoản nhân viên
+  bool _isLoading = false;
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const AddAccountAdminSuccess()),
+  Future<void> _handleSubmit() async {
+    final url = Uri.parse('http://10.0.2.2:3000/taikhoannv');
+
+    final data = {
+      "MaTK": _idController.text.trim(),
+      "TenDangNhapNV": _usernameController.text.trim(),
+      "Password": _passwordController.text.trim(),
+      "MaNV": _employeeIdController.text.trim(),
+    };
+
+    if (data.values.any((value) => value.isEmpty)) {
+      _showDialog("Vui lòng điền đầy đủ thông tin.");
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(data),
+      );
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && responseData['success'] == true) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const AddAccountAdminSuccess()),
+        );
+      } else {
+        _showDialog(responseData['message'] ?? "Tạo tài khoản thất bại.");
+      }
+    } catch (e) {
+      _showDialog("Lỗi kết nối đến máy chủ.");
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  void _showDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("Thông báo"),
+        content: Text(message),
+        actions: [
+          TextButton(
+            child: const Text("Đóng"),
+            onPressed: () => Navigator.of(context).pop(),
+          )
+        ],
+      ),
     );
   }
 
@@ -60,16 +108,16 @@ class _AddEmployeeAccountScreenState extends State<AddEmployeeAccountScreen> {
                 controller: _idController,
                 labelText: "Mã tài khoản",
                 prefixIcon: Icons.vpn_key,
-                keyboardType: TextInputType.number,
+                keyboardType: TextInputType.text,
                 showToggleVisibility: false,
               ),
               const SizedBox(height: 16),
 
               CustomInputField(
-                controller: _emailController,
-                labelText: "Email",
-                prefixIcon: Icons.email,
-                keyboardType: TextInputType.emailAddress,
+                controller: _usernameController,
+                labelText: "Tên đăng nhập",
+                prefixIcon: Icons.person,
+                keyboardType: TextInputType.text,
                 showToggleVisibility: false,
               ),
               const SizedBox(height: 16),
@@ -86,7 +134,7 @@ class _AddEmployeeAccountScreenState extends State<AddEmployeeAccountScreen> {
               CustomInputField(
                 controller: _employeeIdController,
                 labelText: "Mã nhân viên",
-                prefixIcon: Icons.perm_identity,
+                prefixIcon: Icons.badge,
                 keyboardType: TextInputType.text,
                 showToggleVisibility: false,
               ),
@@ -94,7 +142,11 @@ class _AddEmployeeAccountScreenState extends State<AddEmployeeAccountScreen> {
 
               Row(
                 children: [
-                  Expanded(child: CreateButton(onPressed: _handleSubmit)),
+                  Expanded(
+                    child: _isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : CreateButton(onPressed: _handleSubmit),
+                  ),
                   const SizedBox(width: 16),
                   const Expanded(child: ExitButton()),
                 ],

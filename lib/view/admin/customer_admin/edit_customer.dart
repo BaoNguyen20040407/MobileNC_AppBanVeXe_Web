@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/view/admin/customer_admin/customer_list.dart';
@@ -6,6 +8,7 @@ import 'package:giao_dien_1/widget/appbar_admin.dart';
 import 'package:giao_dien_1/widget/input_field.dart';
 import 'package:giao_dien_1/view/admin/customer_admin/edit_customer_success.dart';
 import 'package:giao_dien_1/widget/edit_action_button.dart';
+import 'package:http/http.dart' as http;
 
 class EditCustomerScreen extends StatefulWidget {
   final Map<String, dynamic> customerData;
@@ -31,12 +34,22 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
   void initState() {
     super.initState();
     _maKHController = TextEditingController(text: widget.customerData['MaKH']);
-    _hoTenController = TextEditingController(text: widget.customerData['HoVaTen']);
-    _ngaySinhController = TextEditingController(text: widget.customerData['NgaySinh']);
-    _diaChiController = TextEditingController(text: widget.customerData['DiaChi']);
-    _emailController = TextEditingController(text: widget.customerData['Email']);
+    _hoTenController = TextEditingController(
+      text: widget.customerData['HoVaTen'],
+    );
+    _ngaySinhController = TextEditingController(
+      text: widget.customerData['NgaySinh'],
+    );
+    _diaChiController = TextEditingController(
+      text: widget.customerData['DiaChi'],
+    );
+    _emailController = TextEditingController(
+      text: widget.customerData['Email'],
+    );
     _sdtController = TextEditingController(text: widget.customerData['SDT']);
-    _urlHinhAnhController = TextEditingController(text: widget.customerData['URLHinhAnh']);
+    _urlHinhAnhController = TextEditingController(
+      text: widget.customerData['URLHinhAnh'],
+    );
   }
 
   @override
@@ -54,7 +67,8 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
   Future<void> _selectDate() async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: DateTime.tryParse(_ngaySinhController.text) ?? DateTime.now(),
+      initialDate:
+          DateTime.tryParse(_ngaySinhController.text) ?? DateTime.now(),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
     );
@@ -65,13 +79,61 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
     }
   }
 
-  void _submitForm() {
+  void _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const EditCustomerSuccess()),
-      );
+      final maKH = _maKHController.text;
+      final url = Uri.parse('http://10.0.2.2:3000/khachhang/$maKH');
+
+      final updatedData = {
+        'HoVaTen': _hoTenController.text,
+        'NgaySinh': _ngaySinhController.text,
+        'DiaChi': _diaChiController.text,
+        'Email': _emailController.text,
+        'SDT': _sdtController.text,
+        'URLHinhAnh': _urlHinhAnhController.text,
+      };
+
+      try {
+        final response = await http.put(
+          url,
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(updatedData),
+        );
+
+        if (response.statusCode == 200) {
+          final jsonResponse = jsonDecode(response.body);
+          if (jsonResponse['success'] == true) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const EditCustomerSuccess()),
+            );
+          } else {
+            _showErrorDialog(jsonResponse['message']);
+          }
+        } else {
+          _showErrorDialog('Lỗi cập nhật dữ liệu (mã: ${response.statusCode})');
+        }
+      } catch (e) {
+        _showErrorDialog('Lỗi kết nối: $e');
+      }
     }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Lỗi'),
+            content: Text(message),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Đóng'),
+              ),
+            ],
+          ),
+    );
   }
 
   @override
@@ -167,181 +229,257 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
                     Expanded(
                       child: SizedBox(
                         height: 42,
-                        child: EditActionButton(
-                          onPressed: _submitForm,
-                        ),
+                        child: EditActionButton(onPressed: _submitForm),
                       ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                  child: SizedBox(
-                    height: 42,
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        final confirm = await showDialog<bool>(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            backgroundColor: AppColors.white,
+                      child: SizedBox(
+                        height: 42,
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            final confirm = await showDialog<bool>(
+                              context: context,
+                              builder:
+                                  (context) => AlertDialog(
+                                    backgroundColor: AppColors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    titlePadding: const EdgeInsets.fromLTRB(
+                                      24,
+                                      12,
+                                      24,
+                                      0,
+                                    ),
+                                    contentPadding: const EdgeInsets.fromLTRB(
+                                      24,
+                                      8,
+                                      24,
+                                      0,
+                                    ),
+                                    actionsPadding: const EdgeInsets.fromLTRB(
+                                      16,
+                                      24,
+                                      16,
+                                      16,
+                                    ),
+                                    title: const Text(
+                                      'Bạn có chắc không?',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                        fontFamily: 'Inter',
+                                      ),
+                                    ),
+                                    content: const Text(
+                                      'Dữ liệu này có thể bị xóa',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontFamily: 'Inter',
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                    actionsAlignment: MainAxisAlignment.end,
+                                    actions: [
+                                      OutlinedButton(
+                                        style: ButtonStyle(
+                                          side: MaterialStateProperty.all(
+                                            const BorderSide(
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                          shape: MaterialStateProperty.all(
+                                            RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                          ),
+                                          padding: MaterialStateProperty.all(
+                                            const EdgeInsets.symmetric(
+                                              horizontal: 24,
+                                              vertical: 12,
+                                            ),
+                                          ),
+                                          overlayColor:
+                                              MaterialStateProperty.all(
+                                                Colors.transparent,
+                                              ),
+                                          backgroundColor:
+                                              MaterialStateProperty.all(
+                                                Colors.white,
+                                              ),
+                                          foregroundColor:
+                                              MaterialStateProperty.all(
+                                                Colors.black,
+                                              ),
+                                        ),
+                                        onPressed:
+                                            () => Navigator.of(
+                                              context,
+                                            ).pop(false),
+                                        child: const Text(
+                                          'Hủy',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'Inter',
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.red,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                          ),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 24,
+                                            vertical: 12,
+                                          ),
+                                          elevation: 0,
+                                        ),
+                                        onPressed:
+                                            () =>
+                                                Navigator.of(context).pop(true),
+                                        child: const Text(
+                                          'Xóa',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'Inter',
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                            );
+
+                            if (confirm == true) {
+                              await showDialog<void>(
+                                context: context,
+                                builder:
+                                    (context) => AlertDialog(
+                                      backgroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      titlePadding: const EdgeInsets.fromLTRB(
+                                        24,
+                                        12,
+                                        24,
+                                        0,
+                                      ),
+                                      contentPadding: const EdgeInsets.fromLTRB(
+                                        24,
+                                        8,
+                                        24,
+                                        0,
+                                      ),
+                                      actionsPadding: const EdgeInsets.fromLTRB(
+                                        24,
+                                        24,
+                                        16,
+                                        16,
+                                      ),
+                                      title: const Text(
+                                        'Xóa thành công!',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'Inter',
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                      content: const Text(
+                                        'Dữ liệu đã được xóa khỏi hệ thống.',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontFamily: 'Inter',
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                      actionsAlignment: MainAxisAlignment.end,
+                                      actions: [
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            Navigator.pushReplacement(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder:
+                                                    (_) =>
+                                                        const CustomerListScreen(),
+                                              ),
+                                            );
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: AppColors.red,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 24,
+                                              vertical: 12,
+                                            ),
+                                            elevation: 0,
+                                          ),
+                                          child: const Text(
+                                            'Đóng',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontFamily: 'Inter',
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                              );
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.red,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(6),
                             ),
-                            titlePadding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
-                            contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
-                            actionsPadding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
-                            title: const Text(
-                              'Bạn có chắc không?',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                                fontFamily: 'Inter',
-                              ),
+                            side: const BorderSide(
+                              color: AppColors.mainOrange,
+                              width: 1.2,
                             ),
-                            content: const Text(
-                              'Dữ liệu này có thể bị xóa',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontFamily: 'Inter',
-                                color: Colors.black87,
-                              ),
+                            elevation: 3,
+                            shadowColor: AppColors.mainOrange.withOpacity(0.2),
+                          ).copyWith(
+                            overlayColor: MaterialStateProperty.all(
+                              Colors.transparent,
                             ),
-                            actionsAlignment: MainAxisAlignment.end,
-                            actions: [
-                              OutlinedButton(
-                                style: ButtonStyle(
-                                  side: MaterialStateProperty.all(
-                                    const BorderSide(color: Colors.black),
-                                  ),
-                                  shape: MaterialStateProperty.all(
-                                    RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                  ),
-                                  padding: MaterialStateProperty.all(
-                                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                                  ),
-                                  overlayColor: MaterialStateProperty.all(Colors.transparent),
-                                  backgroundColor: MaterialStateProperty.all(Colors.white),
-                                  foregroundColor: MaterialStateProperty.all(Colors.black),
-                                ),
-                                onPressed: () => Navigator.of(context).pop(false),
-                                child: const Text(
-                                  'Hủy',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'Inter',
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.red,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                                  elevation: 0,
-                                ),
-                                onPressed: () => Navigator.of(context).pop(true),
-                                child: const Text(
-                                  'Xóa',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'Inter',
-                                    color: Colors.white,
-                                  ),
+                            surfaceTintColor: MaterialStateProperty.all(
+                              Colors.transparent,
+                            ),
+                          ),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.delete, color: Colors.white, size: 18),
+                              SizedBox(width: 6),
+                              Text(
+                                'Xóa',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  fontFamily: 'Inter',
                                 ),
                               ),
                             ],
                           ),
-                        );
-
-                        if (confirm == true) {
-                          await showDialog<void>(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              backgroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              titlePadding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
-                              contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
-                              actionsPadding: const EdgeInsets.fromLTRB(24, 24, 16, 16),
-                              title: const Text(
-                                'Xóa thành công!',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Inter',
-                                  color: Colors.black,
-                                ),
-                              ),
-                              content: const Text(
-                                'Dữ liệu đã được xóa khỏi hệ thống.',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontFamily: 'Inter',
-                                  color: Colors.black87,
-                                ),
-                              ),
-                              actionsAlignment: MainAxisAlignment.end,
-                              actions: [
-                                ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(builder: (_) => const CustomerListScreen()),
-                                    );
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.red,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                                    elevation: 0,
-                                  ),
-                                  child: const Text(
-                                    'Đóng',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: 'Inter',
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.red,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                        side: const BorderSide(color: AppColors.mainOrange, width: 1.2),
-                        elevation: 3,
-                        shadowColor: AppColors.mainOrange.withOpacity(0.2),
-                      ).copyWith(
-                        overlayColor: MaterialStateProperty.all(Colors.transparent),
-                        surfaceTintColor: MaterialStateProperty.all(Colors.transparent),
-                      ),
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.delete, color: Colors.white, size: 18),
-                          SizedBox(width: 6),
-                          Text(
-                            'Xóa',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                              fontFamily: 'Inter',
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
-                  ),
-                ),
                   ],
                 ),
               ],

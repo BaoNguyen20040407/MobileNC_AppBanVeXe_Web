@@ -5,30 +5,88 @@ import 'package:giao_dien_1/widget/exit_button.dart';
 import 'package:giao_dien_1/widget/input_field.dart';
 import 'package:giao_dien_1/view/admin/account/account_user/add_account_user_success.dart';
 import 'package:giao_dien_1/widget/create_button.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class AddCustomerAccountScreen extends StatefulWidget {
   const AddCustomerAccountScreen({super.key});
 
   @override
-  State<AddCustomerAccountScreen> createState() => _AddCustomerAccountScreenState();
+  State<AddCustomerAccountScreen> createState() =>
+      _AddCustomerAccountScreenState();
 }
 
 class _AddCustomerAccountScreenState extends State<AddCustomerAccountScreen> {
-  final TextEditingController _idController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _customerIdController = TextEditingController();
+  final TextEditingController _idController = TextEditingController(); // MaTK
+  final TextEditingController _usernameController = TextEditingController(); // TenDangNhapKH
+  final TextEditingController _passwordController = TextEditingController(); // Password
+  final TextEditingController _customerIdController = TextEditingController(); // MaKH
 
-  void _handleSubmit() {
-    print('Mã tài khoản: ${_idController.text}');
-    print('Email: ${_emailController.text}');
-    print('Password: ${_passwordController.text}');
-    print('Mã KH: ${_customerIdController.text}');
-    // TODO: Gọi API thêm tài khoản
+  void _handleSubmit() async {
+    final maTK = _idController.text.trim();
+    final tenDangNhapKH = _usernameController.text.trim();
+    final password = _passwordController.text;
+    final maKH = _customerIdController.text.trim();
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const AddAccountUserSuccess()),
+    final url = Uri.parse('http://10.0.2.2:3000/add-taikhoankh');
+
+    print('Đang gửi dữ liệu đến backend...');
+    print({
+      'MaTK': maTK,
+      'TenDangNhapKH': tenDangNhapKH,
+      'Password': password,
+      'MaKH': maKH,
+    });
+    
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'MaTK': maTK,
+          'TenDangNhapKH': tenDangNhapKH,
+          'Password': password,
+          'MaKH': maKH,
+        }),
+      );
+
+      print('Trạng thái phản hồi: ${response.statusCode}');
+      print('Nội dung phản hồi: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const AddAccountUserSuccess(),
+            ),
+          );
+        } else {
+          _showErrorDialog('Thêm tài khoản thất bại: ${data['message']}');
+        }
+      } else {
+        _showErrorDialog('Lỗi máy chủ: ${response.statusCode}');
+      }
+    } catch (e) {
+      _showErrorDialog('Không thể kết nối đến máy chủ. Chi tiết: $e');
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Lỗi'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -66,10 +124,10 @@ class _AddCustomerAccountScreenState extends State<AddCustomerAccountScreen> {
               const SizedBox(height: 16),
 
               CustomInputField(
-                controller: _emailController,
-                labelText: "Email",
-                prefixIcon: Icons.email,
-                keyboardType: TextInputType.emailAddress,
+                controller: _usernameController,
+                labelText: "Tên đăng nhập",
+                prefixIcon: Icons.person,
+                keyboardType: TextInputType.text,
                 showToggleVisibility: false,
               ),
               const SizedBox(height: 16),

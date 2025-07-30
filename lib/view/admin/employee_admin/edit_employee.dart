@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/view/admin/employee_admin/employee_list.dart';
@@ -5,6 +7,7 @@ import 'package:giao_dien_1/widget/input_field.dart';
 import 'package:giao_dien_1/widget/appbar_admin.dart';
 import 'package:giao_dien_1/view/admin/employee_admin/edit_employee_success.dart';
 import 'package:giao_dien_1/widget/edit_action_button.dart';
+import 'package:http/http.dart' as http;
 
 class EditAccountAdminScreen extends StatefulWidget {
   final Map<String, dynamic> staffData;
@@ -73,13 +76,56 @@ class _EditAccountAdminScreenState extends State<EditAccountAdminScreen> {
     }
   }
 
-  void _submitForm() {
+  void _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const EditEmployeeSuccess()),
-      );
+      final updatedData = {
+        "HoVaTen": _hoTenController.text.trim(),
+        "NgaySinh": _ngaySinhController.text.trim(),
+        "DiaChi": _diaChiController.text.trim(),
+        "Email": _emailController.text.trim(),
+        "SDT": _sdtController.text.trim(),
+        "URLHinhAnh": _urlHinhAnhController.text.trim(),
+        "NgayVaoLam": _ngayVaoLamController.text.trim(),
+        "ChucVu": _chucVuController.text.trim(),
+        "PhongBan": _phongBanController.text.trim(),
+      };
+
+      try {
+        final response = await http.put(
+          Uri.parse('http://10.0.2.2:3000/nhanvien/${_maNVController.text.trim()}'),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode(updatedData),
+        );
+
+        final result = json.decode(response.body);
+        if (response.statusCode == 200 && result['success'] == true) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const EditEmployeeSuccess()),
+          );
+        } else {
+          _showErrorDialog(result['message'] ?? 'Đã xảy ra lỗi khi cập nhật.');
+        }
+      } catch (e) {
+        _showErrorDialog('Lỗi kết nối: $e');
+      }
     }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Lỗi'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

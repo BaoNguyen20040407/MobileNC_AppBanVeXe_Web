@@ -5,6 +5,9 @@ import 'package:giao_dien_1/widget/appbar_admin.dart';
 import 'package:giao_dien_1/widget/input_field.dart';
 import 'package:giao_dien_1/view/admin/account/account_user/edit_account_user_success.dart';
 import 'package:giao_dien_1/widget/edit_action_button.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 
 class EditCustomerAccountScreen extends StatefulWidget {
   final Map<String, dynamic> accountData;
@@ -17,7 +20,9 @@ class EditCustomerAccountScreen extends StatefulWidget {
 
 class _EditCustomerAccountScreenState extends State<EditCustomerAccountScreen> {
   late TextEditingController _maTKController;
-  late TextEditingController _emailController;
+late TextEditingController _tenDangNhapController;
+// replace usage of _emailController with _tenDangNhapController
+
   late TextEditingController _passwordController;
   late TextEditingController _maKHController;
 
@@ -27,7 +32,7 @@ class _EditCustomerAccountScreenState extends State<EditCustomerAccountScreen> {
   void initState() {
     super.initState();
     _maTKController = TextEditingController(text: widget.accountData['MaTK'].toString());
-    _emailController = TextEditingController(text: widget.accountData['Email']);
+    _tenDangNhapController = TextEditingController(text: widget.accountData['TenDangNhap']);
     _passwordController = TextEditingController(text: widget.accountData['Password']);
     _maKHController = TextEditingController(text: widget.accountData['MaKH']);
   }
@@ -35,31 +40,61 @@ class _EditCustomerAccountScreenState extends State<EditCustomerAccountScreen> {
   @override
   void dispose() {
     _maTKController.dispose();
-    _emailController.dispose();
+    _tenDangNhapController.dispose();
     _passwordController.dispose();
     _maKHController.dispose();
     super.dispose();
   }
 
-  void _submitForm() {
+void _submitForm() async {
   if (_formKey.currentState!.validate()) {
-    final updatedData = {
-      'MaTK': _maTKController.text.trim(),
-      'Email': _emailController.text.trim(),
+    final maTK = _maTKController.text.trim();
+    final url = Uri.parse('http://10.0.2.2:3000/taikhoankh/$maTK');
+
+    final body = {
+      'TenDangNhapKH': _tenDangNhapController.text.trim(),
       'Password': _passwordController.text.trim(),
       'MaKH': _maKHController.text.trim(),
     };
 
-    // Gửi API cập nhật ở đây nếu cần...
+    try {
+      final response = await http.put(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(body),
+      );
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => EditAccountUserSuccess(),
-      ),
-    );
+      if (response.statusCode == 200) {
+        // Success
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const EditAccountUserSuccess()),
+        );
+      } else {
+        final error = jsonDecode(response.body)['error'] ?? 'Lỗi không xác định';
+        _showErrorDialog('Cập nhật thất bại', error);
+      }
+    } catch (e) {
+      _showErrorDialog('Lỗi kết nối', e.toString());
+    }
   }
 }
+void _showErrorDialog(String title, String message) {
+  showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: Text(title),
+      content: Text(message),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Đóng'),
+        ),
+      ],
+    ),
+  );
+}
+
 
 
   void _confirmDelete() async {
@@ -216,8 +251,8 @@ class _EditCustomerAccountScreenState extends State<EditCustomerAccountScreen> {
 
                 // Email
                 CustomInputField(
-                  controller: _emailController,
-                  labelText: "Email",
+                  controller: _tenDangNhapController,
+                  labelText: "Ten Dang Nhap",
                   prefixIcon: Icons.email,
                   keyboardType: TextInputType.emailAddress,
                 ),

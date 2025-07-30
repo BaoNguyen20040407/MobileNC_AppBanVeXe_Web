@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/config/default.dart';
+import 'package:giao_dien_1/config/config.dart';
 import 'package:giao_dien_1/widget/appbar.dart';
 import 'package:giao_dien_1/widget/footer.dart';
 import 'dart:convert';
@@ -8,60 +9,87 @@ import 'package:giao_dien_1/model/trip.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:giao_dien_1/view/ticket_booking/ticket_booking.dart';
 import 'package:http/http.dart' as http;
-import 'package:giao_dien_1/config/config.dart'; 
+import 'package:intl/intl.dart';
 
-// ... các import giữ nguyên
 
 class ScheduleScreen extends StatefulWidget {
-  ScheduleScreen({super.key});
+  const ScheduleScreen({super.key});
 
   @override
   State<ScheduleScreen> createState() => _ScheduleScreenState();
 }
 
 class _ScheduleScreenState extends State<ScheduleScreen> {
-  List<Trip> allTrips = [];
+  List<Map<String, dynamic>> allTrips = [];
+  List<Map<String, dynamic>> filteredTrips = [];
+
+  final TextEditingController startController = TextEditingController();
+  final TextEditingController endController = TextEditingController();
+  bool hasSearched = false;
 
   @override
   void initState() {
     super.initState();
+    fetchTrips();
   }
 
-  List<Trip> filteredTrips = [];
-  final TextEditingController startController = TextEditingController();
-  final TextEditingController endController = TextEditingController();
-  bool hasSearched = false;
+  Future<void> fetchTrips() async {
+    try {
+      final response = await http.get(Uri.parse('$baseURL/chuyenxe'));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonList = jsonDecode(response.body);
+        final List<Map<String, dynamic>> parsedList =
+            List<Map<String, dynamic>>.from(jsonList.map((e) => Map<String, dynamic>.from(e)));
+
+        setState(() {
+          allTrips = parsedList;
+        });
+      } else {
+        print('❌ Lỗi khi lấy dữ liệu: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('❌ Lỗi kết nối: $e');
+    }
+  }
 
   void _searchRoutes() async {
   String start = startController.text.trim();
   String end = endController.text.trim();
 
-  setState(() {
-    hasSearched = true;
-    filteredTrips = []; // clear trước khi fetch
-  });
+    setState(() {
+      hasSearched = true;
 
-  if (start.isEmpty && end.isEmpty) return;
+      if (start.isEmpty && end.isEmpty) {
+        filteredTrips = [];
+        return;
+      }
+      if (start.isEmpty) {
+      filteredTrips = allTrips.where((trip) {
+        return trip['DiemDen'].toString().toLowerCase().contains(end);
+      }).toList();
+      }
+      if (end.isEmpty) {
+      filteredTrips = allTrips.where((trip) {
+        return trip['DiemDi'].toString().toLowerCase().contains(start);
+      }).toList();
+      }
+      filteredTrips = allTrips.where((trip) {
+        return trip['DiemDi'].toString().toLowerCase().contains(start) &&
+               trip['DiemDen'].toString().toLowerCase().contains(end);
+      }).toList();
+      
+    });
+  }
 
+String formatDate(String dateTimeString) {
   try {
-    final uri = Uri.parse('$baseURL/api/lichtrinh?diemDi=$start&diemDen=$end');
-
-    final response = await http.get(uri);
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
-      setState(() {
-        filteredTrips = data.map((json) => Trip.fromJson(json)).toList();
-        print('Dữ liệu JSON: ${response.body}');
-      });
-    } else {
-      print('Lỗi API: ${response.statusCode}');
-    }
+    final dt = DateTime.parse(dateTimeString);
+    return DateFormat('dd/MM/yyyy').format(dt);
   } catch (e) {
-    print('Lỗi gọi API: $e');
+    return dateTimeString; // fallback nếu lỗi
   }
 }
-
 
   @override
   Widget build(BuildContext context) {
@@ -84,18 +112,11 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             const SizedBox(height: 8),
             const Text(
               'Cùng bạn đi trên mọi nẻo đường',
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColors.black,
-                fontFamily: 'Inter',
-              ),
+              style: TextStyle(fontSize: 14, color: AppColors.black, fontFamily: 'Inter'),
             ),
             const SizedBox(height: 20),
-
             _buildSearchBox(),
             const SizedBox(height: 30),
-
-            // ✅ Điều kiện hiển thị nội dung
             if (!hasSearched)
               _buildPlaceholder()
             else if (filteredTrips.isEmpty)
@@ -128,7 +149,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Cột chứa 2 ô nhập liệu
               Expanded(
                 child: Column(
                   children: [
@@ -147,14 +167,11 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                   ],
                 ),
               ),
-
-              const SizedBox(width: 16), // Khoảng cách giữa TextField và nút
-
-              // Nút đổi vị trí
+              const SizedBox(width: 16),
               Align(
                 alignment: Alignment.center,
                 child: SizedBox(
-                  width: 35, 
+                  width: 35,
                   height: 55,
                   child: Container(
                     decoration: BoxDecoration(
@@ -162,7 +179,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                       borderRadius: BorderRadius.circular(8),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.mainOrange.withOpacity(0.15), // 👈 bóng nhẹ
+                          color: AppColors.mainOrange.withOpacity(0.15),
                           blurRadius: 3,
                           offset: const Offset(0, 1),
                         ),
@@ -180,7 +197,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                       highlightColor: Colors.transparent,
                       hoverColor: Colors.transparent,
                       padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(), 
+                      constraints: const BoxConstraints(),
                     ),
                   ),
                 ),
@@ -194,9 +211,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.mainOrange,
                 padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                 shadowColor: AppColors.mainOrange,
               ),
               child: const Text(
@@ -228,59 +243,30 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         fontSize: 14,
       ),
       contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-      border: const UnderlineInputBorder(
-        borderSide: BorderSide(color: AppColors.grey400),
-      ),
-      enabledBorder: const UnderlineInputBorder(
-        borderSide: BorderSide(color: AppColors.grey400),
-      ),
-      focusedBorder: const UnderlineInputBorder(
-        borderSide: BorderSide(color: AppColors.mainOrange, width: 2),
-      ),
+      border: const UnderlineInputBorder(borderSide: BorderSide(color: AppColors.grey400)),
+      enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: AppColors.grey400)),
+      focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: AppColors.mainOrange, width: 2)),
       hoverColor: AppColors.white,
     );
   }
 
-  // ✅ Khi chưa tìm: hiển thị hình & dòng đỏ
   Widget _buildPlaceholder() {
     return Column(
       children: [
-        Image.asset(
-          'assets/image/bus_trip_illustration.png',
-          height: 150,
-        ),
+        Image.asset('assets/image/bus_trip_illustration.png', height: 150),
         const SizedBox(height: 10),
-        const Text(
-          'XE TRUNG CHUYỂN',
-          style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.red,
-              fontSize: 20,
-              fontFamily: 'Inter'),
-        ),
-        const Text(
-          'ĐÓN TRẢ TẬN NƠI',
-          style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.red,
-              fontSize: 20,
-              fontFamily: 'Inter'),
-        ),
+        const Text('XE TRUNG CHUYỂN', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red, fontSize: 20, fontFamily: 'Inter')),
+        const Text('ĐÓN TRẢ TẬN NƠI', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red, fontSize: 20, fontFamily: 'Inter')),
       ],
     );
   }
 
-  // ✅ Khi không có kết quả: chỉ hiện dòng chữ
   Widget _buildNoResultMessage() {
     return const Padding(
       padding: EdgeInsets.symmetric(horizontal: 24),
       child: Text(
         'Không tìm thấy lịch trình phù hợp.',
-        style: TextStyle(
-          fontSize: 16,
-          color: Colors.black87,
-          fontFamily: 'Inter',
-        ),
+        style: TextStyle(fontSize: 16, color: Colors.black87, fontFamily: 'Inter'),
         textAlign: TextAlign.center,
       ),
     );
@@ -291,11 +277,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       children: [
         Text(
           'Có ${filteredTrips.length} kết quả được tìm thấy',
-          style: const TextStyle(
-            fontWeight: FontWeight.w500,
-            fontSize: 16,
-            color: AppColors.black87,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 16, color: AppColors.black87),
         ),
         const SizedBox(height: 8),
         ListView.builder(
@@ -303,15 +285,15 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           physics: const NeverScrollableScrollPhysics(),
           itemCount: filteredTrips.length,
           itemBuilder: (context, index) {
-            final route = filteredTrips[index];
-            return _buildTripCard(route);
+            final trip = filteredTrips[index];
+            return _buildTripCard(trip);
           },
         ),
       ],
     );
   }
 
-  Widget _buildTripCard(Trip route) {
+  Widget _buildTripCard(Map<String, dynamic> trip) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
@@ -323,26 +305,15 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12),
-                bottomLeft: Radius.circular(12),
-              ),
-              child: Image.asset(
-                route.image,
-                width: 110,
-                fit: BoxFit.cover,
-              ),
-            ),
+            Image.asset('assets/image/bus_trip_illustration.png', width: 110, fit: BoxFit.cover),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // ✅ Toàn bộ dòng "Tuyến xe" màu cam, chữ đậm
                     Text(
-                      'Tuyến xe: ${route.diemDi} - ${route.diemDen}',
+                      'Tuyến xe: ${trip['DiemDi']} - ${trip['DiemDen']}',
                       style: const TextStyle(
                         fontFamily: 'Inter',
                         fontSize: 14,
@@ -351,9 +322,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    _tripInfoRow('Loại xe:', route.loaiGhe),
+                    _tripInfoRow('Loại xe:', trip['LoaiHinhChuyenDi']),
                     const SizedBox(height: 8),
-                    _tripInfoRow('Thời gian hành trình:', '${route.gioBatDau} - ${route.gioKetThuc}'),
+                    _tripInfoRow('Thời gian hành trình:', '${formatDate(trip['ThoiGianDi'])} - ${formatDate(trip['ThoiGianVe'])}',),
                     const Spacer(),
                     const SizedBox(height: 8),
                     Align(
@@ -362,15 +333,19 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                         onPressed: () async {
                           final prefs = await SharedPreferences.getInstance();
 
-                          await prefs.setString('diemDi', route.diemDi);
-                          await prefs.setString('diemDen', route.diemDen);
-                          await prefs.setInt('seatPrice', route.giaVe);
-                          await prefs.setString('startTime', route.gioBatDau);
+                          await prefs.setString('diemDi', trip['DiemDi']);
+                          await prefs.setString('diemDen', trip['DiemDen']);
+                          await prefs.setInt('seatPrice', double.parse(trip['GiaVe'].toString()).toInt());
+                          DateTime thoiGianDi = DateTime.parse(trip['ThoiGianDi']);
+                          String formattedStartTime = '${thoiGianDi.hour.toString().padLeft(2, '0')}:${thoiGianDi.minute.toString().padLeft(2, '0')}';
 
-                          // Mặc định ngày đi là hôm nay:
+                          await prefs.setString('startTime', formattedStartTime);
+
                           final now = DateTime.now();
                           final formattedToday = '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
                           await prefs.setString('ngayDi', formattedToday);
+                          await prefs.setString('maCX', trip['MaCX']);
+                          await prefs.setString('loaiVe', trip['LoaiHinhChuyenDi']);
 
                           Navigator.push(
                             context,
@@ -380,9 +355,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.softOrange,
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           elevation: 0,
                         ),
                         child: const Text(
@@ -405,7 +378,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     );
   }
 
-  Widget _tripInfoRow(String label, String value,
+  Widget _tripInfoRow(String label, dynamic value,
       {bool boldValue = false, Color? color}) {
     return RichText(
       text: TextSpan(
@@ -416,7 +389,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           TextSpan(
-            text: value,
+            text: value.toString(),
             style: TextStyle(
               fontWeight: boldValue ? FontWeight.bold : FontWeight.normal,
               color: color ?? Colors.black,

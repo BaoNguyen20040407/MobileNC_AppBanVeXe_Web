@@ -119,7 +119,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           'username',
                           data['data']['username'],
                         );
-
+                        await prefs.setString(
+                          'makh',
+                          data['data']['Ma'],
+                        );
                         // Navigate based on role
                         if (data['role'] == 'admin') {
                           Navigator.pushReplacement(

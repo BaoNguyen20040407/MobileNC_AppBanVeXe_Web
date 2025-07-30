@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/config/default.dart';
+import 'package:giao_dien_1/config/config.dart';
 import 'package:giao_dien_1/widget/appbar.dart';
 import 'package:giao_dien_1/widget/footer.dart';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:giao_dien_1/view/payment/wait_payment.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class Payment extends StatefulWidget {
   const Payment({super.key});
@@ -66,6 +69,58 @@ int remainingSeconds = 15 * 60; // 15 phút
       _diemDen = prefs.getString('diemDen') ?? '';
     });
   }
+
+Future<void> _handleConfirmPayment() async {
+  final prefs = await SharedPreferences.getInstance();
+
+  String maCX = prefs.getString('maCX') ?? '';
+  String loaiVe = prefs.getString('loaiVe') ?? '';
+  int giaVe = prefs.getInt('seatPrice') ?? 0;
+  String maKH = prefs.getString('makh') ?? '';
+  List<String> selectedSeats = prefs.getStringList('selectedSeats') ?? [];
+
+  // Lấy ghế đầu tiên
+  String viTriGhe = selectedSeats.isNotEmpty ? selectedSeats[0] : '';
+
+  if (maCX.isEmpty || loaiVe.isEmpty || viTriGhe.isEmpty || maKH.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.")),
+    );
+    return;
+  }
+
+  final response = await http.post(
+    Uri.parse('$baseURL/ve'),
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({
+      'LoaiVe': loaiVe,
+      'ViTriGheNgoi': viTriGhe,
+      'GiaVe': giaVe,
+      'TrangThai': 'Đã thanh toán',
+      'HinhThucThanhToan': 'Momo',
+      'MaCX': maCX,
+      'MaKH': maKH,
+    }),
+  );
+
+ if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+
+    // ✅ Điều hướng đến trang chờ thanh toán sau khi lưu thành công
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => WaitPayment(),
+        settings: const RouteSettings(name: '/wait_payment'),
+      ),
+    );
+  } else {
+    print('Lỗi khi đặt vé: ${response.body}');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Đặt vé thất bại. Vui lòng thử lại.")),
+    );
+}
+}
 
   @override
   void initState() {
@@ -208,15 +263,7 @@ int remainingSeconds = 15 * 60; // 15 phút
 
               SizedBox(
                 child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => WaitPayment(),
-                        settings: const RouteSettings(name: '/wait_payment'),
-                      ),
-                    );
-                  },
+                  onPressed: _handleConfirmPayment,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.mainOrange,
                     shape: RoundedRectangleBorder(

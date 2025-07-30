@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';              
 import 'package:flutter/services.dart'; 
 import 'package:flutter/material.dart';
+import 'package:giao_dien_1/config/config.dart';
 import 'package:giao_dien_1/model/trip.dart';
 import 'package:giao_dien_1/view/news/news.dart';
 import 'package:giao_dien_1/view/news/news_detail_02.dart';
@@ -16,6 +17,8 @@ import 'package:giao_dien_1/widget/tripcard.dart';
 import 'package:giao_dien_1/widget/trip_route_label.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:giao_dien_1/view/ticket_booking/ticket_booking.dart';
+import 'package:http/http.dart' as http;
+import 'package:giao_dien_1/config/config.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -788,75 +791,83 @@ class _PromotionSectionState extends State<PromotionSection> {
     }
   }
 
-class PopularRoutesSection extends StatelessWidget {
-  final List<Map<String, String>> routes = [
-    {
-      'from': 'TP.HCM',
-      'to': 'Đà Lạt',
-      'distance': '305km',
-      'duration': '8h00ph',
-      'price': '290.000 VNĐ',
-    },
-    {
-      'from': 'TP.HCM',
-      'to': 'Cần Thơ',
-      'distance': '166km',
-      'duration': '3h12ph',
-      'price': '165.000 VNĐ',
-    },
-    {
-      'from': 'Hà Nội',
-      'to': 'Hải Phòng',
-      'distance': '120km',
-      'duration': '2h00ph',
-      'price': '90.000 VNĐ',
-    },
-    {
-      'from': 'Hà Nội',
-      'to': 'Thanh Hóa',
-      'distance': '150km',
-      'duration': '3h30ph',
-      'price': '165.000 VNĐ',
-    },
-  ];
+class PopularRoutesSection extends StatefulWidget {
+  const PopularRoutesSection({super.key});
 
-  PopularRoutesSection({super.key});
-  
-
-  // Hàm xử lý khi người dùng chọn tuyến
-  Future<void> _handleRouteTap(BuildContext context, Map<String, String> route) async {
-  final prefs = await SharedPreferences.getInstance();
-
-  final now = DateTime.now();
-  final formattedDate = '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
-
-  await prefs.setString('diemDi', route['from']!);
-  await prefs.setString('diemDen', route['to']!);
-  await prefs.setString('ngayDi', formattedDate);
-
-  // Parse giá từ '290.000 VNĐ' → 290000
-  final rawPrice = route['price'] ?? '120.000 VNĐ';
-  final cleanedPrice = int.tryParse(
-    rawPrice.replaceAll('.', '').replaceAll(' VNĐ', '')
-  ) ?? 120000;
-
-  await prefs.setInt('seatPrice', cleanedPrice);
-
-
-  Navigator.push(
-    context,
-    MaterialPageRoute(builder: (_) => TicketBookingPage()),
-  );
+  @override
+  State<PopularRoutesSection> createState() => _PopularRoutesSectionState();
 }
+
+class _PopularRoutesSectionState extends State<PopularRoutesSection> {
+  List<Map<String, dynamic>> routes = [];
+  bool isLoading = true;
+  String? error;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchPopularRoutes();
+  }
+
+  Future<void> fetchPopularRoutes() async {
+    try {
+      final response = await http.get(Uri.parse('$baseURL/api/tuyenphobien')); // Thay <IP> bằng IP backend của bạn
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        setState(() {
+          routes = data.map((e) => Map<String, dynamic>.from(e)).toList();
+          isLoading = false;
+        });
+      } else {
+        throw Exception('Lỗi máy chủ: ${response.statusCode}');
+      }
+    } catch (e) {
+      setState(() {
+        error = e.toString();
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _handleRouteTap(BuildContext context, Map<String, dynamic> route) async {
+    final prefs = await SharedPreferences.getInstance();
+    final now = DateTime.now();
+    final formattedDate = '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
+
+    await prefs.setString('diemDi', route['from']);
+    await prefs.setString('diemDen', route['to']);
+    await prefs.setString('ngayDi', formattedDate);
+
+    final rawPrice = route['price'] ?? '120000';
+    final cleanedPrice = int.tryParse(
+      rawPrice.toString().replaceAll('.', '').replaceAll(' VNĐ', '')
+    ) ?? 120000;
+
+    await prefs.setInt('seatPrice', cleanedPrice);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => TicketBookingPage()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
     final formattedDate = '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
-    
-    final groupedRoutes = <String, List<Map<String, String>>>{};
+
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (error != null) {
+      return Center(child: Text('Đã xảy ra lỗi: $error'));
+    }
+
+    final groupedRoutes = <String, List<Map<String, dynamic>>>{};
     for (var route in routes) {
-      final from = route['from']!;
+      final from = route['from'];
       groupedRoutes.putIfAbsent(from, () => []).add(route);
     }
 
@@ -890,6 +901,8 @@ class PopularRoutesSection extends StatelessWidget {
           String imagePath = 'assets/default.jpg';
           if (from.contains('TP.HCM')) imagePath = 'assets/image/hochiminh.png';
           if (from.contains('Hà Nội')) imagePath = 'assets/image/hanoi.png';
+          if (from.contains('Đà Nẵng')) imagePath = 'assets/image/danang.jpg';
+          if (from.contains('Long An')) imagePath = 'assets/image/longan.jpg';
 
           return Container(
             margin: const EdgeInsets.symmetric(vertical: 16),
@@ -901,7 +914,7 @@ class PopularRoutesSection extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Ảnh bên trái
+                // Hình ảnh bên trái
                 Container(
                   width: 100,
                   height: 135,
@@ -978,7 +991,7 @@ class PopularRoutesSection extends StatelessWidget {
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      route['to']!,
+                                      route['to'],
                                       style: const TextStyle(
                                         color: AppColors.greenDark,
                                         fontWeight: FontWeight.w600,
@@ -987,7 +1000,7 @@ class PopularRoutesSection extends StatelessWidget {
                                       ),
                                     ),
                                     Text(
-                                      route['price']!,
+                                      route['price'].toString(),
                                       style: const TextStyle(
                                         color: AppColors.mainOrange,
                                         fontWeight: FontWeight.bold,
@@ -999,7 +1012,7 @@ class PopularRoutesSection extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  '${route['distance']} - ${route['duration']} - $formattedDate',
+                                  '${route['duration']} - $formattedDate',
                                   style: const TextStyle(
                                     color: AppColors.black,
                                     fontSize: 14,

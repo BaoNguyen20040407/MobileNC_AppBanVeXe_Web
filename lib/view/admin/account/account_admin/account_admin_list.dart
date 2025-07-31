@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:giao_dien_1/config/config.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/widget/exit_button.dart';
 import 'package:giao_dien_1/widget/appbar_admin.dart';
@@ -35,7 +36,7 @@ class _AccountStaffListState extends State<AccountStaffList> {
 
   Future<void> fetchStaffAccounts() async {
     try {
-      final response = await http.get(Uri.parse('http://10.0.2.2:3000/taikhoannv'));
+      final response = await http.get(Uri.parse('$baseURL/taikhoannv'));
       if (response.statusCode == 200) {
         setState(() {
           staffAccounts = json.decode(response.body);
@@ -64,7 +65,7 @@ class _AccountStaffListState extends State<AccountStaffList> {
     if (confirm != true) return;
 
     try {
-      final response = await http.delete(Uri.parse('http://10.0.2.2:3000/taikhoannv/$maTK'));
+      final response = await http.delete(Uri.parse('$baseURL/taikhoannv/$maTK'));
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Xóa thành công')));
         fetchStaffAccounts();

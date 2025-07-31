@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:giao_dien_1/config/config.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/widget/appbar_admin.dart';
 import 'package:giao_dien_1/widget/exit_button.dart';
@@ -56,48 +57,63 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   }
 
   void _handleSubmit() async {
-    if (_selectedImage == null) {
-      setState(() => _imageUrlError = 'Vui lòng chọn ảnh đại diện.');
-      return;
-    }
+  if (_selectedImage == null) {
+    setState(() => _imageUrlError = 'Vui lòng chọn ảnh đại diện.');
+    print('⚠️ Chưa chọn ảnh đại diện.');
+    return;
+  }
 
-    final bytes = await _selectedImage!.readAsBytes();
-    final base64Image = base64Encode(bytes);
+  final bytes = await _selectedImage!.readAsBytes();
+  final base64Image = base64Encode(bytes);
 
-    final customerData = {
-      'MaKH': _idController.text.trim(),
-      'HoVaTen': _nameController.text.trim(),
-      'NgaySinh': _dobController.text.trim(),
-      'DiaChi': _addressController.text.trim(),
-      'Email': _emailController.text.trim(),
-      'SDT': _phoneController.text.trim(),
-      'URLHinhAnh': base64Image,
-    };
+  final customerData = {
+    'MaKH': _idController.text.trim(),
+    'HoVaTen': _nameController.text.trim(),
+    'NgaySinh': _dobController.text.trim(),
+    'DiaChi': _addressController.text.trim(),
+    'Email': _emailController.text.trim(),
+    'SDT': _phoneController.text.trim(),
+    'URLHinhAnh': base64Image,
+  };
 
-    try {
-      final response = await http.post(
-        Uri.parse('http://10.0.2.2:3000/add-khachhang'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode(customerData),
-      );
+  print('📤 Dữ liệu chuẩn bị gửi lên:');
+  print(jsonEncode(customerData));
 
-      if (response.statusCode == 200) {
-        print("✅ Customer added: ${response.body}");
+  final url = Uri.parse('$baseURL/add-khachhang');
+  print('🌐 Gửi POST đến URL: $url');
+
+  try {
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(customerData),
+    );
+
+    print('📥 Status code: ${response.statusCode}');
+    print('📥 Response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+      if (jsonResponse['success'] == true) {
+        print('✅ Thêm khách hàng thành công.');
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const AddCustomerSuccess()),
         );
       } else {
-        print("❌ Failed to add customer: ${response.body}");
-        _showErrorDialog(
-          "Thêm khách hàng thất bại: ${json.decode(response.body)['message']}",
-        );
+        print('❌ Server trả về lỗi logic: ${jsonResponse['message']}');
+        _showErrorDialog(jsonResponse['message']);
       }
-    } catch (e) {
-      print("❌ Exception: $e");
-      _showErrorDialog("Lỗi khi kết nối đến server.");
+    } else {
+      print('❌ Server trả về lỗi mã: ${response.statusCode}');
+      _showErrorDialog('Thêm khách hàng thất bại (mã: ${response.statusCode})');
     }
+  } catch (e) {
+    print("❌ Exception: $e");
+    _showErrorDialog("Lỗi khi kết nối đến server: $e");
   }
+}
+
 
   void _showErrorDialog(String message) {
     showDialog(

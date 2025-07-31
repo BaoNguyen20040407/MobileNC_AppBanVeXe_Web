@@ -35,7 +35,7 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
 
   Future<void> fetchEmployees() async {
     try {
-      final response = await http.get(Uri.parse('http://10.0.2.2:3000/nhanvien'));
+      final response = await http.get(Uri.parse('$baseURL/nhanvien'));
       if (response.statusCode == 200) {
         setState(() {
           employees = json.decode(response.body);

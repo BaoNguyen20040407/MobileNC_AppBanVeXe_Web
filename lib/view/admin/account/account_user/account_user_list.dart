@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:giao_dien_1/config/config.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/widget/exit_button.dart';
 import 'package:giao_dien_1/widget/appbar_admin.dart';
@@ -34,7 +35,7 @@ class _AccountUserListState extends State<AccountUserList> {
   }
 
   Future<void> fetchAccounts() async {
-    final response = await http.get(Uri.parse('http://10.0.2.2:3000/taikhoankh'));
+    final response = await http.get(Uri.parse('$baseURL/taikhoankh'));
     if (response.statusCode == 200) {
       setState(() {
         accountList = json.decode(response.body);

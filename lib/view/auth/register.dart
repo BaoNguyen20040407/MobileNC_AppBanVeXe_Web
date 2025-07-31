@@ -10,7 +10,7 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
 import 'package:giao_dien_1/config/config.dart';
-
+import 'package:giao_dien_1/config/default.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -303,6 +303,77 @@ Future<void> _submitData() async {
                     ),
                   ),
                   const SizedBox(height: 32),
+                  Align(
+                    alignment: Alignment.center,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center, // Giữa theo chiều ngang
+                      children: [
+                        const Text(
+                          "Ảnh đại diện",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Khung chọn ảnh
+                        GestureDetector(
+                          onTap: _pickImage,
+                          child: Container(
+                            width: 120,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: AppColors.mainOrange),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: _selectedImage != null
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.file(
+                                      _selectedImage!,
+                                      fit: BoxFit.cover,
+                                      width: 120,
+                                      height: 120,
+                                    ),
+                                  )
+                                : const Icon(
+                                    Icons.add_a_photo,
+                                    size: 40,
+                                  ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 8),
+
+                        // Ghi chú bên dưới khung ảnh
+                        Text(
+                          _selectedImage != null
+                              ? 'Đã chọn hình ảnh'
+                              : 'Chọn một hình ảnh từ thiết bị',
+                          style: const TextStyle(fontSize: 14),
+                          textAlign: TextAlign.center,
+                        ),
+
+                        // Hiển thị lỗi nếu có
+                        if (_imageUrlError != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4.0),
+                            child: Text(
+                              _imageUrlError!,
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontSize: 12,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+
+                        const SizedBox(height: 16),
+                      ],
+                    ),
+                  ),
+
                   CustomInputField(
                     controller: _nameController,
                     labelText: "Họ tên",
@@ -448,76 +519,6 @@ Future<void> _submitData() async {
                     },
                   ),
                   const SizedBox(height: 16),
-
-                  // IMAGE PICKER REPLACEMENT START
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "Ảnh đại diện",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            GestureDetector(
-                              onTap: _pickImage,
-                              child: Container(
-                                width: 100,
-                                height: 100,
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.grey),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child:
-                                    _selectedImage != null
-                                        ? ClipRRect(
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                          child: Image.file(
-                                            _selectedImage!,
-                                            fit: BoxFit.cover,
-                                            width: 100,
-                                            height: 100,
-                                          ),
-                                        )
-                                        : const Icon(
-                                          Icons.add_a_photo,
-                                          size: 40,
-                                        ),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Text(
-                                _selectedImage != null
-                                    ? 'Đã chọn hình ảnh'
-                                    : 'Chọn một hình ảnh từ thiết bị',
-                                style: const TextStyle(fontSize: 14),
-                              ),
-                            ),
-                          ],
-                        ),
-                        if (_imageUrlError != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 4.0),
-                            child: Text(
-                              _imageUrlError!,
-                              style: const TextStyle(
-                                color: Colors.red,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
 
                   // IMAGE PICKER REPLACEMENT END
                   const SizedBox(height: 32),

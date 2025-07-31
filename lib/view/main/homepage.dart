@@ -101,7 +101,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _selectDate(BuildContext context) async {
   final DateTime? picked = await showDatePicker(
     context: context,
-    initialDate: _selectedDate ?? DateTime(2000, 1, 1),
+    initialDate: _selectedDate ?? DateTime.now(),
     firstDate: DateTime(1900),
     lastDate: DateTime(2100),
     helpText: 'Chọn ngày',

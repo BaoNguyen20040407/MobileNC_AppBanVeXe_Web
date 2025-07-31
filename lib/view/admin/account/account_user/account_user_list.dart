@@ -6,7 +6,7 @@ import 'package:giao_dien_1/widget/appbar_admin.dart';
 import 'package:giao_dien_1/view/admin/account/account.dart';
 import 'package:giao_dien_1/view/admin/account/account_user/add_account_user.dart';
 import 'package:giao_dien_1/view/admin/account/account_user/edit_account_user.dart';
-import 'package:giao_dien_1/widget/choice_chip_selector.dart';
+import 'package:giao_dien_1/widget/filter_chip_with_input.dart';
 import 'package:giao_dien_1/widget/pagination_control.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -14,6 +14,7 @@ import 'package:printing/printing.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'dart:async';
 
 class AccountUserList extends StatefulWidget {
   const AccountUserList({super.key});
@@ -24,26 +25,84 @@ class AccountUserList extends StatefulWidget {
 
 class _AccountUserListState extends State<AccountUserList> {
   final TextEditingController searchController = TextEditingController();
-  String selectedColumn = 'MaTK';
   bool showSearchOptions = false;
-  List<dynamic> accountList = [];
+  List<Map<String, dynamic>> accountList = [];
+  List<Map<String, dynamic>> filteredList = [];
+  Map<String, String> filters = {
+    'MaTK': '',
+    'TenDangNhapKH': '',
+    'Password': '',
+    'MaKH': '',
+  };
+  Timer? _debounce;
 
   @override
   void initState() {
     super.initState();
     fetchAccounts();
+    searchController.addListener(() {
+      if (_debounce?.isActive ?? false) _debounce!.cancel();
+      _debounce = Timer(const Duration(milliseconds: 300), () {
+        fetchAccounts();
+      });
+    });
+
   }
 
   Future<void> fetchAccounts() async {
-    final response = await http.get(Uri.parse('$baseURL/taikhoankh'));
+  try {
+    final response = await http.get(Uri.parse('$baseURL/loctaikhoankh'));
+
     if (response.statusCode == 200) {
+      final body = jsonDecode(response.body);
+
+      final List<dynamic> jsonList = body is List ? body : body['data'];
+
+      final List<Map<String, dynamic>> parsedList =
+          List<Map<String, dynamic>>.from(jsonList.map((e) => Map<String, dynamic>.from(e)));
+
       setState(() {
-        accountList = json.decode(response.body);
+        accountList = parsedList;
+        _filterAccounts();
       });
+
+      print('✅ Fetch thành công: ${accountList.length} tài khoản');
     } else {
-      print('Lỗi khi tải dữ liệu tài khoản KH');
+      print('❌ Lỗi khi fetch tài khoản: ${response.statusCode}');
     }
+  } catch (e) {
+    print('❌ Lỗi kết nối: $e');
   }
+}
+
+void _filterAccounts() {
+  String keyword = searchController.text.trim().toLowerCase();
+
+  setState(() {
+    filteredList = accountList.where((account) {
+      // 1. Tìm kiếm từ khóa chung
+      final matchesSearch = keyword.isEmpty
+          ? true
+          : account.values.any((value) =>
+              value != null &&
+              value.toString().toLowerCase().contains(keyword));
+
+      // 2. Kiểm tra các bộ lọc chi tiết (nếu có)
+      final matchesFilters = filters.entries.every((entry) {
+        final key = entry.key;
+        final filterValue = entry.value.trim().toLowerCase();
+
+        if (filterValue.isEmpty) return true;
+
+        final fieldValue = account[key]?.toString().toLowerCase() ?? '';
+
+        return fieldValue.startsWith(filterValue); // lọc gần đúng
+      });
+
+      return matchesSearch && matchesFilters;
+    }).toList();
+  });
+}
 
   Future<void> exportAccountsToPDF(List<dynamic> accounts) async {
     final pdf = pw.Document();
@@ -96,12 +155,6 @@ class _AccountUserListState extends State<AccountUserList> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredList = accountList.where((account) {
-      final keyword = searchController.text.toLowerCase();
-      final value = account[selectedColumn]?.toString().toLowerCase() ?? '';
-      return value.contains(keyword);
-    }).toList();
-
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: CustomAppBarAdmin(),
@@ -148,9 +201,8 @@ class _AccountUserListState extends State<AccountUserList> {
                             icon: const Icon(Icons.clear),
                             onPressed: () {
                               searchController.clear();
-                              setState(() {});
-                            },
-                          ),
+                              _filterAccounts();
+                            }),
                           enabledBorder: OutlineInputBorder(
                             borderSide: const BorderSide(color: AppColors.mainOrange, width: 1.5),
                             borderRadius: BorderRadius.circular(12),
@@ -167,12 +219,13 @@ class _AccountUserListState extends State<AccountUserList> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text("Tìm kiếm theo: ", style: TextStyle(fontFamily: 'Inter')),
+                          const Text("Tìm kiếm theo:", style: TextStyle(fontFamily: 'Inter')),
                           IconButton(
                             icon: Icon(showSearchOptions ? Icons.expand_less : Icons.expand_more),
                             onPressed: () {
                               setState(() {
                                 showSearchOptions = !showSearchOptions;
+                                print('showSearchOptions: $showSearchOptions'); // debug
                               });
                             },
                           ),
@@ -180,17 +233,22 @@ class _AccountUserListState extends State<AccountUserList> {
                       ),
                       if (showSearchOptions)
                         Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Wrap(
-                            spacing: 8,
-                            children: [
-                              ChoiceChipSelector(label: 'Mã TK', value: 'MaTK', selectedValue: selectedColumn, onSelected: (val) => setState(() => selectedColumn = val)),
-                              ChoiceChipSelector(label: 'Tên đăng nhập', value: 'TenDangNhapKH', selectedValue: selectedColumn, onSelected: (val) => setState(() => selectedColumn = val)),
-                              ChoiceChipSelector(label: 'Mật khẩu', value: 'Password', selectedValue: selectedColumn, onSelected: (val) => setState(() => selectedColumn = val)),
-                              ChoiceChipSelector(label: 'Mã KH', value: 'MaKH', selectedValue: selectedColumn, onSelected: (val) => setState(() => selectedColumn = val)),
-                            ],
-                          ),
+                          padding: const EdgeInsets.only(top: 8),
+                          child: FilterChipWithInputInline(
+                            filters: [
+                              {'label': 'Mã TK', 'value': 'MaTK'},
+                              {'label': 'Tên đăng nhập', 'value': 'TenDangNhap'},
+                              {'label': 'Password', 'value': 'Password'},
+                              {'label': 'Mã KH', 'value': 'MaKH'},
+                            ], 
+                            filterValues: filters, 
+                            onFilterChanged: (updated) {
+                              setState(() => filters = updated);
+                              _filterAccounts();
+                            },
+                          )
                         ),
+
                       const SizedBox(height: 8),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -222,87 +280,118 @@ class _AccountUserListState extends State<AccountUserList> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      if (filteredList.isEmpty)
-                        Container(
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: AppColors.mainOrange),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: const Padding(
-                            padding: EdgeInsets.all(16),
-                            child: Center(
-                              child: Text(
-                                'Chưa có dữ liệu để hiển thị',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontFamily: 'Inter',
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ),
-                          ),
-                        )
-                      else
-                        ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: filteredList.length,
-                          itemBuilder: (context, index) {
-                            final account = filteredList[index];
-                            return Card(
-                              margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-                              child: ListTile(
-                                title: Text(account['TenDangNhapKH'] ?? ''),
-                                subtitle: Text('MãTK: ${account['MaTK']} - MãKH: ${account['MaKH']}'),
-                                trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.edit, color: Colors.blue),
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => EditCustomerAccountScreen(accountData: account),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.delete, color: Colors.red),
-                                      onPressed: () async {
-                                        final confirm = await showDialog<bool>(
-                                          context: context,
-                                          builder: (ctx) => AlertDialog(
-                                            title: const Text('Xác nhận xóa'),
-                                            content: const Text('Bạn có chắc chắn muốn xóa tài khoản này?'),
-                                            actions: [
-                                              TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Hủy')),
-                                              TextButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Xóa')),
-                                            ],
-                                          ),
-                                        );
-                                        if (confirm == true) {
-                                          final response = await http.delete(
-                                            Uri.parse('http://10.0.2.2:3000/taikhoankh/${account['MaTK']}'),
-                                          );
-                                          if (response.statusCode == 200) {
-                                            setState(() => accountList.removeAt(index));
-                                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('✅ Đã xóa tài khoản')));
-                                          } else {
-                                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('❌ Không thể xóa tài khoản')));
-                                          }
-                                        }
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
+                      // Bảng dữ liệu tài khoản khách hàng
+                      Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.mainOrange),
+                          borderRadius: BorderRadius.circular(6),
                         ),
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: DataTable(
+                            headingRowColor: MaterialStateProperty.all(AppColors.softOrange),
+                            columnSpacing: 8,
+                            dataRowMinHeight: 40,
+                            dataRowMaxHeight: 48,
+                            columns: const [
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 100,
+                                  child: Text(
+                                    'Mã TK',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                  ),
+                                ),
+                              ),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 180,
+                                  child: Text(
+                                    'Tên đăng nhập',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                  ),
+                                ),
+                              ),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 160,
+                                  child: Text(
+                                    'Mật khẩu',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                  ),
+                                ),
+                              ),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 100,
+                                  child: Text(
+                                    'Mã KH',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                  ),
+                                ),
+                              ),
+                            ],
+                            rows: filteredList.map((taiKhoan) {
+                              return DataRow(
+                                cells: [
+                                  DataCell(
+                                    SizedBox(
+                                      width: 100,
+                                      child: InkWell(
+                                        onTap: () {
+                                          // Chuyển sang trang sửa tài khoản nếu có
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => EditCustomerAccountScreen(accountData: taiKhoan),
+                                            ),
+                                          );
+                                        },
+                                        child: Text(
+                                          taiKhoan['MaTK'] ?? '',
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(fontFamily: 'Inter'),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    SizedBox(
+                                      width: 180,
+                                      child: Text(
+                                        taiKhoan['TenDangNhapKH'] ?? '',
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(fontFamily: 'Inter'),
+                                      ),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    SizedBox(
+                                      width: 160,
+                                      child: Text(
+                                        taiKhoan['Password'] ?? '',
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(fontFamily: 'Inter'),
+                                      ),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    SizedBox(
+                                      width: 100,
+                                      child: Text(
+                                        taiKhoan['MaKH'] ?? '',
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(fontFamily: 'Inter'),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ),
                       const SizedBox(height: 16),
                       PaginationControls(
                         currentPage: 1,

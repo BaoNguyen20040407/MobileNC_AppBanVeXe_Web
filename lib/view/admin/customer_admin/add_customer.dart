@@ -11,6 +11,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:giao_dien_1/view/admin/customer_admin/add_customer_success.dart';
 import 'package:giao_dien_1/widget/create_button.dart';
 import 'package:http/http.dart' as http;
+import 'package:giao_dien_1/widget/image_picker_field.dart';
 
 class AddCustomerScreen extends StatefulWidget {
   const AddCustomerScreen({super.key});
@@ -155,6 +156,12 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
               ),
               const SizedBox(height: 32),
 
+              ImagePickerField(
+                selectedImage: _selectedImage,
+                onPick: _pickImage,
+                errorText: _imageUrlError,
+              ),
+              const SizedBox(height: 32,),
               CustomInputField(
                 controller: _idController,
                 labelText: "Mã khách hàng",
@@ -210,74 +217,6 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                 showToggleVisibility: false,
               ),
               const SizedBox(height: 16),
-
-              // Image Picker UI
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Ảnh đại diện",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        GestureDetector(
-                          onTap: _pickImage,
-                          child: Container(
-                            width: 100,
-                            height: 100,
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: _selectedImage != null
-                                ? ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.file(
-                                      _selectedImage!,
-                                      fit: BoxFit.cover,
-                                      width: 100,
-                                      height: 100,
-                                    ),
-                                  )
-                                : const Icon(
-                                    Icons.add_a_photo,
-                                    size: 40,
-                                  ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Text(
-                            _selectedImage != null
-                                ? 'Đã chọn hình ảnh'
-                                : 'Chọn một hình ảnh từ thiết bị',
-                            style: const TextStyle(fontSize: 14),
-                          ),
-                        ),
-                      ],
-                    ),
-                    if (_imageUrlError != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 4.0),
-                        child: Text(
-                          _imageUrlError!,
-                          style: const TextStyle(
-                            color: Colors.red,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 32),
 
               Row(
                 children: [

@@ -1,13 +1,16 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:giao_dien_1/config/config.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/view/admin/employee_admin/add_employee_success.dart';
 import 'package:giao_dien_1/widget/appbar_admin.dart';
 import 'package:giao_dien_1/widget/exit_button.dart';
 import 'package:giao_dien_1/widget/input_field.dart';
-import 'package:giao_dien_1/view/admin/account/account_admin/add_account_admin_success.dart';
 import 'package:giao_dien_1/widget/create_button.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:giao_dien_1/widget/image_picker_field.dart';
 
 class AddEmployeeScreen extends StatefulWidget {
   const AddEmployeeScreen({super.key});
@@ -17,19 +20,32 @@ class AddEmployeeScreen extends StatefulWidget {
 }
 
 class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
-  // Controllers for employee info
-  final TextEditingController _idController = TextEditingController(); // MaNV
-  final TextEditingController _nameController = TextEditingController(); // HoVaTen
-  final TextEditingController _dobController = TextEditingController(); // NgaySinh
-  final TextEditingController _addressController = TextEditingController(); // DiaChi
-  final TextEditingController _emailController = TextEditingController(); // Email
-  final TextEditingController _phoneController = TextEditingController(); // SDT
-  final TextEditingController _imageUrlController = TextEditingController(); // URLHinhAnh
-  final TextEditingController _joinDateController = TextEditingController(); // NgayVaoLam
-  final TextEditingController _positionController = TextEditingController(); // ChucVu
-  final TextEditingController _departmentController = TextEditingController(); // PhongBan
+  final TextEditingController _idController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _dobController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _imageUrlController = TextEditingController();
+  final TextEditingController _joinDateController = TextEditingController();
+  final TextEditingController _positionController = TextEditingController();
+  final TextEditingController _departmentController = TextEditingController();
 
-  // Date picker for DOB or Join Date
+  File? _selectedImage;
+  String? _imageError;
+
+  Future<void> _pickImage() async {
+  final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+
+  if (picked != null) {
+    setState(() {
+      _selectedImage = File(picked.path);
+      _imageError = null;
+    });
+  }
+}
+
+
   Future<void> _selectDate(TextEditingController controller) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -45,22 +61,32 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
   }
 
   void _handleSubmit() async {
-    final Map<String, dynamic> employeeData = {
+    if (_selectedImage == null) {
+      setState(() => _imageError = 'Vui lòng chọn ảnh đại diện.');
+      return;
+    }
+
+    final bytes = await _selectedImage!.readAsBytes();
+    final base64Image = base64Encode(bytes);
+
+
+    final employeeData = {
       "MaNV": _idController.text.trim(),
       "HoVaTen": _nameController.text.trim(),
       "NgaySinh": _dobController.text.trim(),
       "DiaChi": _addressController.text.trim(),
       "Email": _emailController.text.trim(),
       "SDT": _phoneController.text.trim(),
-      "URLHinhAnh": _imageUrlController.text.trim(),
+      "URLHinhAnh": base64Image,
       "NgayVaoLam": _joinDateController.text.trim(),
       "ChucVu": _positionController.text.trim(),
       "PhongBan": _departmentController.text.trim(),
+      
     };
 
     try {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:3000/nhanvien'),
+        Uri.parse('$baseURL/nhanvien'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode(employeeData),
       );
@@ -70,9 +96,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
         if (data['success'] == true) {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const AddEmployeeSuccess(),
-            ),
+            MaterialPageRoute(builder: (context) => const AddEmployeeSuccess()),
           );
         } else {
           _showErrorDialog("Lỗi từ server: ${data['message']}");
@@ -88,13 +112,13 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Lỗi'),
+      builder: (_) => AlertDialog(
+        title: const Text("Lỗi"),
         content: Text(message),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            child: const Text("OK"),
           ),
         ],
       ),
@@ -104,100 +128,111 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.white,
       appBar: CustomAppBarAdmin(),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            CustomInputField(
-              controller: _idController,
-              labelText: 'Mã nhân viên',
-              prefixIcon: Icons.badge,
-            ),
-            const SizedBox(height: 16),
-
-            CustomInputField(
-              controller: _nameController,
-              labelText: 'Họ và tên',
-              prefixIcon: Icons.person,
-            ),
-            const SizedBox(height: 16),
-
-            GestureDetector(
-              onTap: () => _selectDate(_dobController),
-              child: AbsorbPointer(
-                child: CustomInputField(
-                  controller: _dobController,
-                  labelText: 'Ngày sinh',
-                  prefixIcon: Icons.cake,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Center(
+                child: Text(
+                  'THÊM NHÂN VIÊN',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.redAccent,
+                    fontFamily: 'Inter',
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
+              const SizedBox(height: 32),
 
-            CustomInputField(
-              controller: _addressController,
-              labelText: 'Địa chỉ',
-              prefixIcon: Icons.home,
-            ),
-            const SizedBox(height: 16),
-
-            CustomInputField(
-              controller: _emailController,
-              labelText: 'Email',
-              prefixIcon: Icons.email,
-            ),
-            const SizedBox(height: 16),
-
-            CustomInputField(
-              controller: _phoneController,
-              labelText: 'Số điện thoại',
-              prefixIcon: Icons.phone,
-              keyboardType: TextInputType.phone,
-            ),
-            const SizedBox(height: 16),
-
-            CustomInputField(
-              controller: _imageUrlController,
-              labelText: 'URL hình ảnh',
-              prefixIcon: Icons.image,
-            ),
-            const SizedBox(height: 16),
-
-            GestureDetector(
-              onTap: () => _selectDate(_joinDateController),
-              child: AbsorbPointer(
-                child: CustomInputField(
-                  controller: _joinDateController,
-                  labelText: 'Ngày vào làm',
-                  prefixIcon: Icons.calendar_today,
-                ),
+              ImagePickerField(
+                selectedImage: _selectedImage,
+                onPick: _pickImage,
+                errorText: _imageError,
               ),
-            ),
-            const SizedBox(height: 16),
+              const SizedBox(height: 16,),
+              
+              CustomInputField(
+                controller: _idController,
+                labelText: 'Mã nhân viên',
+                prefixIcon: Icons.badge,
+              ),
+              const SizedBox(height: 16),
 
-            CustomInputField(
-              controller: _positionController,
-              labelText: 'Chức vụ',
-              prefixIcon: Icons.work,
-            ),
-            const SizedBox(height: 16),
+              CustomInputField(
+                controller: _nameController,
+                labelText: 'Họ và tên',
+                prefixIcon: Icons.person,
+              ),
+              const SizedBox(height: 16),
 
-            CustomInputField(
-              controller: _departmentController,
-              labelText: 'Phòng ban',
-              prefixIcon: Icons.account_tree,
-            ),
-            const SizedBox(height: 32),
+              CustomInputField(
+                controller: _dobController,
+                labelText: 'Ngày sinh',
+                prefixIcon: Icons.cake,
+                readOnly: true,
+                onTap: () => _selectDate(_dobController),
+              ),
+              const SizedBox(height: 16),
 
-            Row(
-              children: [
-                Expanded(child: CreateButton(onPressed: _handleSubmit)),
-                const SizedBox(width: 16),
-                const Expanded(child: ExitButton()),
-              ],
-            ),
-          ],
+              CustomInputField(
+                controller: _addressController,
+                labelText: 'Địa chỉ',
+                prefixIcon: Icons.home,
+              ),
+              const SizedBox(height: 16),
+
+              CustomInputField(
+                controller: _emailController,
+                labelText: 'Email',
+                prefixIcon: Icons.email,
+              ),
+              const SizedBox(height: 16),
+
+              CustomInputField(
+                controller: _phoneController,
+                labelText: 'Số điện thoại',
+                prefixIcon: Icons.phone,
+                keyboardType: TextInputType.phone,
+              ),
+              const SizedBox(height: 16),
+
+              CustomInputField(
+                controller: _joinDateController,
+                labelText: 'Ngày vào làm',
+                prefixIcon: Icons.calendar_today,
+                readOnly: true,
+                onTap: () => _selectDate(_joinDateController),
+              ),
+              const SizedBox(height: 16),
+
+              CustomInputField(
+                controller: _positionController,
+                labelText: 'Chức vụ',
+                prefixIcon: Icons.work,
+              ),
+              const SizedBox(height: 16),
+
+              CustomInputField(
+                controller: _departmentController,
+                labelText: 'Phòng ban',
+                prefixIcon: Icons.account_tree,
+              ),
+              const SizedBox(height: 32),
+
+              Row(
+                children: [
+                  Expanded(child: CreateButton(onPressed: _handleSubmit)),
+                  const SizedBox(width: 16),
+                  const Expanded(child: ExitButton()),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

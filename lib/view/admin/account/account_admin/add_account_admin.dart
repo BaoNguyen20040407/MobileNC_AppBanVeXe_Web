@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:giao_dien_1/config/config.dart';
 import 'package:http/http.dart' as http;
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/widget/appbar_admin.dart';
@@ -7,6 +8,7 @@ import 'package:giao_dien_1/widget/exit_button.dart';
 import 'package:giao_dien_1/widget/input_field.dart';
 import 'package:giao_dien_1/view/admin/account/account_admin/add_account_admin_success.dart';
 import 'package:giao_dien_1/widget/create_button.dart';
+import 'package:giao_dien_1/widget/dropdown_field.dart';
 
 class AddEmployeeAccountScreen extends StatefulWidget {
   const AddEmployeeAccountScreen({super.key});
@@ -23,61 +25,106 @@ class _AddEmployeeAccountScreenState extends State<AddEmployeeAccountScreen> {
 
   bool _isLoading = false;
 
-  Future<void> _handleSubmit() async {
-    final url = Uri.parse('http://10.0.2.2:3000/taikhoannv');
-
-    final data = {
-      "MaTK": _idController.text.trim(),
-      "TenDangNhapNV": _usernameController.text.trim(),
-      "Password": _passwordController.text.trim(),
-      "MaNV": _employeeIdController.text.trim(),
-    };
-
-    if (data.values.any((value) => value.isEmpty)) {
-      _showDialog("Vui lòng điền đầy đủ thông tin.");
+    void _handleSubmit() async {
+    final maTK = _idController.text.trim();
+    final tenDangNhapNV = _usernameController.text.trim();
+    final password = _passwordController.text;
+    final maNV = selectedMaNV?.trim() ?? '';
+    if (maNV.isEmpty) {
+      _showErrorDialog('Vui lòng chọn mã nhân viên');
       return;
     }
 
-    setState(() => _isLoading = true);
+    final url = Uri.parse('$baseURL/taikhoannv');
+
+    print('Đang gửi dữ liệu đến backend...');
+    print({
+      'MaTK': maTK,
+      'TenDangNhapNV': tenDangNhapNV,
+      'Password': password,
+      'MaNV': maNV,
+    });
+    
 
     try {
       final response = await http.post(
         url,
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(data),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'MaTK': maTK,
+          'TenDangNhapNV': tenDangNhapNV,
+          'Password': password,
+          'MaNV': maNV,
+        }),
       );
 
-      final responseData = jsonDecode(response.body);
+      print('Trạng thái phản hồi: ${response.statusCode}');
+      print('Nội dung phản hồi: ${response.body}');
 
-      if (response.statusCode == 200 && responseData['success'] == true) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const AddAccountAdminSuccess()),
-        );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const AddAccountAdminSuccess(),
+            ),
+          );
+        } else {
+          _showErrorDialog('Thêm tài khoản thất bại: ${data['message']}');
+        }
       } else {
-        _showDialog(responseData['message'] ?? "Tạo tài khoản thất bại.");
+        _showErrorDialog('Lỗi máy chủ: ${response.statusCode}');
       }
     } catch (e) {
-      _showDialog("Lỗi kết nối đến máy chủ.");
-    } finally {
-      setState(() => _isLoading = false);
+      _showErrorDialog('Không thể kết nối đến máy chủ. Chi tiết: $e');
     }
   }
 
-  void _showDialog(String message) {
+  List<String> maNVList = [];
+  String? selectedMaNV;
+
+Future<void> fetchMaNVList() async {
+  try {
+    final response = await http.get(Uri.parse('$baseURL/nhanvien'));
+
+    if (response.statusCode == 200) {
+      final body = jsonDecode(response.body);
+
+      final List<dynamic> data =
+          body is List ? body : body['data']; // ✅ kiểm tra kiểu
+
+      setState(() {
+        maNVList = data.map<String>((item) => item['MaNV'].toString()).toList();
+      });
+    } else {
+      _showErrorDialog('Không thể tải danh sách nhân viên');
+    }
+  } catch (e) {
+    _showErrorDialog('Lỗi kết nối: $e');
+  }
+}
+
+  void _showErrorDialog(String message) {
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text("Thông báo"),
+      builder: (context) => AlertDialog(
+        title: const Text('Lỗi'),
         content: Text(message),
         actions: [
           TextButton(
-            child: const Text("Đóng"),
-            onPressed: () => Navigator.of(context).pop(),
-          )
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
         ],
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchMaNVList();
   }
 
   @override
@@ -131,12 +178,16 @@ class _AddEmployeeAccountScreenState extends State<AddEmployeeAccountScreen> {
               ),
               const SizedBox(height: 16),
 
-              CustomInputField(
-                controller: _employeeIdController,
+              CustomDropdownField(
+                value: selectedMaNV,
+                items: maNVList,
                 labelText: "Mã nhân viên",
-                prefixIcon: Icons.badge,
-                keyboardType: TextInputType.text,
-                showToggleVisibility: false,
+                prefixIcon: Icons.perm_identity,
+                onChanged: (newValue) {
+                  setState(() {
+                    selectedMaNV = newValue;
+                  });
+                },
               ),
               const SizedBox(height: 32),
 

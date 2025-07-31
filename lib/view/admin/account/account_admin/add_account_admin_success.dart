@@ -8,7 +8,7 @@ class AddAccountAdminSuccess extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SuccessScreen(
-      message: 'Thêm tài khoản nhân viên thành công',
+      message: 'Thêm tài khoản nhân viên\nthành công',
       nextScreen: AccountStaffList(),
       routeName: '/tài khoản nhân viên',
     );

@@ -251,18 +251,18 @@ class _EditCustomerScreenState extends State<EditCustomerScreen> {
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                    child: ConfirmDeleteButton(
-                      onConfirmDelete: deleteCustomer,
-                      successTitle: 'Xóa thành công!',
-                      successMessage: 'Khách hàng đã được xóa khỏi hệ thống.',
-                      onSuccessClose: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (_) => const CustomerListScreen()),
-                        );
-                      },
+                      child: ConfirmDeleteButton(
+                        onConfirmDelete: deleteCustomer,
+                        successTitle: 'Xóa thành công!',
+                        successMessage: 'Khách hàng đã được xóa khỏi hệ thống.',
+                        onSuccessClose: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (_) => const CustomerListScreen()),
+                          );
+                        },
+                      ),
                     ),
-                  ),
                   ],
                 ),
               ],

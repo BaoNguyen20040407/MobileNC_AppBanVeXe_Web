@@ -6,7 +6,7 @@ import 'package:giao_dien_1/widget/appbar_admin.dart';
 import 'package:giao_dien_1/view/admin/account/account.dart';
 import 'package:giao_dien_1/view/admin/account/account_admin/add_account_admin.dart';
 import 'package:giao_dien_1/view/admin/account/account_admin/edit_account_admin.dart';
-import 'package:giao_dien_1/widget/choice_chip_selector.dart';
+import 'package:giao_dien_1/widget/filter_chip_with_input.dart';
 import 'package:giao_dien_1/widget/pagination_control.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -14,6 +14,7 @@ import 'package:printing/printing.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:async';
 
 class AccountStaffList extends StatefulWidget {
   const AccountStaffList({super.key});
@@ -24,58 +25,83 @@ class AccountStaffList extends StatefulWidget {
 
 class _AccountStaffListState extends State<AccountStaffList> {
   final TextEditingController searchController = TextEditingController();
-  String selectedColumn = 'MaTK';
   bool showSearchOptions = false;
-  List<dynamic> staffAccounts = [];
+  List<Map<String, dynamic>> accountList = [];
+  List<Map<String, dynamic>> filteredList = [];
+  Map<String, String> filters = {
+    'MaTK': '',
+    'TenDangNhapNV': '',
+    'Password': '',
+    'MaNV': '',
+  };
+  Timer? _debounce;
 
-  @override
+    @override
   void initState() {
     super.initState();
-    fetchStaffAccounts();
+    fetchAccounts();
+    searchController.addListener(() {
+      if (_debounce?.isActive ?? false) _debounce!.cancel();
+      _debounce = Timer(const Duration(milliseconds: 300), () {
+        fetchAccounts();
+      });
+    });
   }
 
-  Future<void> fetchStaffAccounts() async {
-    try {
-      final response = await http.get(Uri.parse('$baseURL/taikhoannv'));
-      if (response.statusCode == 200) {
-        setState(() {
-          staffAccounts = json.decode(response.body);
-        });
-      } else {
-        throw Exception('Failed to load accounts');
-      }
-    } catch (e) {
-      print('❌ Error fetching accounts: $e');
+  Future<void> fetchAccounts() async {
+  try {
+    final response = await http.get(Uri.parse('$baseURL/loctaikhoannv'));
+
+    if (response.statusCode == 200) {
+      final body = jsonDecode(response.body);
+
+      final List<dynamic> jsonList = body is List ? body : body['data'];
+
+      final List<Map<String, dynamic>> parsedList =
+          List<Map<String, dynamic>>.from(jsonList.map((e) => Map<String, dynamic>.from(e)));
+
+      setState(() {
+        accountList = parsedList;
+        _filterAccounts();
+      });
+
+      print('✅ Fetch thành công: ${accountList.length} tài khoản');
+    } else {
+      print('❌ Lỗi khi fetch tài khoản: ${response.statusCode}');
     }
+  } catch (e) {
+    print('❌ Lỗi kết nối: $e');
   }
+}
 
-  Future<void> deleteAccount(String maTK) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Xác nhận'),
-        content: const Text('Bạn có chắc muốn xóa tài khoản này?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Hủy')),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Xóa')),
-        ],
-      ),
-    );
+void _filterAccounts() {
+  String keyword = searchController.text.trim().toLowerCase();
 
-    if (confirm != true) return;
+  setState(() {
+    filteredList = accountList.where((account) {
+      // 1. Tìm kiếm từ khóa chung
+      final matchesSearch = keyword.isEmpty
+          ? true
+          : account.values.any((value) =>
+              value != null &&
+              value.toString().toLowerCase().contains(keyword));
 
-    try {
-      final response = await http.delete(Uri.parse('$baseURL/taikhoannv/$maTK'));
-      if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Xóa thành công')));
-        fetchStaffAccounts();
-      } else {
-        throw Exception('Failed to delete');
-      }
-    } catch (e) {
-      print('❌ Error deleting: $e');
-    }
-  }
+      // 2. Kiểm tra các bộ lọc chi tiết (nếu có)
+      final matchesFilters = filters.entries.every((entry) {
+        final key = entry.key;
+        final filterValue = entry.value.trim().toLowerCase();
+
+        if (filterValue.isEmpty) return true;
+
+        final fieldValue = account[key]?.toString().toLowerCase() ?? '';
+
+        return fieldValue.startsWith(filterValue); // lọc gần đúng
+      });
+
+      return matchesSearch && matchesFilters;
+    }).toList();
+  });
+}
 
   Future<void> exportStaffAccountsToPDF(List<dynamic> accounts) async {
     final pdf = pw.Document();
@@ -110,11 +136,6 @@ class _AccountStaffListState extends State<AccountStaffList> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredList = staffAccounts.where((account) {
-      final query = searchController.text.toLowerCase();
-      return account[selectedColumn]?.toLowerCase().contains(query) ?? false;
-    }).toList();
-
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: CustomAppBarAdmin(),
@@ -161,9 +182,8 @@ class _AccountStaffListState extends State<AccountStaffList> {
                             icon: const Icon(Icons.clear),
                             onPressed: () {
                               searchController.clear();
-                              setState(() {});
-                            },
-                          ),
+                              _filterAccounts();
+                            }),
                           enabledBorder: OutlineInputBorder(
                             borderSide: const BorderSide(color: AppColors.mainOrange, width: 1.5),
                             borderRadius: BorderRadius.circular(12),
@@ -180,26 +200,36 @@ class _AccountStaffListState extends State<AccountStaffList> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text("Tìm kiếm theo: ", style: TextStyle(fontFamily: 'Inter')),
+                          const Text("Tìm kiếm theo:", style: TextStyle(fontFamily: 'Inter')),
                           IconButton(
                             icon: Icon(showSearchOptions ? Icons.expand_less : Icons.expand_more),
-                            onPressed: () => setState(() => showSearchOptions = !showSearchOptions),
+                            onPressed: () {
+                              setState(() {
+                                showSearchOptions = !showSearchOptions;
+                                print('showSearchOptions: $showSearchOptions'); // debug
+                              });
+                            },
                           ),
                         ],
                       ),
                       if (showSearchOptions)
                         Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Wrap(
-                            spacing: 8,
-                            children: [
-                              ChoiceChipSelector(label: 'Mã TK', value: 'MaTK', selectedValue: selectedColumn, onSelected: (val) => setState(() => selectedColumn = val)),
-                              ChoiceChipSelector(label: 'Tên đăng nhập', value: 'TenDangNhapNV', selectedValue: selectedColumn, onSelected: (val) => setState(() => selectedColumn = val)),
-                              ChoiceChipSelector(label: 'Mật khẩu', value: 'Password', selectedValue: selectedColumn, onSelected: (val) => setState(() => selectedColumn = val)),
-                              ChoiceChipSelector(label: 'Mã NV', value: 'MaNV', selectedValue: selectedColumn, onSelected: (val) => setState(() => selectedColumn = val)),
-                            ],
-                          ),
+                          padding: const EdgeInsets.only(top: 8),
+                          child: FilterChipWithInputInline(
+                            filters: [
+                              {'label': 'Mã TK', 'value': 'MaTK'},
+                              {'label': 'Tên đăng nhập', 'value': 'TenDangNhap'},
+                              {'label': 'Password', 'value': 'Password'},
+                              {'label': 'Mã NV', 'value': 'MaNV'},
+                            ], 
+                            filterValues: filters, 
+                            onFilterChanged: (updated) {
+                              setState(() => filters = updated);
+                              _filterAccounts();
+                            },
+                          )
                         ),
+
                       const SizedBox(height: 8),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -229,7 +259,7 @@ class _AccountStaffListState extends State<AccountStaffList> {
                                       builder: (_) => const AddEmployeeAccountScreen(),
                                       settings: const RouteSettings(name: '/add_account_admin'),
                                     ),
-                                  ).then((_) => fetchStaffAccounts());
+                                  ).then((_) => fetchAccounts());
                                 },
                               ),
                             ],
@@ -237,28 +267,118 @@ class _AccountStaffListState extends State<AccountStaffList> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      ...filteredList.map((acc) => ListTile(
-                            title: Text('${acc['MaTK']} - ${acc['TenDangNhapNV']}', style: const TextStyle(fontFamily: 'Inter')),
-                            subtitle: Text('Mã NV: ${acc['MaNV']}', style: const TextStyle(fontFamily: 'Inter')),
-                            trailing: Wrap(
-                              spacing: 8,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.edit, color: Colors.blue),
-                                  onPressed: () => Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => EditAccountAdminScreen(accountData: acc),
+                      // Bảng dữ liệu tài khoản nhân viên
+                      Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.mainOrange),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: DataTable(
+                            headingRowColor: MaterialStateProperty.all(AppColors.softOrange),
+                            columnSpacing: 8,
+                            dataRowMinHeight: 40,
+                            dataRowMaxHeight: 48,
+                            columns: const [
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 100,
+                                  child: Text(
+                                    'Mã TK',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                  ),
+                                ),
+                              ),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 180,
+                                  child: Text(
+                                    'Tên đăng nhập',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                  ),
+                                ),
+                              ),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 160,
+                                  child: Text(
+                                    'Mật khẩu',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                  ),
+                                ),
+                              ),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 100,
+                                  child: Text(
+                                    'Mã NV',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                  ),
+                                ),
+                              ),
+                            ],
+                            rows: filteredList.map((taiKhoan) {
+                              return DataRow(
+                                cells: [
+                                  DataCell(
+                                    SizedBox(
+                                      width: 100,
+                                      child: InkWell(
+                                        onTap: () {
+                                          // Chuyển sang trang sửa tài khoản nếu có
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => EditAccountAdminScreen(accountData: taiKhoan),
+                                            ),
+                                          );
+                                        },
+                                        child: Text(
+                                          taiKhoan['MaTK'] ?? '',
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(fontFamily: 'Inter'),
+                                        ),
+                                      ),
                                     ),
-                                  ).then((_) => fetchStaffAccounts()),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.delete, color: Colors.red),
-                                  onPressed: () => deleteAccount(acc['MaTK']),
-                                ),
-                              ],
-                            ),
-                          )),
+                                  ),
+                                  DataCell(
+                                    SizedBox(
+                                      width: 180,
+                                      child: Text(
+                                        taiKhoan['TenDangNhapNV'] ?? '',
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(fontFamily: 'Inter'),
+                                      ),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    SizedBox(
+                                      width: 160,
+                                      child: Text(
+                                        taiKhoan['Password'] ?? '',
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(fontFamily: 'Inter'),
+                                      ),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    SizedBox(
+                                      width: 100,
+                                      child: Text(
+                                        taiKhoan['MaNV'] ?? '',
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(fontFamily: 'Inter'),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ),
                       const SizedBox(height: 16),
                       PaginationControls(
                         currentPage: 1,

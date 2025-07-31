@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:giao_dien_1/config/config.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/view/admin/account/account_user/account_user_list.dart';
 import 'package:giao_dien_1/widget/appbar_admin.dart';
@@ -7,7 +8,7 @@ import 'package:giao_dien_1/view/admin/account/account_user/edit_account_user_su
 import 'package:giao_dien_1/widget/edit_action_button.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
+import 'package:giao_dien_1/widget/confirm_delete_button.dart';
 
 class EditCustomerAccountScreen extends StatefulWidget {
   final Map<String, dynamic> accountData;
@@ -32,7 +33,7 @@ late TextEditingController _tenDangNhapController;
   void initState() {
     super.initState();
     _maTKController = TextEditingController(text: widget.accountData['MaTK'].toString());
-    _tenDangNhapController = TextEditingController(text: widget.accountData['TenDangNhap']);
+    _tenDangNhapController = TextEditingController(text: widget.accountData['TenDangNhapKH']);
     _passwordController = TextEditingController(text: widget.accountData['Password']);
     _maKHController = TextEditingController(text: widget.accountData['MaKH']);
   }
@@ -49,7 +50,7 @@ late TextEditingController _tenDangNhapController;
 void _submitForm() async {
   if (_formKey.currentState!.validate()) {
     final maTK = _maTKController.text.trim();
-    final url = Uri.parse('http://10.0.2.2:3000/taikhoankh/$maTK');
+    final url = Uri.parse('$baseURL/taikhoankh/$maTK');
 
     final body = {
       'TenDangNhapKH': _tenDangNhapController.text.trim(),
@@ -95,125 +96,33 @@ void _showErrorDialog(String title, String message) {
   );
 }
 
+Future<void> deleteCustomerAccount() async {
+  final maTK = _maTKController.text.trim();
 
+  if (maTK.isEmpty) {
+    _showErrorDialog('Lỗi dữ liệu', '❌ Mã tài khoản không được để trống.');
+    return;
+  }
 
-  void _confirmDelete() async {
-  final confirm = await showDialog<bool>(
-    context: context,
-    builder: (_) => AlertDialog(
-      backgroundColor: AppColors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      titlePadding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
-      contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
-      actionsPadding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
-      title: const Text(
-        'Bạn có chắc không?',
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 18,
-          fontFamily: 'Inter',
-        ),
-      ),
-      content: Text(
-        'Tài khoản "${_maTKController.text}" sẽ bị xóa khỏi hệ thống.',
-        style: const TextStyle(
-          fontSize: 14,
-          fontFamily: 'Inter',
-          color: Colors.black87,
-        ),
-      ),
-      actionsAlignment: MainAxisAlignment.end,
-      actions: [
-        OutlinedButton(
-          style: ButtonStyle(
-            side: MaterialStateProperty.all(const BorderSide(color: Colors.black)),
-            shape: MaterialStateProperty.all(
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            ),
-            padding: MaterialStateProperty.all(
-              const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            ),
-            backgroundColor: MaterialStateProperty.all(Colors.white),
-            foregroundColor: MaterialStateProperty.all(Colors.black),
-          ),
-          onPressed: () => Navigator.of(context).pop(false),
-          child: const Text(
-            'Hủy',
-            style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
-          ),
-        ),
-        const SizedBox(width: 12),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.red,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            elevation: 0,
-          ),
-          onPressed: () => Navigator.of(context).pop(true),
-          child: const Text(
-            'Xóa',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Inter',
-              color: Colors.white,
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
+  final url = Uri.parse('$baseURL/taikhoankh/$maTK');
 
-  if (confirm == true) {
-    await showDialog<void>(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        titlePadding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
-        contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
-        actionsPadding: const EdgeInsets.fromLTRB(24, 24, 16, 16),
-        title: const Text(
-          'Xóa thành công!',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Inter',
-            color: Colors.black,
-          ),
-        ),
-        content: const Text(
-          'Tài khoản đã được xóa khỏi hệ thống.',
-          style: TextStyle(fontSize: 14, fontFamily: 'Inter', color: Colors.black87),
-        ),
-        actionsAlignment: MainAxisAlignment.end,
-        actions: [
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop(); // Đóng AlertDialog
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => AccountUserList()),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.red,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              elevation: 0,
-            ),
-            child: const Text(
-              'Đóng',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Inter',
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+  try {
+    final response = await http.delete(url);
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['message'] == 'Xóa tài khoản thành công') {
+        print('✅ Đã xóa tài khoản $maTK');
+        // Gọi fetch lại dữ liệu nếu cần
+      } else {
+        _showErrorDialog('Lỗi xóa tài khoản', '⚠️ ${data['error'] ?? "Không rõ lỗi."}');
+      }
+    } else {
+      _showErrorDialog('Lỗi xóa tài khoản', '❌ Xóa thất bại (mã: ${response.statusCode})');
+    }
+  } catch (e) {
+    _showErrorDialog('Lỗi kết nối', '❌ Không thể kết nối tới máy chủ: $e');
+    rethrow;
   }
 }
 
@@ -254,7 +163,7 @@ void _showErrorDialog(String title, String message) {
                   controller: _tenDangNhapController,
                   labelText: "Ten Dang Nhap",
                   prefixIcon: Icons.email,
-                  keyboardType: TextInputType.emailAddress,
+                  keyboardType: TextInputType.text,
                 ),
                 const SizedBox(height: 16),
 
@@ -287,41 +196,16 @@ void _showErrorDialog(String title, String message) {
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: SizedBox(
-                        height: 42,
-                        child: ElevatedButton(
-                          onPressed: _confirmDelete,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.red,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            side: const BorderSide(color: AppColors.red, width: 1.2),
-                            elevation: 3,
-                            shadowColor: AppColors.red.withOpacity(0.2),
-                          ).copyWith(
-                            overlayColor: MaterialStateProperty.all(Colors.transparent),
-                            surfaceTintColor: MaterialStateProperty.all(Colors.transparent),
-                          ),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.delete, color: Colors.white, size: 18),
-                              SizedBox(width: 6),
-                              Text(
-                                'Xóa',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                  fontFamily: 'Inter',
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                      child: ConfirmDeleteButton(
+                        onConfirmDelete: deleteCustomerAccount,
+                        successTitle: 'Xóa thành công!',
+                        successMessage: 'Tài khoản khách hàng đã được xóa khỏi hệ thống.',
+                        onSuccessClose: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (_) => const AccountUserList()),
+                          );
+                        },
                       ),
                     ),
                   ],

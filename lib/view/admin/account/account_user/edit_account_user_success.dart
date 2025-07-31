@@ -8,7 +8,7 @@ class EditAccountUserSuccess extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SuccessScreen(
-      message: 'Sửa thông tin tài khoản khách hàng\nthành công',
+      message: 'Sửa thông tin tài khoản khách hàng thành công',
       nextScreen: const AccountUserList(),
       routeName: '/account_user_list',
     );

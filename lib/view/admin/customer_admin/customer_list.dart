@@ -296,7 +296,7 @@ void _filterCustomers() {
                             headingRowColor: MaterialStateProperty.all(AppColors.softOrange),
                             columnSpacing: 8,
                             dataRowMinHeight: 40,
-                            dataRowMaxHeight: 60,
+                            dataRowMaxHeight: 48,
                             columns: const [
                               DataColumn(
                                 label: SizedBox(
@@ -460,7 +460,6 @@ void _filterCustomers() {
                       ),
                       const SizedBox(height: 16),
 
-                      const SizedBox(height: 16),
                       PaginationControls(
                         currentPage: 1,
                         onFirstPressed: () => print("Go to first page"),

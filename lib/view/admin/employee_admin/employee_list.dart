@@ -13,6 +13,8 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:printing/printing.dart';
 import 'dart:convert';
+import 'dart:async';
+import 'package:giao_dien_1/widget/filter_chip_with_input.dart';
 
 class EmployeeListScreen extends StatefulWidget {
   const EmployeeListScreen({super.key});
@@ -23,59 +25,93 @@ class EmployeeListScreen extends StatefulWidget {
 
 class _EmployeeListScreenState extends State<EmployeeListScreen> {
   final TextEditingController searchController = TextEditingController();
-  String selectedColumn = 'MaNV';
   bool showSearchOptions = false;
-  List<dynamic> employees = [];
+  List<Map<String, dynamic>> employeeList = [];
+  List<Map<String, dynamic>> filteredList = [];
+  Map<String, String> filters = {
+    'MaNV': '',
+    'HoVaTen': '',
+    'NgaySinh': '',
+    'DiaChi': '',
+    'Email': '',
+    'SDT': '',
+    'URLHinhAnh': '',
+    'NgayVaoLam': '',
+    'ChucVu': '',
+    'PhongBan': '',
+  };
+  Timer? _debounce;
 
   @override
   void initState() {
     super.initState();
     fetchEmployees();
+    searchController.addListener(() {
+      if (_debounce?.isActive ?? false) _debounce!.cancel();
+      _debounce = Timer(const Duration(milliseconds: 300), () {
+        fetchEmployees();
+      });
+    });
+
   }
 
   Future<void> fetchEmployees() async {
-    try {
-      final response = await http.get(Uri.parse('$baseURL/nhanvien'));
-      if (response.statusCode == 200) {
-        setState(() {
-          employees = json.decode(response.body);
-        });
-      } else {
-        throw Exception('Failed to load employees');
-      }
-    } catch (e) {
-      print('❌ Error fetching employees: $e');
-    }
-  }
+  try {
+    final response = await http.get(Uri.parse('$baseURL/nhanvien'));
 
-  Future<void> deleteEmployee(String maNV) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Xác nhận'),
-        content: Text('Bạn có chắc muốn xóa nhân viên $maNV không?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Hủy')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Xóa')),
-        ],
-      ),
-    );
+    if (response.statusCode == 200) {
+      final body = jsonDecode(response.body);
 
-    if (confirm == true) {
-      try {
-        final response = await http.delete(Uri.parse('http://10.0.2.2:3000/nhanvien/$maNV'));
-        if (response.statusCode == 200) {
-          setState(() {
-            employees.removeWhere((e) => e['MaNV'] == maNV);
-          });
-        } else {
-          throw Exception('Delete failed');
-        }
-      } catch (e) {
-        print('❌ Delete error: $e');
-      }
+      // Kiểm tra xem trả về danh sách trực tiếp hay bọc trong object
+      final List<dynamic> jsonList =
+          body is List ? body : body['data'];
+
+      final List<Map<String, dynamic>> parsedList =
+          List<Map<String, dynamic>>.from(
+              jsonList.map((e) => Map<String, dynamic>.from(e)));
+
+      setState(() {
+        employeeList = parsedList;
+        _filterEmployees();
+      });
+
+      print('✅ Fetch thành công: ${employeeList.length} nhân viên');
+    } else {
+      print('❌ Lỗi khi fetch nhân viên: ${response.statusCode}');
     }
+  } catch (e) {
+    print('❌ Lỗi kết nối: $e');
   }
+}
+
+void _filterEmployees() {
+  String keyword = searchController.text.trim().toLowerCase();
+
+  setState(() {
+    filteredList = employeeList.where((employee) {
+      // 1. Tìm kiếm theo từ khóa chung
+      final matchesSearch = keyword.isEmpty
+          ? true
+          : employee.values.any((value) =>
+              value != null &&
+              value.toString().toLowerCase().contains(keyword));
+
+      // 2. Lọc theo các trường cụ thể
+      final matchesFilters = filters.entries.every((entry) {
+        final key = entry.key;
+        final filterValue = entry.value.trim().toLowerCase();
+
+        if (filterValue.isEmpty) return true;
+
+        final fieldValue = employee[key]?.toString().toLowerCase() ?? '';
+
+        return fieldValue.startsWith(filterValue); // Có thể đổi thành contains nếu muốn fuzzy hơn
+      });
+
+      return matchesSearch && matchesFilters;
+    }).toList();
+  });
+}
 
   Future<void> exportEmployeesToPDF(List<dynamic> employees) async {
     final pdf = pw.Document();
@@ -126,11 +162,6 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredList = employees.where((nv) {
-      final value = nv[selectedColumn]?.toString().toLowerCase() ?? '';
-      return value.contains(searchController.text.toLowerCase());
-    }).toList();
-
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: CustomAppBarAdmin(),
@@ -169,9 +200,8 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
                             icon: const Icon(Icons.clear),
                             onPressed: () {
                               searchController.clear();
-                              setState(() {});
-                            },
-                          ),
+                              _filterEmployees();
+                            }),
                           enabledBorder: OutlineInputBorder(
                             borderSide: const BorderSide(color: AppColors.mainOrange),
                             borderRadius: BorderRadius.circular(12),
@@ -182,7 +212,6 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
                           ),
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         ),
-                        onChanged: (_) => setState(() {}),
                       ),
 
                       const SizedBox(height: 16),
@@ -193,22 +222,39 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
                           const Text("Tìm kiếm theo:", style: TextStyle(fontFamily: 'Inter')),
                           IconButton(
                             icon: Icon(showSearchOptions ? Icons.expand_less : Icons.expand_more),
-                            onPressed: () => setState(() => showSearchOptions = !showSearchOptions),
+                            onPressed: () {
+                              setState(() {
+                                showSearchOptions = !showSearchOptions;
+                                print('showSearchOptions: $showSearchOptions'); // debug
+                              });
+                            },
                           ),
                         ],
                       ),
                       if (showSearchOptions)
-                        Wrap(
-                          spacing: 8,
-                          children: [
-                            _buildChoiceChip('Mã NV', 'MaNV'),
-                            _buildChoiceChip('Họ tên', 'HoVaTen'),
-                            _buildChoiceChip('SĐT', 'SDT'),
-                            _buildChoiceChip('Email', 'Email'),
-                            _buildChoiceChip('Chức vụ', 'ChucVu'),
-                            _buildChoiceChip('Phòng ban', 'PhongBan'),
-                          ],
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: FilterChipWithInputInline(
+                            filters: [
+                              {'label': 'Mã NV', 'value': 'MaNV'},
+                              {'label': 'Họ và tên', 'value': 'HoVaTen'},
+                              {'label': 'Ngày sinh', 'value': 'NgaySinh'},
+                              {'label': 'Địa chỉ', 'value': 'DiaChi'},
+                              {'label': 'Email', 'value': 'Email'},
+                              {'label': 'Số điện thoại', 'value': 'SDT'},
+                              {'label': 'URL hình ảnh', 'value': 'URLHinhAnh'},
+                              {'label': 'Ngày vào làm', 'value': 'NgayVaoLam'},
+                              {'label': 'Chức vụ', 'value': 'ChucVu'},
+                              {'label': 'Phòng ban', 'value': 'PhongBan'},
+                            ], 
+                            filterValues: filters, 
+                            onFilterChanged: (updated) {
+                              setState(() => filters = updated);
+                              _filterEmployees();
+                            },
+                          )
                         ),
+
 
                       const SizedBox(height: 8),
 
@@ -241,47 +287,218 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
 
                       const SizedBox(height: 16),
 
-                      if (filteredList.isEmpty)
-                        const Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(16),
-                            child: Text('Chưa có dữ liệu để hiển thị', style: TextStyle(fontSize: 16, color: Colors.grey, fontFamily: 'Inter')),
-                          ),
-                        )
-                      else
-                        ListView.builder(
-                          itemCount: filteredList.length,
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemBuilder: (_, index) {
-                            final nv = filteredList[index];
-                            return ListTile(
-                              leading: CircleAvatar(child: Text(nv['HoVaTen'][0])),
-                              title: Text(nv['HoVaTen']),
-                              subtitle: Text('Email: ${nv['Email']} - SDT: ${nv['SDT']}'),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.edit, color: Colors.blue),
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => EditAccountAdminScreen(staffData: nv),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete, color: Colors.red),
-                                    onPressed: () => deleteEmployee(nv['MaNV']),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
+                      // Bảng dữ liệu nhân viên
+                      Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.mainOrange),
+                          borderRadius: BorderRadius.circular(6),
                         ),
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: DataTable(
+                            headingRowColor: MaterialStateProperty.all(AppColors.softOrange),
+                            columnSpacing: 8,
+                            dataRowMinHeight: 40,
+                            dataRowMaxHeight: 48,
+                            columns: const [
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 80,
+                                  child: Text(
+                                    'Mã NV',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                  ),
+                                ),
+                              ),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 160,
+                                  child: Text(
+                                    'Họ và tên',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                  ),
+                                ),
+                              ),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 120,
+                                  child: Text(
+                                    'Ngày sinh',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                  ),
+                                ),
+                              ),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 200,
+                                  child: Text(
+                                    'Địa chỉ',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                  ),
+                                ),
+                              ),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 250,
+                                  child: Text(
+                                    'Email',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                  ),
+                                ),
+                              ),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 120,
+                                  child: Text(
+                                    'SĐT',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                  ),
+                                ),
+                              ),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 140,
+                                  child: Text(
+                                    'Ngày vào làm',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                  ),
+                                ),
+                              ),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 120,
+                                  child: Text(
+                                    'Chức vụ',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                  ),
+                                ),
+                              ),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 120,
+                                  child: Text(
+                                    'Phòng ban',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                  ),
+                                ),
+                              ),
+                              DataColumn(
+                                label: SizedBox(
+                                  width: 100,
+                                  child: Text(
+                                    'Ảnh',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                                  ),
+                                ),
+                              ),
+                            ],
+                            rows: filteredList.map((nhanVien) {
+                              return DataRow(
+                                cells: [
+                                  DataCell(
+                                    SizedBox(
+                                      width: 80,
+                                      child: InkWell(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => EditEmployee(staffData: nhanVien),
+                                            ),
+                                          );
+                                        },
+                                        child: Text(
+                                          nhanVien['MaNV'] ?? '',
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(fontFamily: 'Inter'),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  DataCell(SizedBox(
+                                    width: 160,
+                                    child: Text(
+                                      nhanVien['HoVaTen'] ?? '',
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(fontFamily: 'Inter'),
+                                    ),
+                                  )),
+                                  DataCell(SizedBox(
+                                    width: 120,
+                                    child: Text(
+                                      nhanVien['NgaySinh'] ?? '',
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(fontFamily: 'Inter'),
+                                    ),
+                                  )),
+                                  DataCell(SizedBox(
+                                    width: 200,
+                                    child: Text(
+                                      nhanVien['DiaChi'] ?? '',
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(fontFamily: 'Inter'),
+                                    ),
+                                  )),
+                                  DataCell(SizedBox(
+                                    width: 250,
+                                    child: Text(
+                                      nhanVien['Email'] ?? '',
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(fontFamily: 'Inter'),
+                                    ),
+                                  )),
+                                  DataCell(SizedBox(
+                                    width: 120,
+                                    child: Text(
+                                      nhanVien['SDT'] ?? '',
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(fontFamily: 'Inter'),
+                                    ),
+                                  )),
+                                  DataCell(SizedBox(
+                                    width: 140,
+                                    child: Text(
+                                      nhanVien['NgayVaoLam'] ?? '',
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(fontFamily: 'Inter'),
+                                    ),
+                                  )),
+                                  DataCell(SizedBox(
+                                    width: 120,
+                                    child: Text(
+                                      nhanVien['ChucVu'] ?? '',
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(fontFamily: 'Inter'),
+                                    ),
+                                  )),
+                                  DataCell(SizedBox(
+                                    width: 120,
+                                    child: Text(
+                                      nhanVien['PhongBan'] ?? '',
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(fontFamily: 'Inter'),
+                                    ),
+                                  )),
+                                  DataCell(SizedBox(
+                                    width: 100,
+                                    height: 60,
+                                    child: nhanVien['URLHinhAnh'] != null &&
+                                            nhanVien['URLHinhAnh'].toString().isNotEmpty
+                                        ? Image.network(
+                                            nhanVien['URLHinhAnh'],
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (context, error, stackTrace) =>
+                                                const Icon(Icons.broken_image),
+                                          )
+                                        : const Icon(Icons.image_not_supported),
+                                  )),
+                                ],
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ),
 
                       const SizedBox(height: 16),
 
@@ -304,24 +521,6 @@ class _EmployeeListScreenState extends State<EmployeeListScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildChoiceChip(String label, String value) {
-    return ChoiceChip(
-      label: Text(label, style: const TextStyle(fontFamily: 'Inter')),
-      selected: selectedColumn == value,
-      onSelected: (_) => setState(() => selectedColumn = value),
-      selectedColor: AppColors.mainOrange,
-      backgroundColor: Colors.white,
-      labelStyle: TextStyle(
-        color: selectedColumn == value ? Colors.white : Colors.black87,
-        fontWeight: FontWeight.bold,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: BorderSide(color: AppColors.mainOrange),
       ),
     );
   }

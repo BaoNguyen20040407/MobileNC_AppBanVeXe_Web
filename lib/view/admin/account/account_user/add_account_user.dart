@@ -7,6 +7,8 @@ import 'package:giao_dien_1/view/admin/account/account_user/add_account_user_suc
 import 'package:giao_dien_1/widget/create_button.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:giao_dien_1/config/config.dart';
+import 'package:giao_dien_1/widget/dropdown_field.dart';
 
 class AddCustomerAccountScreen extends StatefulWidget {
   const AddCustomerAccountScreen({super.key});
@@ -26,9 +28,13 @@ class _AddCustomerAccountScreenState extends State<AddCustomerAccountScreen> {
     final maTK = _idController.text.trim();
     final tenDangNhapKH = _usernameController.text.trim();
     final password = _passwordController.text;
-    final maKH = _customerIdController.text.trim();
+    final maKH = selectedMaKH?.trim() ?? '';
+    if (maKH.isEmpty) {
+      _showErrorDialog('Vui lòng chọn mã khách hàng');
+      return;
+    }
 
-    final url = Uri.parse('http://10.0.2.2:3000/add-taikhoankh');
+    final url = Uri.parse('$baseURL/add-taikhoankh');
 
     print('Đang gửi dữ liệu đến backend...');
     print({
@@ -74,6 +80,30 @@ class _AddCustomerAccountScreenState extends State<AddCustomerAccountScreen> {
     }
   }
 
+  List<String> maKHList = [];
+  String? selectedMaKH;
+
+  Future<void> fetchMaKHList() async {
+  try {
+    final response = await http.get(Uri.parse('$baseURL/khachhang'));
+
+    if (response.statusCode == 200) {
+      final body = jsonDecode(response.body);
+
+      final List<dynamic> data =
+          body is List ? body : body['data']; // ✅ kiểm tra kiểu
+
+      setState(() {
+        maKHList = data.map<String>((item) => item['MaKH'].toString()).toList();
+      });
+    } else {
+      _showErrorDialog('Không thể tải danh sách khách hàng');
+    }
+  } catch (e) {
+    _showErrorDialog('Lỗi kết nối: $e');
+  }
+}
+
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
@@ -89,6 +119,13 @@ class _AddCustomerAccountScreenState extends State<AddCustomerAccountScreen> {
       ),
     );
   }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchMaKHList();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +155,7 @@ class _AddCustomerAccountScreenState extends State<AddCustomerAccountScreen> {
                 controller: _idController,
                 labelText: "Mã tài khoản",
                 prefixIcon: Icons.vpn_key,
-                keyboardType: TextInputType.number,
+                keyboardType: TextInputType.text,
                 showToggleVisibility: false,
               ),
               const SizedBox(height: 16),
@@ -141,12 +178,16 @@ class _AddCustomerAccountScreenState extends State<AddCustomerAccountScreen> {
               ),
               const SizedBox(height: 16),
 
-              CustomInputField(
-                controller: _customerIdController,
+              CustomDropdownField(
+                value: selectedMaKH,
+                items: maKHList,
                 labelText: "Mã khách hàng",
                 prefixIcon: Icons.perm_identity,
-                keyboardType: TextInputType.text,
-                showToggleVisibility: false,
+                onChanged: (newValue) {
+                  setState(() {
+                    selectedMaKH = newValue;
+                  });
+                },
               ),
               const SizedBox(height: 32),
 

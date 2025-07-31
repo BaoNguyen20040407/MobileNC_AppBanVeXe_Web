@@ -8,7 +8,7 @@ class AddAccountUserSuccess extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const SuccessScreen(
-      message: 'Thêm tài khoản khách hàng thành công',
+      message: 'Thêm tài khoản khách hàng\nthành công',
       nextScreen: AccountUserList(),
       routeName: '/tài khoản khách hàng',
     );

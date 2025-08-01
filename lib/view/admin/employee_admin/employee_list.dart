@@ -15,6 +15,7 @@ import 'package:printing/printing.dart';
 import 'dart:convert';
 import 'dart:async';
 import 'package:giao_dien_1/widget/filter_chip_with_input.dart';
+import 'package:giao_dien_1/widget/search_field.dart';
 
 class EmployeeListScreen extends StatefulWidget {
   const EmployeeListScreen({super.key});
@@ -192,26 +193,12 @@ void _filterEmployees() {
                       const SizedBox(height: 16),
 
                       // Search Box
-                      TextField(
+                      CustomSearchField(
                         controller: searchController,
-                        decoration: InputDecoration(
-                          hintText: 'Nhập từ khóa...',
-                          suffixIcon: IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () {
-                              searchController.clear();
-                              _filterEmployees();
-                            }),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: AppColors.mainOrange),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: AppColors.mainOrange, width: 2),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        ),
+                        onClear: () {
+                          searchController.clear();
+                          _filterEmployees();
+                        },
                       ),
 
                       const SizedBox(height: 16),

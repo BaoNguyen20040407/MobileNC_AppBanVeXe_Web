@@ -14,6 +14,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:giao_dien_1/config/config.dart';
+import 'package:giao_dien_1/widget/search_field.dart';
 
 class TicketListScreen extends StatefulWidget {
   const TicketListScreen({super.key});
@@ -187,28 +188,13 @@ class _TicketListScreenState extends State<TicketListScreen> {
                       const SizedBox(height: 16),
 
                       // Ô tìm kiếm
-                      TextField(
+                      CustomSearchField(
                         controller: searchController,
-                        decoration: InputDecoration(
-                          hintText: 'Nhập từ khóa...',
-                          hintStyle: const TextStyle(fontFamily: 'Inter'),
-                          suffixIcon: IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () {
-                              searchController.clear();
-                              filters[selectedColumn] = '';
-                              fetchTickets();
-                            }),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: AppColors.mainOrange, width: 1.5),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: AppColors.mainOrange, width: 2),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        ),
+                        onClear: () {
+                          searchController.clear();
+                          filters[selectedColumn] = '';
+                          fetchTickets();
+                        },
                         onChanged: (value) {
                           filters[selectedColumn] = value.trim();
                         },

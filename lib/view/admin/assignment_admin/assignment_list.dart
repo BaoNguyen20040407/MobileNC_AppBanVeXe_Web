@@ -12,7 +12,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:giao_dien_1/config/config.dart';
-import 'package:giao_dien_1/widget/choice_chip_selector.dart';
+import 'package:giao_dien_1/widget/search_field.dart';
 import 'package:giao_dien_1/widget/pagination_control.dart';
 import 'dart:async';
 
@@ -160,29 +160,14 @@ class _AssignmentListState extends State<AssignmentList> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      TextField(
+                      // Tìm kiếm
+                      CustomSearchField(
                         controller: searchController,
-                        decoration: InputDecoration(
-                          hintText: 'Nhập từ khóa...',
-                          hintStyle: const TextStyle(fontFamily: 'Inter'),
-                          suffixIcon: IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () {
-                              searchController.clear();
-                              filters[selectedColumn] = '';
-                              fetchAssignments();
-                            },
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: AppColors.mainOrange, width: 1.5),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: AppColors.mainOrange, width: 2),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        ),
+                        onClear: () {
+                          searchController.clear();
+                          filters[selectedColumn] = '';
+                          fetchAssignments();
+                        },
                         onChanged: (value) {
                           filters[selectedColumn] = value.trim();
                         },

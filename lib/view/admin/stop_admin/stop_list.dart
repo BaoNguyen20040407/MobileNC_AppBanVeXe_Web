@@ -9,12 +9,12 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:giao_dien_1/view/admin/home_admin/manage_trip.dart';
-import 'package:giao_dien_1/widget/choice_chip_selector.dart';
 import 'package:giao_dien_1/view/admin/stop_admin/add_stop.dart';
 import 'package:giao_dien_1/view/admin/stop_admin/edit_stop.dart';
 import 'package:giao_dien_1/config/config.dart';
 import 'package:giao_dien_1/widget/pagination_control.dart';
 import 'dart:async';
+import 'package:giao_dien_1/widget/search_field.dart';
 
 class StopList extends StatefulWidget {
   const StopList({super.key});
@@ -170,33 +170,18 @@ class _StopListState extends State<StopList> {
                       ),
                       const SizedBox(height: 16),
                       // Tìm kiếm
-                      TextField(
+                      CustomSearchField(
                         controller: searchController,
-                        decoration: InputDecoration(
-                          hintText: 'Nhập từ khóa...',
-                          suffixIcon: IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () {
-                              searchController.clear();
-                              filters[selectedColumn] = '';
-                              fetchTransfers();
-                            },
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: AppColors.mainOrange, width: 1.5),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: AppColors.mainOrange, width: 2),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        ),
-                      onChanged: (value) {
-                        filters[selectedColumn] = value.trim();
-                      },
-
+                        onClear: () {
+                          searchController.clear();
+                          filters[selectedColumn] = '';
+                          fetchTransfers();
+                        },
+                        onChanged: (value) {
+                          filters[selectedColumn] = value.trim();
+                        },
                       ),
+
                       const SizedBox(height: 16),
                       // Bộ lọc
                       Row(

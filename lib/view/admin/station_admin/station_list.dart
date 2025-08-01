@@ -14,6 +14,7 @@ import 'package:giao_dien_1/view/admin/home_admin/manage_station.dart';
 import 'package:giao_dien_1/config/config.dart';
 import 'package:giao_dien_1/widget/pagination_control.dart';
 import 'package:giao_dien_1/widget/filter_chip_with_input.dart';
+import 'package:giao_dien_1/widget/search_field.dart';
 
 class StationList extends StatefulWidget {
   const StationList({super.key});
@@ -178,29 +179,13 @@ class _StationListState extends State<StationList> {
                       const SizedBox(height: 16),
 
                       // Tìm kiếm
-                      TextField(
+                      CustomSearchField(
                         controller: searchController,
-                        decoration: InputDecoration(
-                          hintText: 'Nhập từ khóa...',
-                          hintStyle: const TextStyle(fontFamily: 'Inter'),
-                          suffixIcon: IconButton(
-                              icon: const Icon(Icons.clear),
-                              onPressed: () {
-                                searchController.clear();
-                                _filterStations();
-                              }),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: AppColors.mainOrange, width: 1.5),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: AppColors.mainOrange, width: 2),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        ),
+                        onClear: () {
+                          searchController.clear();
+                          _filterStations();
+                        },
                       ),
-
                       const SizedBox(height: 16),
 
                       //Bộ lọc

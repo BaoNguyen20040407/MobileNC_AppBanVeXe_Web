@@ -7,7 +7,6 @@ import 'package:giao_dien_1/widget/appbar_admin.dart';
 import 'package:giao_dien_1/widget/exit_button.dart';
 import 'package:giao_dien_1/view/admin/home_admin/manage_people.dart';
 import 'package:giao_dien_1/view/admin/customer_admin/add_customer.dart';
-import 'package:giao_dien_1/widget/choice_chip_selector.dart';
 import 'package:giao_dien_1/widget/filter_chip_with_input.dart';
 import 'package:giao_dien_1/widget/pagination_control.dart';
 import 'package:pdf/pdf.dart';
@@ -16,6 +15,7 @@ import 'package:printing/printing.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:http/http.dart' as http;
 import 'dart:async';
+import 'package:giao_dien_1/widget/search_field.dart';
 
 class CustomerListScreen extends StatefulWidget {
   const CustomerListScreen({super.key});
@@ -193,28 +193,14 @@ void _filterCustomers() {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      TextField(
+                      CustomSearchField(
                         controller: searchController,
-                        decoration: InputDecoration(
-                          hintText: 'Nhập từ khóa...',
-                          hintStyle: const TextStyle(fontFamily: 'Inter'),
-                          suffixIcon: IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () {
-                              searchController.clear();
-                              _filterCustomers();
-                            }),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: AppColors.mainOrange, width: 1.5),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: AppColors.mainOrange, width: 2),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        ),
+                        onClear: () {
+                          searchController.clear();
+                          _filterCustomers();
+                        },
                       ),
+
                       const SizedBox(height: 16),
                       //Bộ lọc
                       Row(

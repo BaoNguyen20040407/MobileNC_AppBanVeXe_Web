@@ -22,6 +22,7 @@ dependencies:
   google_maps_flutter: ^2.12.3
   geolocator: ^14.0.2
   geocoding: ^4.0.0
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
@@ -42,3 +43,8 @@ flutter:
           weight: 100
         - asset: assets/font/inter_18pt_bold.ttf
           weight: 100
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/image/iconappnamhai.png"

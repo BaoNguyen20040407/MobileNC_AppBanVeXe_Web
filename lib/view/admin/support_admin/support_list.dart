@@ -14,6 +14,7 @@ import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:giao_dien_1/widget/filter_chip_with_input.dart';
+import 'package:giao_dien_1/widget/build_pdf_page.dart';
 
 class SupportListScreen extends StatefulWidget {
   const SupportListScreen({super.key});
@@ -90,47 +91,38 @@ class _SupportListScreenState extends State<SupportListScreen> {
     }
   }
 
-  Future<void> exportSupportsToPDF(List<Map<String, dynamic>> data) async {
-    final pdf = pw.Document();
-    final fontData = await rootBundle.load('assets/font/inter_18pt_regular.ttf');
-    final ttf = pw.Font.ttf(fontData.buffer.asByteData());
+  Future<void> exportSupportsToPDF(List<Map<String, dynamic>> supports) async {
+    try {
+      final pdf = pw.Document();
+      final fontData = await rootBundle.load('assets/font/inter_18pt_regular.ttf');
+      final ttf = pw.Font.ttf(fontData.buffer.asByteData());
+      final logoBytes = await loadLogoBytes('assets/image/logovexekhach_1.png');
 
-    pdf.addPage(
-      pw.MultiPage(
-        pageFormat: PdfPageFormat.a4,
-        build: (pw.Context context) {
-          return [
-            pw.Text(
-              'Danh sách hỗ trợ',
-              style: pw.TextStyle(font: ttf, fontSize: 18, fontWeight: pw.FontWeight.bold),
-            ),
-            pw.SizedBox(height: 12),
-            pw.Table.fromTextArray(
-              headers: ['Mã HT', 'Tiêu đề', 'Câu hỏi', 'Trả lời', 'Mã KH', 'Mã NV'],
-              data: data.map((item) {
-                return [
-                  item['MaHT'] ?? '',
-                  item['TieuDe'] ?? '',
-                  item['CauHoi'] ?? '',
-                  item['CauTraLoi'] ?? '',
-                  item['MaKH'] ?? '',
-                  item['MaNV'] ?? '',
-                ];
-              }).toList(),
-              cellStyle: pw.TextStyle(font: ttf, fontSize: 10),
-              headerStyle: pw.TextStyle(font: ttf, fontSize: 12, fontWeight: pw.FontWeight.bold),
-              headerDecoration: pw.BoxDecoration(color: PdfColors.grey300),
-              border: pw.TableBorder.all(width: 0.5),
-              cellAlignment: pw.Alignment.centerLeft,
-            ),
-          ];
-        },
-      ),
-    );
+      final data = supports.map((item) => [
+        item['MaHT']?.toString() ?? '',
+        item['TieuDe']?.toString() ?? '',
+        item['CauHoi']?.toString() ?? '',
+        item['CauTraLoi']?.toString() ?? '',
+        item['MaKH']?.toString() ?? '',
+        item['MaNV']?.toString() ?? '',
+      ]).toList();
 
-    await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => pdf.save(),
-    );
+      final page = buildPdfPage(
+        font: ttf,
+        logoBytes: logoBytes,
+        title: 'DANH SÁCH HỖ TRỢ',
+        headers: ['Mã HT', 'Tiêu đề', 'Câu hỏi', 'Trả lời', 'Mã KH', 'Mã NV'],
+        data: data,
+        totalCount: supports.length,
+      );
+
+      pdf.addPage(page);
+
+      await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+    } catch (e, stacktrace) {
+      print('Lỗi khi tạo hoặc in PDF hỗ trợ: $e');
+      print('Stacktrace: $stacktrace');
+    }
   }
 
   @override

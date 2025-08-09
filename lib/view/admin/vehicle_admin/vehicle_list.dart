@@ -15,6 +15,7 @@ import 'package:giao_dien_1/config/config.dart';
 import 'package:giao_dien_1/widget/pagination_control.dart';
 import 'package:giao_dien_1/widget/filter_chip_with_input.dart';
 import 'package:giao_dien_1/widget/search_field.dart';
+import 'package:giao_dien_1/widget/build_pdf_page.dart';
 
 class VehicleList extends StatefulWidget {
   const VehicleList({super.key});
@@ -117,35 +118,44 @@ class _VehicleListState extends State<VehicleList> {
   // Khởi tạo selectedColumn để tương tác với searchController
   String selectedColumn = 'BienSoXe';
 
-  Future<void> exportToPDF(List<Map<String, dynamic>> data) async {
+  Future<void> exportVehiclesToPDF(List<Map<String, dynamic>> vehicles) async {
     final pdf = pw.Document();
+
+    // Load font
     final fontData = await rootBundle.load('assets/font/inter_18pt_regular.ttf');
     final ttf = pw.Font.ttf(fontData.buffer.asByteData());
 
-    pdf.addPage(
-      pw.Page(
-        build: (pw.Context context) {
-          return pw.Table.fromTextArray(
-            headers: ['Biển số', 'Loại xe', 'Số chỗ', 'Hãng SX', 'Năm SX', 'Mã BX'],
-            data: data.map((xe) {
-              return [
-                xe['BienSoXe'] ?? '',
-                xe['LoaiXe'] ?? '',
-                xe['SoChoNgoi']?.toString() ?? '',
-                xe['HangSanXuat'] ?? '',
-                xe['NamSanXuat']?.toString() ?? '',
-                xe['MaBX'] ?? '',
-              ];
-            }).toList(),
-            cellStyle: pw.TextStyle(font: ttf, fontSize: 12),
-            headerStyle: pw.TextStyle(font: ttf, fontSize: 14, fontWeight: pw.FontWeight.bold),
-          );
-        },
-      ),
+    // Load logo
+    final logoBytes = await loadLogoBytes('assets/image/logovexekhach_1.png');
+
+    // Chuẩn bị dữ liệu bảng, ép tất cả thành String
+    final data = vehicles.map((xe) {
+      return [
+        (xe['BienSoXe'] ?? '').toString(),
+        (xe['LoaiXe'] ?? '').toString(),
+        xe['SoChoNgoi'] != null ? xe['SoChoNgoi'].toString() : '',
+        (xe['HangSanXuat'] ?? '').toString(),
+        xe['NamSanXuat'] != null ? xe['NamSanXuat'].toString() : '',
+        (xe['MaBX'] ?? '').toString(),
+      ];
+    }).toList();
+
+    // Tạo trang PDF dùng widget buildPdfPage đã có
+    final page = buildPdfPage(
+      font: ttf,
+      logoBytes: logoBytes,
+      title: 'DANH SÁCH XE',
+      headers: ['Biển số', 'Loại xe', 'Số chỗ', 'Hãng SX', 'Năm SX', 'Mã BX'],
+      data: data,
+      totalCount: vehicles.length,
     );
 
+    pdf.addPage(page);
+
+    // In PDF
     await Printing.layoutPdf(onLayout: (format) async => pdf.save());
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -261,7 +271,7 @@ class _VehicleListState extends State<VehicleList> {
                               IconButton(
                                 icon: const Icon(Icons.print),
                                 tooltip: 'Xuất PDF',
-                                onPressed: () => exportToPDF(filteredList),
+                                onPressed: () => exportVehiclesToPDF(filteredList),
                               ),
                               const SizedBox(width: 8),
                               IconButton(

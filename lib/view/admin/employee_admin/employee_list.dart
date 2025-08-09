@@ -16,6 +16,7 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:giao_dien_1/widget/filter_chip_with_input.dart';
 import 'package:giao_dien_1/widget/search_field.dart';
+import 'package:giao_dien_1/widget/build_pdf_page.dart';
 
 class EmployeeListScreen extends StatefulWidget {
   const EmployeeListScreen({super.key});
@@ -115,51 +116,55 @@ void _filterEmployees() {
 }
 
   Future<void> exportEmployeesToPDF(List<dynamic> employees) async {
+  try {
     final pdf = pw.Document();
+
     final fontData = await rootBundle.load('assets/font/inter_18pt_regular.ttf');
     final ttf = pw.Font.ttf(fontData.buffer.asByteData());
 
-    pdf.addPage(
-      pw.Page(
-        build: (pw.Context context) {
-          return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Text('Danh sách nhân viên',
-                  style: pw.TextStyle(font: ttf, fontSize: 18, fontWeight: pw.FontWeight.bold)),
-              pw.SizedBox(height: 12),
-              pw.Table.fromTextArray(
-                headers: [
-                  'Mã NV', 'Họ và tên', 'Ngày sinh', 'Địa chỉ',
-                  'Email', 'SĐT', 'Ngày vào', 'Chức vụ', 'Phòng ban',
-                ],
-                data: employees.map((nv) {
-                  return [
-                    nv['MaNV'] ?? '',
-                    nv['HoVaTen'] ?? '',
-                    nv['NgaySinh'] ?? '',
-                    nv['DiaChi'] ?? '',
-                    nv['Email'] ?? '',
-                    nv['SDT'] ?? '',
-                    nv['NgayVaoLam'] ?? '',
-                    nv['ChucVu'] ?? '',
-                    nv['PhongBan'] ?? '',
-                  ];
-                }).toList(),
-                cellStyle: pw.TextStyle(font: ttf, fontSize: 10),
-                headerStyle: pw.TextStyle(font: ttf, fontSize: 12, fontWeight: pw.FontWeight.bold),
-                headerDecoration: pw.BoxDecoration(color: PdfColors.grey300),
-                border: pw.TableBorder.all(width: 0.5),
-                cellAlignment: pw.Alignment.centerLeft,
-              ),
-            ],
-          );
-        },
-      ),
+    final logoBytes = await loadLogoBytes('assets/image/logovexekhach_1.png');
+
+    final data = employees.map((nv) {
+      return [
+        nv['MaNV']?.toString() ?? '',
+        nv['HoVaTen']?.toString() ?? '',
+        nv['NgaySinh']?.toString() ?? '',
+        nv['DiaChi']?.toString() ?? '',
+        nv['Email']?.toString() ?? '',
+        nv['SDT']?.toString() ?? '',
+        nv['NgayVaoLam']?.toString() ?? '',
+        nv['ChucVu']?.toString() ?? '',
+        nv['PhongBan']?.toString() ?? '',
+      ];
+    }).toList();
+
+    final page = buildPdfPage(
+      font: ttf,
+      logoBytes: logoBytes,
+      title: 'DANH SÁCH NHÂN VIÊN',
+      headers: [
+        'Mã NV',
+        'Họ và tên',
+        'Ngày sinh',
+        'Địa chỉ',
+        'Email',
+        'SĐT',
+        'Ngày vào',
+        'Chức vụ',
+        'Phòng ban',
+      ],
+      data: data,
+      totalCount: employees.length,
     );
 
-    await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdf.save());
+    pdf.addPage(page);
+
+    await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+  } catch (e, stacktrace) {
+    print('Lỗi khi tạo PDF danh sách nhân viên: $e');
+    print('Stacktrace: $stacktrace');
   }
+}
 
   @override
   Widget build(BuildContext context) {

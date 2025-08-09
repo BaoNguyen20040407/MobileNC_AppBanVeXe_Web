@@ -17,6 +17,7 @@ import 'package:giao_dien_1/config/config.dart';
 import 'package:giao_dien_1/widget/search_field.dart';
 import 'package:giao_dien_1/widget/revenue_dialog.dart';
 import 'package:intl/intl.dart'; // định dạng ngày & số
+import 'package:giao_dien_1/widget/build_pdf_page.dart';
 
 class TicketListScreen extends StatefulWidget {
   const TicketListScreen({super.key});
@@ -111,49 +112,48 @@ class _TicketListScreenState extends State<TicketListScreen> {
 }
 
   Future<void> exportTicketsToPDF(List<dynamic> tickets) async {
-  final pdf = pw.Document();
-  final fontData = await rootBundle.load('assets/font/inter_18pt_regular.ttf');
-  final ttf = pw.Font.ttf(fontData.buffer.asByteData());
-
-  final numberFormat = NumberFormat('#,###', 'vi_VN');
-
-  pdf.addPage(
-    pw.Page(
-      build: (pw.Context context) {
-        return pw.Table.fromTextArray(
-          headers: [
-            'Mã vé',
-            'Loại vé',
-            'Vị trí ghế',
-            'Giá vé (VNĐ)',
-            'Trạng thái',
-            'Thanh toán',
-            'Mã CX',
-            'Mã KH',
-          ],
-          data: tickets.map((ticket) {
-            return [
-              ticket['MaVe'] ?? '',
-              ticket['LoaiVe'] ?? '',
-              ticket['ViTriGheNgoi'] ?? '',
-              ticket['GiaVe'] != null ? numberFormat.format(ticket['GiaVe']) : '',
-              ticket['TrangThai'] ?? '',
-              ticket['HinhThucThanhToan'] ?? '',
-              ticket['MaCX'] ?? '',
-              ticket['MaKH'] ?? '',
-            ];
-          }).toList(),
-          cellStyle: pw.TextStyle(font: ttf, fontSize: 11),
-          headerStyle: pw.TextStyle(font: ttf, fontSize: 13, fontWeight: pw.FontWeight.bold),
-          border: pw.TableBorder.all(width: 0.5),
-          headerDecoration: pw.BoxDecoration(color: PdfColors.grey300),
-          cellAlignment: pw.Alignment.centerLeft,
-        );
-      },
-    ),
-  );
-
-  await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+  try {
+    final pdf = pw.Document();
+    final fontData = await rootBundle.load('assets/font/inter_18pt_regular.ttf');
+    final ttf = pw.Font.ttf(fontData.buffer.asByteData());
+    final logoBytes = await loadLogoBytes('assets/image/logovexekhach_1.png');
+    final numberFormat = NumberFormat('#,###', 'vi_VN');
+    final data = tickets.map((ticket) {
+      final row = [
+        (ticket['MaVe'] ?? '').toString(),
+        (ticket['LoaiVe'] ?? '').toString(),
+        (ticket['ViTriGheNgoi'] ?? '').toString(),
+        ticket['GiaVe'] != null ? numberFormat.format(ticket['GiaVe']).toString() : '',
+        (ticket['TrangThai'] ?? '').toString(),
+        (ticket['HinhThucThanhToan'] ?? '').toString(),
+        (ticket['MaCX'] ?? '').toString(),
+        (ticket['MaKH'] ?? '').toString(),
+      ];
+      return row;
+    }).toList();
+    final page = buildPdfPage(
+      font: ttf,
+      logoBytes: logoBytes,
+      title: 'DANH SÁCH VÉ',
+      headers: [
+        'Mã vé',
+        'Loại vé',
+        'Vị trí ghế',
+        'Giá vé (VNĐ)',
+        'Trạng thái',
+        'Thanh toán',
+        'Mã CX',
+        'Mã KH',
+      ],
+      data: data,
+      totalCount: tickets.length,
+    );
+    pdf.addPage(page);
+    await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+  } catch (e, stacktrace) {
+    print('Lỗi khi tạo hoặc in PDF: $e');
+    print('Stacktrace: $stacktrace');
+  }
 }
 
 Future<void> _exportRevenueToPDF(

@@ -15,6 +15,7 @@ import 'package:giao_dien_1/config/config.dart';
 import 'package:giao_dien_1/widget/search_field.dart';
 import 'package:giao_dien_1/widget/pagination_control.dart';
 import 'dart:async';
+import 'package:giao_dien_1/widget/build_pdf_page.dart';
 
 class AssignmentList extends StatefulWidget {
   const AssignmentList({super.key});
@@ -95,33 +96,39 @@ class _AssignmentListState extends State<AssignmentList> {
   }
 }
 
-  Future<void> exportToPDF(List<dynamic> data) async {
+  Future<void> exportAssignmentsToPDF(List<dynamic> data) async {
+  try {
     final pdf = pw.Document();
     final fontData = await rootBundle.load('assets/font/inter_18pt_regular.ttf');
     final ttf = pw.Font.ttf(fontData.buffer.asByteData());
+    final logoBytes = await loadLogoBytes('assets/image/logovexekhach_1.png');
 
-    pdf.addPage(
-      pw.Page(
-        build: (pw.Context context) {
-          return pw.Table.fromTextArray(
-            headers: ['Mã CX', 'Mã NV', 'Vị trí', 'Ngày phân công'],
-            data: data.map((item) {
-              return [
-                item['MaCX'] ?? '',
-                item['MaNV'] ?? '',
-                item['ViTri'] ?? '',
-                item['NgayPhanCong'] ?? '',
-              ];
-            }).toList(),
-            cellStyle: pw.TextStyle(font: ttf, fontSize: 12),
-            headerStyle: pw.TextStyle(font: ttf, fontSize: 14, fontWeight: pw.FontWeight.bold),
-          );
-        },
-      ),
+    final rows = data.map((item) {
+      return [
+        item['MaCX']?.toString() ?? '',
+        item['MaNV']?.toString() ?? '',
+        item['ViTri']?.toString() ?? '',
+        item['NgayPhanCong']?.toString() ?? '',
+      ];
+    }).toList();
+
+    final page = buildPdfPage(
+      font: ttf,
+      logoBytes: logoBytes,
+      title: 'DANH SÁCH PHÂN CÔNG',
+      headers: ['Mã CX', 'Mã NV', 'Vị trí', 'Ngày phân công'],
+      data: rows,
+      totalCount: data.length,
     );
 
+    pdf.addPage(page);
+
     await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+  } catch (e, stacktrace) {
+    print('Lỗi khi tạo PDF phân công: $e');
+    print('Stacktrace: $stacktrace');
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -212,7 +219,7 @@ class _AssignmentListState extends State<AssignmentList> {
                               IconButton(
                                 icon: const Icon(Icons.print),
                                 tooltip: 'Xuất PDF',
-                                onPressed: () => exportToPDF(filteredList),
+                                onPressed: () => exportAssignmentsToPDF(filteredList),
                               ),
                               const SizedBox(width: 8),
                               IconButton(

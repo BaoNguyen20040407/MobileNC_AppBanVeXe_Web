@@ -15,6 +15,9 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:giao_dien_1/view/admin/home_admin/manage_trip.dart';
 import 'package:giao_dien_1/view/admin/trip_admin/edit_trip.dart';
 import 'package:giao_dien_1/widget/search_field.dart';
+import 'package:giao_dien_1/widget/build_pdf_page.dart';
+import 'package:intl/intl.dart';
+import 'package:pdf/pdf.dart';
 
 class TripList extends StatefulWidget {
   const TripList({super.key});
@@ -97,30 +100,90 @@ class _TripListState extends State<TripList> {
   }
 
   Future<void> exportToPDF(List<Map<String, dynamic>> data) async {
-    final pdf = pw.Document();
-    final bytes = await rootBundle.load('assets/font/inter_18pt_regular.ttf');
-    final ttf = pw.Font.ttf(bytes.buffer.asByteData());
-    pdf.addPage(pw.Page(
-      build: (pw.Context ctx) {
-        return pw.Table.fromTextArray(
-          headers: ['Mã CX','Biển số','Điểm đi','Điểm đến','Loại hình','Giá vé','Số chỗ'],
-          data: data.map((t) => [
-            t['MaCX'] ?? '',
-            t['BienSoXe'] ?? '',
-            t['DiemDi'] ?? '',
-            t['DiemDen'] ?? '',
-            t['LoaiHinhChuyenDi'] ?? '',
-            t['GiaVe']?.toString() ?? '',
-            t['SoChoNgoi']?.toString() ?? '',
-          ]).toList(),
-          cellStyle: pw.TextStyle(font: ttf, fontSize: 12),
-          headerStyle:
-              pw.TextStyle(font: ttf, fontSize: 14, fontWeight: pw.FontWeight.bold),
-        );
-      },
-    ));
-    await Printing.layoutPdf(onLayout: (fmt) async => pdf.save());
-  }
+  final pdf = pw.Document();
+
+  // Load font
+  final fontData = await rootBundle.load('assets/font/inter_18pt_regular.ttf');
+  final ttf = pw.Font.ttf(fontData.buffer.asByteData());
+
+  // Load logo (đường dẫn tùy bạn)
+  final logoBytes = await loadLogoBytes('assets/image/logovexekhach_1.png');
+
+  // Chuẩn bị dữ liệu bảng, ép thành String
+  final tableData = data.map((t) {
+    return [
+      (t['MaCX'] ?? '').toString(),
+      (t['BienSoXe'] ?? '').toString(),
+      (t['DiemDi'] ?? '').toString(),
+      (t['DiemDen'] ?? '').toString(),
+      (t['LoaiHinhChuyenDi'] ?? '').toString(),
+      t['GiaVe'] != null ? t['GiaVe'].toString() : '',
+      t['SoChoNgoi'] != null ? t['SoChoNgoi'].toString() : '',
+    ];
+  }).toList();
+
+  final page = pw.Page(
+    build: (context) {
+      final now = DateTime.now();
+      final formattedDate = DateFormat('HH:mm dd/MM/yyyy').format(now);
+
+      return pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          // Header logo + title
+          pw.Row(
+            crossAxisAlignment: pw.CrossAxisAlignment.center,
+            children: [
+              pw.Image(pw.MemoryImage(logoBytes), width: 100, height: 100),
+              pw.SizedBox(width: 12),
+              pw.Expanded(
+                child: pw.Center(
+                  child: pw.Text(
+                    'DANH SÁCH CHUYẾN XE',
+                    style: pw.TextStyle(
+                      font: ttf,
+                      fontSize: 20,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          pw.SizedBox(height: 8),
+
+          // Tổng số bản ghi và thời gian
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Text('Tổng số: ${data.length}', style: pw.TextStyle(font: ttf, fontSize: 12)),
+              pw.Text('Xuất lúc: $formattedDate', style: pw.TextStyle(font: ttf, fontSize: 12)),
+            ],
+          ),
+
+          pw.SizedBox(height: 12),
+
+          // Bảng dữ liệu
+          pw.Table.fromTextArray(
+            headers: ['Mã CX','Biển số','Điểm đi','Điểm đến','Loại hình','Giá vé','Số chỗ'],
+            data: tableData,
+            cellStyle: pw.TextStyle(font: ttf, fontSize: 11),
+            headerStyle: pw.TextStyle(font: ttf, fontSize: 13, fontWeight: pw.FontWeight.bold),
+            border: pw.TableBorder.all(width: 0.5),
+            headerDecoration: pw.BoxDecoration(color: PdfColors.grey300),
+            cellAlignment: pw.Alignment.centerLeft,
+            headerAlignment: pw.Alignment.center,
+          ),
+        ],
+      );
+    },
+  );
+
+  pdf.addPage(page);
+
+  await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+}
 
   @override
   Widget build(BuildContext context) {

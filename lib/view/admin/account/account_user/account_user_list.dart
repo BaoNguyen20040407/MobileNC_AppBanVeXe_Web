@@ -16,6 +16,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'package:giao_dien_1/widget/search_field.dart';
+import 'package:giao_dien_1/widget/build_pdf_page.dart';
 
 class AccountUserList extends StatefulWidget {
   const AccountUserList({super.key});
@@ -106,53 +107,39 @@ void _filterAccounts() {
 }
 
   Future<void> exportAccountsToPDF(List<dynamic> accounts) async {
+  try {
     final pdf = pw.Document();
     final fontData = await rootBundle.load('assets/font/inter_18pt_regular.ttf');
     final ttf = pw.Font.ttf(fontData.buffer.asByteData());
+    final logoBytes = await loadLogoBytes('assets/image/logovexekhach_1.png');
 
-    pdf.addPage(
-      pw.Page(
-        build: (pw.Context context) {
-          return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Text(
-                'Danh sách tài khoản khách hàng',
-                style: pw.TextStyle(
-                  font: ttf,
-                  fontSize: 18,
-                  fontWeight: pw.FontWeight.bold,
-                ),
-              ),
-              pw.SizedBox(height: 12),
-              pw.Table.fromTextArray(
-                headers: ['Mã TK', 'Tên đăng nhập', 'Mật khẩu', 'Mã KH'],
-                data: accounts.map((tk) {
-                  return [
-                    tk['MaTK'] ?? '',
-                    tk['TenDangNhapKH'] ?? '',
-                    tk['Password'] ?? '',
-                    tk['MaKH'] ?? '',
-                  ];
-                }).toList(),
-                cellStyle: pw.TextStyle(font: ttf, fontSize: 11),
-                headerStyle: pw.TextStyle(
-                  font: ttf,
-                  fontSize: 13,
-                  fontWeight: pw.FontWeight.bold,
-                ),
-                headerDecoration: pw.BoxDecoration(color: PdfColors.grey300),
-                border: pw.TableBorder.all(width: 0.5),
-                cellAlignment: pw.Alignment.centerLeft,
-              ),
-            ],
-          );
-        },
-      ),
+    final data = accounts.map((tk) {
+      return [
+        tk['MaTK']?.toString() ?? '',
+        tk['TenDangNhapKH']?.toString() ?? '',
+        tk['Password']?.toString() ?? '',
+        tk['MaKH']?.toString() ?? '',
+      ];
+    }).toList();
+
+    final page = buildPdfPage(
+      font: ttf,
+      logoBytes: logoBytes,
+      title: 'DANH SÁCH TÀI KHOẢN KHÁCH HÀNG',
+      headers: ['Mã TK', 'Tên đăng nhập', 'Mật khẩu', 'Mã KH'],
+      data: data,
+      totalCount: accounts.length,
     );
 
-    await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdf.save());
+    pdf.addPage(page);
+
+    await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+  } catch (e, stacktrace) {
+    print('Lỗi khi tạo PDF danh sách tài khoản: $e');
+    print('Stacktrace: $stacktrace');
   }
+}
+
 
   @override
   Widget build(BuildContext context) {

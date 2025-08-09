@@ -14,6 +14,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:printing/printing.dart';
 import 'package:giao_dien_1/widget/filter_chip_with_input.dart';
+import 'package:giao_dien_1/widget/build_pdf_page.dart';
 
 class FeedbackListScreen extends StatefulWidget {
   const FeedbackListScreen({super.key});
@@ -59,56 +60,44 @@ class _FeedbackListScreenState extends State<FeedbackListScreen> {
     }
   }
 
-  Future<void> exportFeedbackToPDF(List<Map<String, dynamic>> data) async {
-  final pdf = pw.Document();
-  final fontData = await rootBundle.load('assets/font/inter_18pt_regular.ttf');
-  final ttf = pw.Font.ttf(fontData.buffer.asByteData());
+Future<void> exportFeedbackToPDF(List<Map<String, dynamic>> data) async {
+  try {
+    final pdf = pw.Document();
 
-  pdf.addPage(
-    pw.MultiPage(
-      pageFormat: PdfPageFormat.a4,
-      build: (pw.Context context) {
-        return [
-          pw.Text(
-            'Danh sách góp ý',
-            style: pw.TextStyle(
-              font: ttf,
-              fontSize: 18,
-              fontWeight: pw.FontWeight.bold,
-            ),
-          ),
-          pw.SizedBox(height: 12),
-          pw.Table.fromTextArray(
-            headers: ['Mã GY', 'Tiêu đề', 'Nội dung', 'Phản hồi', 'Mã KH', 'Mã NV'],
-            data: data.map((item) {
-              return [
-                item['MaGY'] ?? '',
-                item['TieuDe'] ?? '',
-                item['NoiDungGopY'] ?? '',
-                item['PhanHoi'] ?? '',
-                item['MaKH'] ?? '',
-                item['MaNV'] ?? '',
-              ];
-            }).toList(),
-            cellStyle: pw.TextStyle(font: ttf, fontSize: 10),
-            headerStyle: pw.TextStyle(
-              font: ttf,
-              fontSize: 12,
-              fontWeight: pw.FontWeight.bold,
-            ),
-            headerDecoration: pw.BoxDecoration(color: PdfColors.grey300),
-            border: pw.TableBorder.all(width: 0.5),
-            cellAlignment: pw.Alignment.centerLeft,
-          ),
-        ];
-      },
-    ),
-  );
+    final fontData = await rootBundle.load('assets/font/inter_18pt_regular.ttf');
+    final ttf = pw.Font.ttf(fontData.buffer.asByteData());
 
-  await Printing.layoutPdf(
-    onLayout: (PdfPageFormat format) async => pdf.save(),
-  );
+    final logoBytes = await loadLogoBytes('assets/image/logovexekhach_1.png');
+
+    final tableData = data.map((item) {
+      return [
+        item['MaGY']?.toString() ?? '',
+        item['TieuDe']?.toString() ?? '',
+        item['NoiDungGopY']?.toString() ?? '',
+        item['PhanHoi']?.toString() ?? '',
+        item['MaKH']?.toString() ?? '',
+        item['MaNV']?.toString() ?? '',
+      ];
+    }).toList();
+
+    final page = buildPdfPage(
+      font: ttf,
+      logoBytes: logoBytes,
+      title: 'DANH SÁCH GÓP Ý',
+      headers: ['Mã GY', 'Tiêu đề', 'Nội dung', 'Phản hồi', 'Mã KH', 'Mã NV'],
+      data: tableData,
+      totalCount: data.length,
+    );
+
+    pdf.addPage(page);
+
+    await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+  } catch (e, stacktrace) {
+    print('Lỗi khi tạo PDF danh sách góp ý: $e');
+    print('Stacktrace: $stacktrace');
+  }
 }
+
   Future<void> _filterFeedbacks() async {
     try {
       final response = await http.post(

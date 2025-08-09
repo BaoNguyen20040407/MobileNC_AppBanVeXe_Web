@@ -15,6 +15,7 @@ import 'package:giao_dien_1/config/config.dart';
 import 'package:giao_dien_1/widget/pagination_control.dart';
 import 'package:giao_dien_1/widget/filter_chip_with_input.dart';
 import 'package:giao_dien_1/widget/search_field.dart';
+import 'package:giao_dien_1/widget/build_pdf_page.dart';
 
 class StationList extends StatefulWidget {
   const StationList({super.key});
@@ -112,32 +113,42 @@ class _StationListState extends State<StationList> {
   });
 }
 
-  Future<void> exportToPDF(List<Map<String, dynamic>> data) async {
+  Future<void> exportStationsToPDF(List<Map<String, dynamic>> data) async {
+  try {
     final pdf = pw.Document();
+
     final fontData = await rootBundle.load('assets/font/inter_18pt_regular.ttf');
     final ttf = pw.Font.ttf(fontData.buffer.asByteData());
 
-    pdf.addPage(
-      pw.Page(
-        build: (pw.Context context) {
-          return pw.Table.fromTextArray(
-            headers: ['Mã BX', 'Tên BX', 'Tỉnh/Thành'],
-            data: data.map((station) {
-              return [
-                station['MaBX'] ?? '',
-                station['TenBX'] ?? '',
-                station['TinhThanh'] ?? '',
-              ];
-            }).toList(),
-            cellStyle: pw.TextStyle(font: ttf, fontSize: 12),
-            headerStyle: pw.TextStyle(font: ttf, fontSize: 14, fontWeight: pw.FontWeight.bold),
-          );
-        },
-      ),
+    final logoBytes = await loadLogoBytes('assets/image/logovexekhach_1.png');
+
+    final tableData = data.map((station) {
+      return [
+        station['MaBX']?.toString() ?? '',
+        station['TenBX']?.toString() ?? '',
+        station['TinhThanh']?.toString() ?? '',
+        station['DiaChi']?.toString() ?? ''
+      ];
+    }).toList();
+
+    final page = buildPdfPage(
+      font: ttf,
+      logoBytes: logoBytes,
+      title: 'DANH SÁCH BẾN XE',
+      headers: ['Mã BX', 'Tên BX', 'Tỉnh/Thành', 'Địa chỉ'],
+      data: tableData,
+      totalCount: data.length,
     );
 
+    pdf.addPage(page);
+
     await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+  } catch (e, stacktrace) {
+    print('Lỗi khi tạo PDF danh sách bến xe: $e');
+    print('Stacktrace: $stacktrace');
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -234,7 +245,7 @@ class _StationListState extends State<StationList> {
                               IconButton(
                                 icon: const Icon(Icons.print),
                                 tooltip: 'Xuất PDF',
-                                onPressed: () => exportToPDF(filteredList),
+                                onPressed: () => exportStationsToPDF(filteredList),
                               ),
                               const SizedBox(width: 8),
                               IconButton(

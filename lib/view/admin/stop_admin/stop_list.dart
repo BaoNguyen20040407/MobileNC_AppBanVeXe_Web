@@ -15,6 +15,7 @@ import 'package:giao_dien_1/config/config.dart';
 import 'package:giao_dien_1/widget/pagination_control.dart';
 import 'dart:async';
 import 'package:giao_dien_1/widget/search_field.dart';
+import 'package:giao_dien_1/widget/build_pdf_page.dart';
 
 class StopList extends StatefulWidget {
   const StopList({super.key});
@@ -101,35 +102,43 @@ class _StopListState extends State<StopList> {
   }
 }
 
-  Future<void> exportToPDF(List<dynamic> data) async {
+  Future<void> exportStopsToPDF(List<dynamic> stops) async {
+  try {
     final pdf = pw.Document();
 
     final fontData = await rootBundle.load('assets/font/inter_18pt_regular.ttf');
     final ttf = pw.Font.ttf(fontData.buffer.asByteData());
 
-    pdf.addPage(
-      pw.Page(
-        build: (pw.Context context) {
-          return pw.Table.fromTextArray(
-            headers: ['Mã CX', 'Thứ tự', 'Điểm dừng', 'TG đến', 'TG đi'],
-            data: data.map((item) {
-              return [
-                item['MaCX'] ?? '',
-                item['ThuTu'].toString(),
-                item['DiemDung'] ?? '',
-                item['ThoiGianDen'] ?? '',
-                item['ThoiGianDi'] ?? '',
-              ];
-            }).toList(),
-            cellStyle: pw.TextStyle(font: ttf, fontSize: 12),
-            headerStyle: pw.TextStyle(font: ttf, fontSize: 14, fontWeight: pw.FontWeight.bold),
-          );
-        },
-      ),
+    final logoBytes = await loadLogoBytes('assets/image/logovexekhach_1.png');
+
+    final data = stops.map((stop) {
+      return [
+        (stop['MaCX'] ?? '').toString(),
+        (stop['ThuTu'] != null ? stop['ThuTu'].toString() : ''),
+        (stop['DiemDung'] ?? '').toString(),
+        (stop['ThoiGianDen'] ?? '').toString(),
+        (stop['ThoiGianDi'] ?? '').toString(),
+      ];
+    }).toList();
+
+    final page = buildPdfPage(
+      font: ttf,
+      logoBytes: logoBytes,
+      title: 'DANH SÁCH ĐIỂM DỪNG',
+      headers: ['Mã CX', 'Thứ tự', 'Điểm dừng', 'Thời gian đến', 'Thời gian đi'],
+      data: data,
+      totalCount: stops.length,
     );
 
+    pdf.addPage(page);
+
     await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+  } catch (e, stacktrace) {
+    print('Lỗi khi tạo hoặc in PDF điểm dừng: $e');
+    print('Stacktrace: $stacktrace');
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -225,7 +234,7 @@ class _StopListState extends State<StopList> {
                               IconButton(
                                 icon: const Icon(Icons.print),
                                 tooltip: 'Xuất PDF',
-                                onPressed: () => exportToPDF(filteredList),
+                                onPressed: () => exportStopsToPDF(filteredList),
                               ),
                               const SizedBox(width: 8),
                               IconButton(

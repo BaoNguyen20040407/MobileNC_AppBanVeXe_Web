@@ -16,4 +16,5 @@ class AppColors {
   static Color greyShade300 = Colors.grey.shade300;
   static const Color softOrangeBackground = Color(0xFFFFF3E0);
   static const Color profileHeaderOrange = Color(0xFFF5A562);
+  static const Color redRevenue = Color(0xFFBF360C);
 }

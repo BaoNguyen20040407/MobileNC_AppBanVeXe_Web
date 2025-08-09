@@ -15,6 +15,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:giao_dien_1/config/config.dart';
 import 'package:giao_dien_1/widget/search_field.dart';
+import 'package:giao_dien_1/widget/revenue_dialog.dart';
+import 'package:intl/intl.dart'; // định dạng ngày & số
 
 class TicketListScreen extends StatefulWidget {
   const TicketListScreen({super.key});
@@ -113,36 +115,130 @@ class _TicketListScreenState extends State<TicketListScreen> {
   final fontData = await rootBundle.load('assets/font/inter_18pt_regular.ttf');
   final ttf = pw.Font.ttf(fontData.buffer.asByteData());
 
+  final numberFormat = NumberFormat('#,###', 'vi_VN');
+
   pdf.addPage(
     pw.Page(
       build: (pw.Context context) {
         return pw.Table.fromTextArray(
           headers: [
             'Mã vé',
-            'SĐT',
-            'Tên khách',
-            'Tuyến',
-            'Ngày đi',
-            'Chỗ',
+            'Loại vé',
+            'Vị trí ghế',
+            'Giá vé (VNĐ)',
+            'Trạng thái',
+            'Thanh toán',
+            'Mã CX',
+            'Mã KH',
           ],
           data: tickets.map((ticket) {
             return [
               ticket['MaVe'] ?? '',
-              ticket['SDT'] ?? '',
-              ticket['HoTenKH'] ?? '',
-              '${ticket['DiemDi']} - ${ticket['DiemDen']}',
-              ticket['NgayDi'] ?? '',
-              ticket['GheNgoi'] ?? '',
+              ticket['LoaiVe'] ?? '',
+              ticket['ViTriGheNgoi'] ?? '',
+              ticket['GiaVe'] != null ? numberFormat.format(ticket['GiaVe']) : '',
+              ticket['TrangThai'] ?? '',
+              ticket['HinhThucThanhToan'] ?? '',
+              ticket['MaCX'] ?? '',
+              ticket['MaKH'] ?? '',
             ];
           }).toList(),
           cellStyle: pw.TextStyle(font: ttf, fontSize: 11),
-          headerStyle: pw.TextStyle(
-              font: ttf, fontSize: 13, fontWeight: pw.FontWeight.bold),
+          headerStyle: pw.TextStyle(font: ttf, fontSize: 13, fontWeight: pw.FontWeight.bold),
           border: pw.TableBorder.all(width: 0.5),
           headerDecoration: pw.BoxDecoration(color: PdfColors.grey300),
           cellAlignment: pw.Alignment.centerLeft,
         );
       },
+    ),
+  );
+
+  await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+}
+
+Future<void> _exportRevenueToPDF(
+  DateTime start,
+  DateTime end,
+  Map<String, dynamic> revenue,
+  List<Map<String, dynamic>> tickets,
+) async {
+  final pdf = pw.Document();
+
+  // Font
+  final fontData = await rootBundle.load('assets/font/inter_18pt_regular.ttf');
+  final ttf = pw.Font.ttf(fontData.buffer.asByteData());
+
+  // Logo
+  final logoData = await rootBundle.load('assets/image/logovexekhach_1.png');
+  final logoImage = pw.MemoryImage(logoData.buffer.asUint8List());
+
+  final dateFormat = DateFormat('dd-MM-yyyy');
+  final numberFormat = NumberFormat('#,###', 'vi_VN');
+
+  pdf.addPage(
+    pw.MultiPage(
+      build: (context) => [
+        // Header với logo và tiêu đề
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          children: [
+            pw.Image(logoImage, width: 60, height: 60),
+            pw.Text(
+              'BÁO CÁO DOANH THU',
+              style: pw.TextStyle(
+                font: ttf,
+                fontSize: 20,
+                fontWeight: pw.FontWeight.bold,
+              ),
+            ),
+            pw.SizedBox(width: 60), // chừa khoảng trống cân đối
+          ],
+        ),
+        pw.SizedBox(height: 16),
+        pw.Text('Từ ngày: ${dateFormat.format(start)}', style: pw.TextStyle(font: ttf)),
+        pw.SizedBox(height: 8),
+        pw.Text('Đến ngày: ${dateFormat.format(end)}', style: pw.TextStyle(font: ttf)),
+        pw.SizedBox(height: 32),
+
+        pw.Table.fromTextArray(
+          headers: ['Mã vé', 'Mã chuyến xe', 'Ngày đi', 'Ghế', 'Giá vé (VNĐ)'],
+          headerStyle: pw.TextStyle(font: ttf, fontWeight: pw.FontWeight.bold),
+          cellStyle: pw.TextStyle(font: ttf),
+          headerDecoration: pw.BoxDecoration(color: PdfColors.grey300),
+          cellAlignment: pw.Alignment.centerLeft,
+          cellAlignments: {
+            0: pw.Alignment.centerLeft,  // Mã vé
+            1: pw.Alignment.centerLeft,  // Mã chuyến xe
+            2: pw.Alignment.centerLeft,  // Ngày đi
+            3: pw.Alignment.centerLeft,  // Ghế
+            4: pw.Alignment.centerRight, // Giá vé căn phải
+          },
+          data: tickets.map((t) {
+            return [
+              t['MaVe'] ?? '',
+              t['MaCX'] ?? '',   // Thêm cột mã chuyến xe
+              dateFormat.format(DateTime.parse(t['NgayDi'])),
+              t['ViTriGheNgoi'] ?? '',
+              numberFormat.format(t['GiaVe'] ?? 0),
+            ];
+          }).toList()
+            ..add([
+              'TỔNG',
+              '', // ô trống cho cột mã chuyến xe
+              '',
+              numberFormat.format(revenue['tongVe'] ?? 0) + ' vé',
+              numberFormat.format(revenue['tongDoanhThu'] ?? 0),
+            ]),
+        ),
+        pw.SizedBox(height: 16),
+        pw.Container(
+          alignment: pw.Alignment.centerRight,
+          child: pw.Text(
+            'Thời điểm thống kê: ${DateFormat('dd-MM-yyyy HH:mm').format(DateTime.now())}',
+            style: pw.TextStyle(font: ttf, fontSize: 10, color: PdfColors.black),
+          ),
+        ),
+      ],
     ),
   );
 
@@ -257,12 +353,43 @@ class _TicketListScreenState extends State<TicketListScreen> {
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              Tooltip(
-                                message: 'Không thể thêm vé thủ công',
-                                child: IconButton(
-                                  icon: const Icon(Icons.add_circle, color: Colors.grey),
-                                  onPressed: null, // Vô hiệu hóa
-                                ),
+                              IconButton(
+                                icon: const Icon(Icons.bar_chart),
+                                tooltip: 'Thống kê doanh thu',
+                               onPressed: () async {
+                                  final result = await showDialog(
+                                    context: context,
+                                    builder: (_) => const RevenueDialog(),
+                                  );
+
+                                  if (result != null) {
+                                    final startStr = DateFormat('dd-MM-yyyy').format(result['start']);
+                                    final endStr = DateFormat('dd-MM-yyyy').format(result['end']);
+
+                                    // Gọi API lấy danh sách vé
+                                    final ticketResp = await http.get(Uri.parse(
+                                      '$baseURL/thongke/danhsachve?startDate=$startStr&endDate=$endStr'
+                                    ));
+
+                                    if (ticketResp.statusCode == 200) {
+                                      final ticketData = jsonDecode(ticketResp.body);
+                                      if (ticketData['success'] == true) {
+                                        final tickets = List<Map<String, dynamic>>.from(ticketData['data']);
+
+                                        _exportRevenueToPDF(
+                                          result['start'],
+                                          result['end'],
+                                          result['revenue'],
+                                          tickets,
+                                        );
+                                      } else {
+                                        print("⚠️ Lấy danh sách vé thất bại: ${ticketData['message']}");
+                                      }
+                                    } else {
+                                      print("❌ API lỗi: ${ticketResp.statusCode}");
+                                    }
+                                  }
+                                }
                               ),
                             ],
                           ),

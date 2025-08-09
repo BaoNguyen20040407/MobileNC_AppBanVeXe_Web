@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:giao_dien_1/widget/appbar_profile.dart';
+import 'package:giao_dien_1/widget/appbar_profile_admin.dart';
 import 'package:giao_dien_1/config/default.dart';
 
 class LocationPickerAdminScreen extends StatefulWidget {
@@ -82,7 +82,7 @@ class _LocationPickerAdminScreenState extends State<LocationPickerAdminScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.softOrangeBackground,
-      appBar: const AppBarProfile(title: 'ĐỊA CHỈ CỦA BẠN'),
+      appBar: const AppBarAdminProfile(title: 'ĐỊA CHỈ CỦA BẠN'),
       body: _currentLatLng == null
           ? const Center(child: CircularProgressIndicator())
           : Padding(

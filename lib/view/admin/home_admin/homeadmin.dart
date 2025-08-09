@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/view/admin/feedback_admin/feedback_list.dart';
+import 'package:giao_dien_1/view/admin/home_admin/manage_ticket.dart';
 import 'package:giao_dien_1/view/admin/support_admin/support_list.dart';
-import 'package:giao_dien_1/view/admin/ticket_admin/ticket_list.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/view/admin/home_admin/manage_people.dart';
 import 'package:giao_dien_1/view/admin/home_admin/manage_station.dart';
@@ -59,7 +59,7 @@ class HomeAdmin extends StatelessWidget {
                     Navigator.push(context, MaterialPageRoute(builder: (_) => FeedbackListScreen()));
                     break;
                   case '/ticket':
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => TicketListScreen()));
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => ManageTicketScreen()));
                     break;
                   default:
                     // Hiện thông báo placeholder

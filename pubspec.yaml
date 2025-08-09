@@ -23,6 +23,7 @@ dependencies:
   geolocator: ^14.0.2
   geocoding: ^4.0.0
   flutter_launcher_icons: ^0.14.4
+  qr_code_tools: ^0.2.0
 
 dev_dependencies:
   flutter_test:

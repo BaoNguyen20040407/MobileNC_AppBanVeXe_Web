@@ -18,6 +18,7 @@ import 'package:giao_dien_1/widget/search_field.dart';
 import 'package:giao_dien_1/widget/revenue_dialog.dart';
 import 'package:intl/intl.dart'; // định dạng ngày & số
 import 'package:giao_dien_1/widget/build_pdf_page.dart';
+import 'package:giao_dien_1/view/admin/home_admin/manage_ticket.dart';
 
 class TicketListScreen extends StatefulWidget {
   const TicketListScreen({super.key});
@@ -564,7 +565,7 @@ Future<void> _exportRevenueToPDF(
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (_) => HomeAdmin()),
+                  MaterialPageRoute(builder: (_) => ManageTicketScreen()),
                 );
               },
             ),

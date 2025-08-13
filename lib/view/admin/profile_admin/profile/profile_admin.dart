@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/view/admin/profile_admin/location_admin/location_admin.dart';
+import 'package:giao_dien_1/view/admin/profile_admin/notification/notification_admin_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:giao_dien_1/config/default.dart';
-import 'package:giao_dien_1/view/notification/notifications_screen.dart';
 import 'package:giao_dien_1/view/auth/login_screen.dart';
 import 'package:giao_dien_1/config/config.dart';
 import 'package:http/http.dart' as http;
@@ -156,7 +156,13 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
                   "Thông báo",
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
-                    
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => NotificationAdminScreen(),
+                        settings: const RouteSettings(name: '/admin/notification'),
+                      ),
+                    );
                   },
                 ),
                 _buildMenuItem(

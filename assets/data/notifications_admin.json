@@ -1,0 +1,20 @@
+[
+    {
+        "title": "Thông báo: Mời tham dự họp công ty",
+        "sender": "Văn phòng NX Nam Hải - TP.HCM",
+        "time": "14:25 13/08/2025",
+        "meeting": {
+            "department": "Các phòng ban trong công ty",
+            "topic": "Kế hoạch triển khai du lịch cùng Nhà Xe Nam Hải an toàn dịp Tết 2026",
+            "code": "HOP-CT-130825",
+            "start": "09:00 18/08/2025",
+            "end": "11:30 18/08/2025",
+            "location": "Phòng họp tầng 5 - Trụ sở chính"
+        }
+    },
+    {
+        "title": "Thông báo: Mời tham dự họp công ty",
+        "sender": "Văn phòng NX Nam Hải - TP.HCM",
+        "time": "14:25 13/08/2025"
+    }
+]

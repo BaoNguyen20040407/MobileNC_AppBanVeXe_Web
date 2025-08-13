@@ -5,6 +5,7 @@ import 'package:giao_dien_1/widget/exit_button.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:qr_code_tools/qr_code_tools.dart';
 import 'package:giao_dien_1/config/default.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 class QRScanFromImageScreen extends StatefulWidget {
   const QRScanFromImageScreen({Key? key}) : super(key: key);
@@ -43,6 +44,31 @@ class _QRScanFromImageScreenState extends State<QRScanFromImageScreen> {
       });
     }
   }
+
+  Future<void> scanQRFromCamera() async {
+  final String? scannedData = await Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => Scaffold(
+        body: MobileScanner(
+          onDetect: (barcodeCapture) {
+            final List<Barcode> barcodes = barcodeCapture.barcodes;
+            if (barcodes.isNotEmpty) {
+              Navigator.pop(context, barcodes.first.rawValue ?? '');
+            }
+          },
+        ),
+      ),
+    ),
+  );
+
+  if (scannedData != null && scannedData.isNotEmpty) {
+    setState(() {
+      isLoading = false;
+      qrData = scannedData;
+    });
+  }
+}
 
   void confirmTicket() {
     if (qrData == null || qrData!.isEmpty) {
@@ -136,19 +162,46 @@ class _QRScanFromImageScreenState extends State<QRScanFromImageScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.mainOrange,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-              onPressed: pickImageAndScanQR,
-              icon: const Icon(Icons.photo_library, size: 24),
-              label: const Text('Chọn ảnh từ thư viện'),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.mainOrange,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                      textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    ),
+                    onPressed: pickImageAndScanQR,
+                    icon: const Icon(Icons.photo_library, size: 24),
+                    label: const Text(
+                      'Chọn ảnh',
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.greenDark,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                      textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    ),
+                    onPressed: scanQRFromCamera,
+                    icon: const Icon(Icons.qr_code_scanner, size: 24),
+                    label: const Text(
+                      'Quét camera',
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 32),
             if (isLoading) ...[
               const CircularProgressIndicator(color: AppColors.mainOrange),
               const SizedBox(height: 16),

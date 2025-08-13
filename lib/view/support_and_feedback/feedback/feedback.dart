@@ -7,6 +7,8 @@ import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/config/config.dart';
 import 'package:giao_dien_1/view/support_and_feedback/feedback/feedback_answer.dart';
 import 'package:giao_dien_1/view/support_and_feedback/feedback/feedback_loading.dart';
+import 'package:giao_dien_1/widget/feedback_and_support.dart';
+import 'package:giao_dien_1/widget/feedback_and_support_list.dart';
 
 class FeedbackPage extends StatefulWidget {
   const FeedbackPage({super.key});
@@ -113,59 +115,13 @@ class _FeedbackPageState extends State<FeedbackPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildFeedbackForm(),
-            const SizedBox(height: 32),
-            _buildFeedbackList(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFeedbackForm() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.mainOrange, width: 5),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.mainOrange,
-            offset: const Offset(0, 0),
-            blurRadius: 0,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'GÓP Ý',
-            style: TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.bold,
-              color: AppColors.black,
-              fontFamily: 'Inter',
-            ),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _titleController,
-            cursorColor: AppColors.mainOrange,
-            decoration: _buildInputDecoration('Nhập tiêu đề...'),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _contentController,
-            maxLines: 4,
-            cursorColor: AppColors.mainOrange,
-            decoration: _buildInputDecoration('Nhập nội dung góp ý...'),
-          ),
-          const SizedBox(height: 16),
-          Center(
-            child: ElevatedButton(
-              onPressed: () async {
+            FeedbackAndSupportWidget(
+              titleController: _titleController,
+              contentController: _contentController,
+              formTitle: 'GÓP Ý',
+              titleHint: 'Nhập tiêu đề...',
+              contentHint: 'Nhập nội dung góp ý...',
+              onSubmit: () async {
                 final title = _titleController.text.trim();
                 final content = _contentController.text.trim();
                 if (title.isNotEmpty && content.isNotEmpty) {
@@ -176,113 +132,24 @@ class _FeedbackPageState extends State<FeedbackPage> {
                   );
                 }
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.mainOrange,
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-              ),
-              child: const Text(
-                'Gửi',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                  fontFamily: 'Inter',
-                ),
-              ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  InputDecoration _buildInputDecoration(String hint) {
-    return InputDecoration(
-      hintText: hint,
-      hintStyle: const TextStyle(
-        color: AppColors.greyLight,
-        fontFamily: 'Inter',
-        fontSize: 14,
-      ),
-      filled: true,
-      fillColor: Colors.white,
-      hoverColor: Colors.transparent,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: AppColors.greyLight),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: AppColors.greyLight),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: AppColors.greyLight),
-      ),
-    );
-  }
-
-  Widget _buildFeedbackList() {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: Text(
-              'GÓP Ý CỦA TÔI',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 17,
-                fontFamily: 'Inter',
-              ),
-            ),
-          ),
-          if (_myFeedbacks.isEmpty)
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: Text('Bạn chưa có góp ý nào.', style: TextStyle(fontFamily: 'Inter')),
-            ),
-          ..._myFeedbacks.map((feedback) {
-            return Column(
-              children: [
-                InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => FeedbackAnswerPage(maGY: feedback['MaGY']),
-                      ),
-                    );
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.feedback_outlined, color: Colors.black),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            feedback['TieuDe'] ?? '',
-                            style: const TextStyle(fontSize: 14, fontFamily: 'Inter'),
-                          ),
-                        ),
-                        const Icon(Icons.arrow_forward_ios, size: 14),
-                      ],
-                    ),
+            const SizedBox(height: 32),
+            FeedbackAndSupportList(
+              title: 'GÓP Ý CỦA TÔI',
+              emptyMessage: 'Bạn chưa có góp ý nào.',
+              items: _myFeedbacks,
+              icon: Icons.feedback_outlined,
+              onItemTap: (feedback) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => FeedbackAnswerPage(maGY: feedback['MaGY']),
                   ),
-                ),
-                const Divider(height: 1, thickness: 0.5, color: Colors.black12),
-              ],
-            );
-          }).toList(),
-        ],
+                );
+              },
+            )
+          ],
+        ),
       ),
     );
   }

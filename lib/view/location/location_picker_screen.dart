@@ -15,7 +15,8 @@ class LocationPickerScreen extends StatefulWidget {
 class _LocationPickerScreenState extends State<LocationPickerScreen> {
   GoogleMapController? _mapController;
   LatLng? _currentLatLng;
-  String _currentAddress = 'Đang xác định địa chỉ...';
+  String _currentAddress = "Đang xác định địa chỉ...";
+  String _selectedType = "Nhà";
 
   @override
   void initState() {
@@ -44,38 +45,103 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
       _currentLatLng = latLng;
     });
 
-    _mapController?.animateCamera(CameraUpdate.newLatLngZoom(latLng, 16));
+    _mapController?.animateCamera(
+      CameraUpdate.newLatLngZoom(latLng, 16),
+    );
+
     _getAddressFromLatLng(latLng);
   }
 
   Future<void> _getAddressFromLatLng(LatLng latLng) async {
-  try {
-    final placemarks = await placemarkFromCoordinates(
-      latLng.latitude,
-      latLng.longitude,
-    );
+    try {
+      final placemarks = await placemarkFromCoordinates(
+        latLng.latitude,
+        latLng.longitude,
+      );
 
-    if (placemarks.isEmpty) {
+      if (placemarks.isEmpty) {
+        setState(() {
+          _currentAddress = "Không tìm thấy địa chỉ.";
+        });
+        return;
+      }
+
+      final place = placemarks.first;
+
+      final parts = [
+        place.name,
+        place.street,
+        place.subAdministrativeArea,
+        place.locality,
+        place.administrativeArea,
+      ];
+
+      final address = parts
+          .where((part) => part != null && part!.isNotEmpty)
+          .join(", ");
+
       setState(() {
-        _currentAddress = 'Không tìm thấy địa chỉ.';
+        _currentAddress = address;
       });
-      return;
+    } catch (e) {
+      setState(() {
+        _currentAddress = "Lỗi lấy địa chỉ.";
+      });
     }
-
-    final place = placemarks.first;
-    final address =
-        '${place.name ?? ''}, ${place.street ?? ''}, ${place.locality ?? ''}, ${place.administrativeArea ?? ''}';
-
-    setState(() {
-      _currentAddress = address;
-    });
-  } catch (e) {
   }
-}
-
 
   void _onMapCreated(GoogleMapController controller) {
     _mapController = controller;
+  }
+
+  void _saveLocation() {
+    print("Địa chỉ: $_currentAddress");
+    print("Loại: $_selectedType");
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Đã lưu $_selectedType"),
+      ),
+    );
+  }
+
+  Widget _buildTypeButton(String type, IconData icon) {
+    final isSelected = _selectedType == type;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _selectedType = type;
+          });
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.orange : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.orange),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                color: isSelected ? Colors.white : Colors.orange,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                type,
+                style: TextStyle(
+                  color: isSelected ? Colors.white : Colors.orange,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -86,13 +152,14 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
       body: _currentLatLng == null
           ? const Center(child: CircularProgressIndicator())
           : Padding(
-              padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
               child: Column(
                 children: [
-                  /// Bản đồ hiển thị
+
+                  /// MAP
                   Expanded(
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
                       child: GoogleMap(
                         onMapCreated: _onMapCreated,
                         initialCameraPosition: CameraPosition(
@@ -110,8 +177,10 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                         onTap: (position) {
                           setState(() {
                             _currentLatLng = position;
-                            _getAddressFromLatLng(position);
                           });
+
+                          _getAddressFromLatLng(position);
+
                           _mapController?.animateCamera(
                             CameraUpdate.newLatLng(position),
                           );
@@ -119,6 +188,34 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                       ),
                     ),
                   ),
+
+                  const SizedBox(height: 16),
+
+                  /// Ô địa chỉ
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.orange),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.location_on,
+                            color: Colors.orange),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _currentAddress,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
                   const SizedBox(height: 16),
                 ],
               ),

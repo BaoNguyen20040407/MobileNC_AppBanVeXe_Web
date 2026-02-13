@@ -1,17 +1,69 @@
-# App Đặt vé xe khách Nam Hải
+**📱 MobileNC - Bus Ticket Booking App**
 
-App đặt vé xe khách Nam Hải giúp cho khách hàng có thể:
-- Tra cứu các chuyến xe tùy địa điểm mình mong muốn đến.
-- Tùy chọn loại xe mong muốn. Tùy chọn chỗ ngồi trên xe. 
-- Lựa chọn phương thức thanh toán tùy theo mong muốn (Hoàn tất quy trình đặt vé xe)
-- Xem lịch trình các chuyến xe
-- Tra cứu vé đã mua/ xem danh sách vé đã từng mua
-- Xem tin tức, thông tin về nhà xe
-- Feedback về dịch vụ nhà xe
-- Xem thông báo của nhà xe gửi đến khách hàng về chuyến xe
-- Xem/ sửa thông tin tài khoản, đổi mật khẩu
-- Định vị được vị trí của mình qua tính năng tích hợp Google Map
+MobileNC is a full-stack bus ticket booking application built with:
 
-Về phía admin
-- Quản lý được các thông tin liên quan về khách hàng, nhân viên, tài khoản, bến xe, chuyến xe, nhân sự liên quan, vé.
-- Gửi thông báo đến khách hàng về những thông tin liên quan đến nhà xe, chuyến xe...
+📱 Flutter (Mobile App)
+
+🖥 Node.js + Express.js (Backend)
+
+🗄 MySQL (Database)
+
+🚀 How to Install and Run the Project
+**STEP 1: Install Node.js**
+
+Download and install Node.js from:
+https://nodejs.org/
+
+Check installation:
+
+node -v
+npm -v
+
+**STEP 2: Install MySQL**
+
+Install MySQL
+
+Create a database named: mobilenc_db
+
+Import the provided .sql file (if available)
+
+**STEP 3: Run the Backend**
+
+Open terminal in the project folder and run:
+
+npm install
+node server.js
+
+
+If successful, you should see:
+
+Server running on port 3000
+
+**STEP 4: Install Flutter**
+
+Check Flutter installation:
+
+flutter doctor
+
+**STEP 5: Install Flutter Dependencies**
+flutter pub get
+
+**STEP 6: Update API Base URL**
+
+Inside the lib/ folder, find:
+
+http://localhost:3000
+
+
+If using Android Emulator, change it to:
+
+http://10.0.2.2:3000
+
+**STEP 7: Run the App**
+flutter run
+
+⚠️ Important Notes
+
+✔ Make sure backend is running before starting the app
+✔ Make sure MySQL service is running
+✔ If connection fails, check port 3000

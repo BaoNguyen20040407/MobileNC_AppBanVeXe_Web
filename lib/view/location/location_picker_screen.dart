@@ -4,6 +4,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:giao_dien_1/widget/appbar_profile.dart';
 import 'package:giao_dien_1/config/default.dart';
+import 'package:giao_dien_1/view/location/add_location_screen.dart';
 
 class LocationPickerScreen extends StatefulWidget {
   const LocationPickerScreen({Key? key}) : super(key: key);
@@ -92,6 +93,15 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
 
   void _onMapCreated(GoogleMapController controller) {
     _mapController = controller;
+  }
+
+  void _openAddLocationScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const AddLocationScreen(),
+      ),
+    );
   }
 
   void _saveLocation() {
@@ -216,6 +226,34 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                     ),
                   ),
 
+                  const SizedBox(height: 16),
+
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton.icon(
+                      onPressed: _openAddLocationScreen, 
+                      icon: const Icon(
+                        Icons.add_location_alt,
+                        color: Colors.white,
+                      ),
+                      label: const Text(
+                        'Thêm địa điểm',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                  ),
+                  
                   const SizedBox(height: 16),
                 ],
               ),

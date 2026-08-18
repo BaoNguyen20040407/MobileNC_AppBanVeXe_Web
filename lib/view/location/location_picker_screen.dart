@@ -2,22 +2,44 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+
 import 'package:giao_dien_1/widget/appbar_profile.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/view/location/add_location_screen.dart';
+import 'package:giao_dien_1/model/saved_location.dart';
 
 class LocationPickerScreen extends StatefulWidget {
   const LocationPickerScreen({Key? key}) : super(key: key);
 
   @override
-  State<LocationPickerScreen> createState() => _LocationPickerScreenState();
+  State<LocationPickerScreen> createState() =>
+      _LocationPickerScreenState();
 }
 
 class _LocationPickerScreenState extends State<LocationPickerScreen> {
   GoogleMapController? _mapController;
+
   LatLng? _currentLatLng;
-  String _currentAddress = "Đang xác định địa chỉ...";
-  String _selectedType = "Nhà";
+
+  String _currentAddress = 'Đang xác định địa chỉ...';
+  String _selectedType = 'Nhà';
+
+  // ============================================================
+  // DANH SÁCH ĐỊA ĐIỂM ĐÃ LƯU
+  // ============================================================
+
+  final List<SavedLocation> _savedLocations = [];
+
+  // true = hiện danh sách
+  // false = chỉ hiện tiêu đề
+  bool _showSavedLocations = true;
+
+  // Chỉ hiển thị tối đa 3 địa điểm ở màn hình chính
+  static const int _previewLimit = 3;
+
+  // ============================================================
+  // INIT
+  // ============================================================
 
   @override
   void initState() {
@@ -25,35 +47,75 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
     _determinePosition();
   }
 
+  // ============================================================
+  // LẤY VỊ TRÍ HIỆN TẠI
+  // ============================================================
+
   Future<void> _determinePosition() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    final serviceEnabled =
+        await Geolocator.isLocationServiceEnabled();
+
     if (!serviceEnabled) {
       await Geolocator.openLocationSettings();
       return;
     }
 
-    LocationPermission permission = await Geolocator.checkPermission();
+    LocationPermission permission =
+        await Geolocator.checkPermission();
+
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
     }
 
-    if (permission == LocationPermission.deniedForever) return;
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
+      if (!mounted) return;
 
-    final position = await Geolocator.getCurrentPosition();
-    final latLng = LatLng(position.latitude, position.longitude);
+      setState(() {
+        _currentAddress = 'Không có quyền truy cập vị trí.';
+      });
 
-    setState(() {
-      _currentLatLng = latLng;
-    });
+      return;
+    }
 
-    _mapController?.animateCamera(
-      CameraUpdate.newLatLngZoom(latLng, 16),
-    );
+    try {
+      final position = await Geolocator.getCurrentPosition();
 
-    _getAddressFromLatLng(latLng);
+      final latLng = LatLng(
+        position.latitude,
+        position.longitude,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _currentLatLng = latLng;
+      });
+
+      _mapController?.animateCamera(
+        CameraUpdate.newLatLngZoom(
+          latLng,
+          16,
+        ),
+      );
+
+      _getAddressFromLatLng(latLng);
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _currentAddress = 'Không thể lấy vị trí hiện tại.';
+      });
+    }
   }
 
-  Future<void> _getAddressFromLatLng(LatLng latLng) async {
+  // ============================================================
+  // LẤY ĐỊA CHỈ TỪ TỌA ĐỘ
+  // ============================================================
+
+  Future<void> _getAddressFromLatLng(
+    LatLng latLng,
+  ) async {
     try {
       final placemarks = await placemarkFromCoordinates(
         latLng.latitude,
@@ -61,9 +123,12 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
       );
 
       if (placemarks.isEmpty) {
+        if (!mounted) return;
+
         setState(() {
-          _currentAddress = "Không tìm thấy địa chỉ.";
+          _currentAddress = 'Không tìm thấy địa chỉ.';
         });
+
         return;
       }
 
@@ -78,183 +143,545 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
       ];
 
       final address = parts
-          .where((part) => part != null && part!.isNotEmpty)
-          .join(", ");
+          .where(
+            (part) =>
+                part != null &&
+                part!.trim().isNotEmpty,
+          )
+          .join(', ');
+
+      if (!mounted) return;
 
       setState(() {
-        _currentAddress = address;
+        _currentAddress = address.isEmpty
+            ? 'Không tìm thấy địa chỉ.'
+            : address;
       });
     } catch (e) {
+      if (!mounted) return;
+
       setState(() {
-        _currentAddress = "Lỗi lấy địa chỉ.";
+        _currentAddress = 'Lỗi lấy địa chỉ.';
       });
     }
   }
 
-  void _onMapCreated(GoogleMapController controller) {
+  // ============================================================
+  // GOOGLE MAP
+  // ============================================================
+
+  void _onMapCreated(
+    GoogleMapController controller,
+  ) {
     _mapController = controller;
   }
 
-  void _openAddLocationScreen() {
-    Navigator.push(
+  // ============================================================
+  // TẠO MARKER HIỆN TẠI
+  // ============================================================
+
+  Set<Marker> _buildMarkers() {
+    if (_currentLatLng == null) {
+      return {};
+    }
+
+    return {
+      Marker(
+        markerId: const MarkerId(
+          'selected_location',
+        ),
+        position: _currentLatLng!,
+        infoWindow: InfoWindow(
+          title: _selectedType,
+          snippet: _currentAddress,
+        ),
+      ),
+    };
+  }
+
+  // ============================================================
+  // XỬ LÝ KHI CHẠM BẢN ĐỒ
+  // ============================================================
+
+  Future<void> _onMapTap(
+    LatLng position,
+  ) async {
+    setState(() {
+      _currentLatLng = position;
+    });
+
+    await _getAddressFromLatLng(position);
+
+    _mapController?.animateCamera(
+      CameraUpdate.newLatLng(position),
+    );
+  }
+
+  // ============================================================
+  // MỞ MÀN HÌNH THÊM ĐỊA ĐIỂM
+  // ============================================================
+
+  Future<void> _openAddLocationScreen() async {
+    final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const AddLocationScreen(),
+        builder: (context) =>
+            const AddLocationScreen(),
       ),
     );
+
+    if (!mounted) return;
+
+    if (result is SavedLocation) {
+      setState(() {
+        _savedLocations.add(result);
+
+        _selectedType = result.type;
+
+        if (result.address != null &&
+            result.address!.trim().isNotEmpty) {
+          _currentAddress = result.address!;
+        }
+
+        if (result.latitude != null &&
+            result.longitude != null) {
+          _currentLatLng = LatLng(
+            result.latitude!,
+            result.longitude!,
+          );
+        }
+
+        // Tự mở danh sách sau khi thêm
+        _showSavedLocations = true;
+      });
+
+      // Di chuyển bản đồ tới địa điểm vừa lưu
+      if (result.latitude != null &&
+          result.longitude != null) {
+        final latLng = LatLng(
+          result.latitude!,
+          result.longitude!,
+        );
+
+        _mapController?.animateCamera(
+          CameraUpdate.newLatLngZoom(
+            latLng,
+            16,
+          ),
+        );
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Đã lưu địa điểm "${result.type}"',
+            style: const TextStyle(
+              fontFamily: 'Inter',
+            ),
+          ),
+        ),
+      );
+    }
   }
 
-  void _saveLocation() {
-    print("Địa chỉ: $_currentAddress");
-    print("Loại: $_selectedType");
+  // ============================================================
+  // CHỌN ĐỊA ĐIỂM ĐÃ LƯU
+  // ============================================================
+
+  void _selectSavedLocation(
+    SavedLocation location,
+  ) {
+    setState(() {
+      _selectedType = location.type;
+
+      if (location.address != null &&
+          location.address!.trim().isNotEmpty) {
+        _currentAddress = location.address!;
+      }
+
+      if (location.latitude != null &&
+          location.longitude != null) {
+        _currentLatLng = LatLng(
+          location.latitude!,
+          location.longitude!,
+        );
+      }
+    });
+
+    if (location.latitude != null &&
+        location.longitude != null) {
+      final latLng = LatLng(
+        location.latitude!,
+        location.longitude!,
+      );
+
+      _mapController?.animateCamera(
+        CameraUpdate.newLatLngZoom(
+          latLng,
+          16,
+        ),
+      );
+    }
+  }
+
+  // ============================================================
+  // MỞ DANH SÁCH ĐẦY ĐỦ
+  // ============================================================
+
+  void _openSavedLocationsScreen() {
+    // TODO:
+    // Sau này thay bằng:
+    //
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (_) => SavedLocationsScreen(
+    //       locations: _savedLocations,
+    //     ),
+    //   ),
+    // );
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("Đã lưu $_selectedType"),
-      ),
-    );
-  }
-
-  Widget _buildTypeButton(String type, IconData icon) {
-    final isSelected = _selectedType == type;
-
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {
-          setState(() {
-            _selectedType = type;
-          });
-        },
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: isSelected ? Colors.orange : Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.orange),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
-                color: isSelected ? Colors.white : Colors.orange,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                type,
-                style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.orange,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
+      const SnackBar(
+        content: Text(
+          'Màn hình danh sách địa điểm sẽ được thêm sau.',
+          style: TextStyle(
+            fontFamily: 'Inter',
           ),
         ),
       ),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.softOrangeBackground,
-      appBar: const AppBarProfile(title: 'ĐỊA CHỈ CỦA BẠN'),
-      body: _currentLatLng == null
-          ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
-              child: Column(
-                children: [
+  // ============================================================
+  // KHUNG CÁC ĐỊA ĐIỂM ĐÃ LƯU
+  // ============================================================
 
-                  /// MAP
-                  Expanded(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: GoogleMap(
-                        onMapCreated: _onMapCreated,
-                        initialCameraPosition: CameraPosition(
-                          target: _currentLatLng!,
-                          zoom: 16,
-                        ),
-                        myLocationEnabled: true,
-                        myLocationButtonEnabled: true,
-                        markers: {
-                          Marker(
-                            markerId: const MarkerId('current_location'),
-                            position: _currentLatLng!,
-                          ),
-                        },
-                        onTap: (position) {
-                          setState(() {
-                            _currentLatLng = position;
-                          });
+  Widget _buildSavedLocations() {
+    // Chưa có địa điểm thì không hiển thị
+    if (_savedLocations.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
-                          _getAddressFromLatLng(position);
+    // Chỉ hiển thị tối đa 3 địa điểm ở màn hình chính
+    final previewLocations =
+        _savedLocations.take(_previewLimit).toList();
 
-                          _mapController?.animateCamera(
-                            CameraUpdate.newLatLng(position),
-                          );
-                        },
-                      ),
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+
+        // BO GÓC GIỐNG Ô ĐỊA CHỈ
+        borderRadius: BorderRadius.circular(12),
+
+        // GIỮ VIỀN CAM BÊN NGOÀI
+        border: Border.all(
+          color: Colors.orange,
+        ),
+      ),
+      child: Column(
+        children: [
+          // ==================================================
+          // HEADER
+          // ==================================================
+
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              12,
+              4,
+              4,
+              4,
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.location_on,
+                  color: Colors.orange,
+                  size: 21,
+                ),
+
+                const SizedBox(width: 8),
+
+                const Expanded(
+                  child: Text(
+                    'CÁC ĐỊA ĐIỂM ĐÃ LƯU',
+                    style: TextStyle(
+                      color: Colors.green,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Inter',
                     ),
                   ),
+                ),
 
-                  const SizedBox(height: 16),
+                // ==================================================
+                // NÚT ẨN / HIỆN
+                // ==================================================
 
-                  /// Ô địa chỉ
-                  Container(
+                Tooltip(
+                  message: _showSavedLocations
+                      ? 'Ẩn danh sách'
+                      : 'Hiện danh sách',
+                  textStyle: const TextStyle(
+                    fontFamily: 'Inter',
+                    color: Colors.white,
+                    fontSize: 14,
+                  ),
+                  child: IconButton(
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () {
+                      setState(() {
+                        _showSavedLocations = !_showSavedLocations;
+                      });
+                    },
+                    icon: Icon(
+                      _showSavedLocations
+                          ? Icons.keyboard_arrow_up
+                          : Icons.keyboard_arrow_down,
+                      color: Colors.orange,
+                    ),
+                  ),
+                ),
+
+                // ==================================================
+                // NÚT 3 CHẤM
+                // ==================================================
+
+                Tooltip(
+                  message: 'Xem tất cả',
+                  textStyle: const TextStyle(
+                    fontFamily: 'Inter',
+                    color: Colors.white,
+                    fontSize: 14,
+                  ),
+                  child: IconButton(
+                    visualDensity: VisualDensity.compact,
+                    onPressed: _openSavedLocationsScreen,
+                    icon: const Icon(
+                      Icons.more_vert,
+                      color: Colors.orange,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // ==================================================
+          // DANH SÁCH
+          // ==================================================
+
+          if (_showSavedLocations)
+            ...previewLocations.map(
+              (location) {
+                return InkWell(
+                  borderRadius: BorderRadius.circular(8),
+                  onTap: () {
+                    _selectSavedLocation(location);
+                  },
+                  child: Padding(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 14),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.orange),
+                      vertical: 10,
+                      horizontal: 12,
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.location_on,
-                            color: Colors.orange),
+                        const Icon(
+                          Icons.location_on,
+                          color: Colors.orange,
+                          size: 22,
+                        ),
+
                         const SizedBox(width: 8),
+
                         Expanded(
                           child: Text(
-                            _currentAddress,
+                            location.type,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Inter',
+                            ),
                           ),
+                        ),
+
+                        const Icon(
+                          Icons.chevron_right,
+                          color: Colors.grey,
+                          size: 20,
                         ),
                       ],
                     ),
                   ),
+                );
+              },
+            ),
+        ],
+      ),
+    );
+  }
 
-                  const SizedBox(height: 16),
+  // ============================================================
+  // Ô ĐỊA CHỈ
+  // ============================================================
 
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: ElevatedButton.icon(
-                      onPressed: _openAddLocationScreen, 
-                      icon: const Icon(
-                        Icons.add_location_alt,
-                        color: Colors.white,
-                      ),
-                      label: const Text(
-                        'Thêm địa điểm',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+  Widget _buildAddressBox() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: 12,
+        vertical: 14,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.orange,
+        ),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.location_on,
+            color: Colors.orange,
+          ),
+
+          const SizedBox(width: 8),
+
+          Expanded(
+            child: Text(
+              _currentAddress,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontFamily: 'Inter',
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ============================================================
+  // NÚT THÊM ĐỊA ĐIỂM
+  // ============================================================
+
+  Widget _buildAddLocationButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 48,
+      child: ElevatedButton.icon(
+        onPressed: _openAddLocationScreen,
+        icon: const Icon(
+          Icons.add_location_alt,
+          color: Colors.white,
+        ),
+        label: const Text(
+          'Thêm địa điểm',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            fontFamily: 'Inter',
+          ),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.orange,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ============================================================
+  // BUILD
+  // ============================================================
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor:
+          AppColors.softOrangeBackground,
+
+      appBar: const AppBarProfile(
+        title: 'ĐỊA CHỈ CỦA BẠN',
+      ),
+
+      body: _currentLatLng == null
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : Padding(
+              padding: const EdgeInsets.fromLTRB(
+                24,
+                24,
+                24,
+                16,
+              ),
+              child: Column(
+                children: [
+                  // ==================================================
+                  // BẢN ĐỒ
+                  // ==================================================
+
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius:
+                          BorderRadius.circular(16),
+                      child: GoogleMap(
+                        onMapCreated:
+                            _onMapCreated,
+
+                        initialCameraPosition:
+                            CameraPosition(
+                          target:
+                              _currentLatLng!,
+                          zoom: 16,
                         ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+
+                        myLocationEnabled: true,
+
+                        myLocationButtonEnabled:
+                            true,
+
+                        markers:
+                            _buildMarkers(),
+
+                        onTap: _onMapTap,
                       ),
                     ),
                   ),
-                  
-                  const SizedBox(height: 16),
+
+                  const SizedBox(height: 12),
+
+                  // ==================================================
+                  // Ô ĐỊA CHỈ
+                  // ==================================================
+
+                  _buildAddressBox(),
+
+                  const SizedBox(height: 12),
+
+                  // ==================================================
+                  // CÁC ĐỊA ĐIỂM ĐÃ LƯU
+                  // ==================================================
+
+                  _buildSavedLocations(),
+
+                  if (_savedLocations.isNotEmpty)
+                    const SizedBox(height: 12),
+
+                  // ==================================================
+                  // THÊM ĐỊA ĐIỂM
+                  // ==================================================
+
+                  _buildAddLocationButton(),
                 ],
               ),
             ),

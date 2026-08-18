@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:giao_dien_1/widget/input_field.dart';
 
 class LocationForm extends StatefulWidget {
   final bool isEdit;
   final String? initialType;
   final String? initialAddress;
-  final VoidCallback? onSave;
+
+  final void Function(String type, String address)? onSave;
 
   const LocationForm({
     super.key,
@@ -42,6 +44,25 @@ class _LocationFormState extends State<LocationForm> {
     super.dispose();
   }
 
+  void _handleSave() {
+    final type = typeController.text.trim();
+    final address = addressController.text.trim();
+
+    if (type.isEmpty || address.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Vui lòng nhập đầy đủ loại địa điểm và địa chỉ',
+            style: TextStyle(fontFamily: 'Inter'),
+          ),
+        ),
+      );
+      return;
+    }
+
+    widget.onSave?.call(type, address);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -60,70 +81,31 @@ class _LocationFormState extends State<LocationForm> {
                 color: Colors.green,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
+                fontFamily: 'Inter',
               ),
             ),
           ),
 
           const SizedBox(height: 20),
 
-          const Text(
-            'Loại địa điểm',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-
-          const SizedBox(height: 8),
-
-          TextField(
+          // LOẠI ĐỊA ĐIỂM
+          CustomInputField(
             controller: typeController,
-            decoration: InputDecoration(
-              hintText: 'Nhập loại địa điểm. VD: Nhà, Công ty...',
-              prefixIcon: const Icon(Icons.location_on),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(
-                  color: Colors.orange,
-                ),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(
-                  color: Colors.orange,
-                ),
-              ),
-            ),
+            labelText: 'Loại địa điểm',
+            prefixIcon: Icons.location_on,
+            keyboardType: TextInputType.text,
+            showToggleVisibility: false,
           ),
 
           const SizedBox(height: 24),
 
-          const Text(
-            'Địa chỉ',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-
-          const SizedBox(height: 8),
-
-          TextField(
+          // ĐỊA CHỈ
+          CustomInputField(
             controller: addressController,
-            maxLines: 3,
-            decoration: InputDecoration(
-              hintText: 'Nhập địa chỉ',
-              prefixIcon: const Icon(Icons.location_on),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(
-                  color: Colors.orange,
-                ),
-              ),
-            ),
+            labelText: 'Địa chỉ',
+            prefixIcon: Icons.location_on,
+            keyboardType: TextInputType.streetAddress,
+            showToggleVisibility: false,
           ),
 
           const SizedBox(height: 24),
@@ -133,7 +115,7 @@ class _LocationFormState extends State<LocationForm> {
               width: 156,
               height: 42,
               child: ElevatedButton(
-                onPressed: widget.onSave,
+                onPressed: _handleSave,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepOrange,
                   shape: RoundedRectangleBorder(
@@ -145,6 +127,7 @@ class _LocationFormState extends State<LocationForm> {
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
+                    fontFamily: 'Inter',
                   ),
                 ),
               ),

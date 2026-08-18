@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:giao_dien_1/widget/input_field.dart';
+import 'package:giao_dien_1/config/default.dart';
 
 class LocationForm extends StatefulWidget {
   final bool isEdit;
@@ -78,7 +79,7 @@ class _LocationFormState extends State<LocationForm> {
             child: Text(
               widget.isEdit ? 'SỬA ĐỊA ĐIỂM' : 'THÊM ĐỊA ĐIỂM',
               style: const TextStyle(
-                color: Colors.green,
+                color: AppColors.greenDark,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Inter',
@@ -117,7 +118,7 @@ class _LocationFormState extends State<LocationForm> {
               child: ElevatedButton(
                 onPressed: _handleSave,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepOrange,
+                  backgroundColor: AppColors.mainOrange,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(7),
                   ),
@@ -125,7 +126,7 @@ class _LocationFormState extends State<LocationForm> {
                 child: Text(
                   widget.isEdit ? 'CẬP NHẬT' : 'LƯU',
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: AppColors.white,
                     fontWeight: FontWeight.bold,
                     fontFamily: 'Inter',
                   ),

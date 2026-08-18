@@ -7,6 +7,8 @@ import 'package:giao_dien_1/widget/appbar_profile.dart';
 import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/view/location/add_location_screen.dart';
 import 'package:giao_dien_1/model/saved_location.dart';
+import 'package:giao_dien_1/view/location/saved_locations_screen.dart';
+import 'package:giao_dien_1/config/default.dart';
 
 class LocationPickerScreen extends StatefulWidget {
   const LocationPickerScreen({Key? key}) : super(key: key);
@@ -329,27 +331,13 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
   // ============================================================
 
   void _openSavedLocationsScreen() {
-    // TODO:
-    // Sau này thay bằng:
-    //
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (_) => SavedLocationsScreen(
-    //       locations: _savedLocations,
-    //     ),
-    //   ),
-    // );
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Màn hình danh sách địa điểm sẽ được thêm sau.',
-          style: TextStyle(
-            fontFamily: 'Inter',
-          ),
+    Navigator.push(
+      context,
+       MaterialPageRoute(
+        builder: (_) => SavedLocationsScreen(
+           locations: _savedLocations,
         ),
-      ),
+       ),
     );
   }
 
@@ -370,14 +358,14 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
 
         // BO GÓC GIỐNG Ô ĐỊA CHỈ
         borderRadius: BorderRadius.circular(12),
 
         // GIỮ VIỀN CAM BÊN NGOÀI
         border: Border.all(
-          color: Colors.orange,
+          color: AppColors.mainOrange,
         ),
       ),
       child: Column(
@@ -397,7 +385,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
               children: [
                 const Icon(
                   Icons.location_on,
-                  color: Colors.orange,
+                  color: AppColors.mainOrange,
                   size: 21,
                 ),
 
@@ -407,7 +395,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                   child: Text(
                     'CÁC ĐỊA ĐIỂM ĐÃ LƯU',
                     style: TextStyle(
-                      color: Colors.green,
+                      color: AppColors.greenDark,
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
                       fontFamily: 'Inter',
@@ -425,7 +413,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                       : 'Hiện danh sách',
                   textStyle: const TextStyle(
                     fontFamily: 'Inter',
-                    color: Colors.white,
+                    color: AppColors.white,
                     fontSize: 14,
                   ),
                   child: IconButton(
@@ -439,7 +427,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                       _showSavedLocations
                           ? Icons.keyboard_arrow_up
                           : Icons.keyboard_arrow_down,
-                      color: Colors.orange,
+                      color: AppColors.mainOrange,
                     ),
                   ),
                 ),
@@ -452,7 +440,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                   message: 'Xem tất cả',
                   textStyle: const TextStyle(
                     fontFamily: 'Inter',
-                    color: Colors.white,
+                    color: AppColors.white,
                     fontSize: 14,
                   ),
                   child: IconButton(
@@ -460,7 +448,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                     onPressed: _openSavedLocationsScreen,
                     icon: const Icon(
                       Icons.more_vert,
-                      color: Colors.orange,
+                      color: AppColors.mainOrange,
                     ),
                   ),
                 ),
@@ -489,7 +477,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                       children: [
                         const Icon(
                           Icons.location_on,
-                          color: Colors.orange,
+                          color: AppColors.mainOrange,
                           size: 22,
                         ),
 
@@ -502,7 +490,6 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                               fontSize: 15,
-                              fontWeight: FontWeight.bold,
                               fontFamily: 'Inter',
                             ),
                           ),
@@ -510,7 +497,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
 
                         const Icon(
                           Icons.chevron_right,
-                          color: Colors.grey,
+                          color: AppColors.grey600,
                           size: 20,
                         ),
                       ],
@@ -536,17 +523,17 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
         vertical: 14,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colors.orange,
+          color: AppColors.mainOrange,
         ),
       ),
       child: Row(
         children: [
           const Icon(
             Icons.location_on,
-            color: Colors.orange,
+            color: AppColors.mainOrange,
           ),
 
           const SizedBox(width: 8),
@@ -578,19 +565,19 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
         onPressed: _openAddLocationScreen,
         icon: const Icon(
           Icons.add_location_alt,
-          color: Colors.white,
+          color: AppColors.white,
         ),
         label: const Text(
           'Thêm địa điểm',
           style: TextStyle(
-            color: Colors.white,
+            color: AppColors.white,
             fontWeight: FontWeight.bold,
             fontSize: 16,
             fontFamily: 'Inter',
           ),
         ),
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.orange,
+          backgroundColor: AppColors.mainOrange,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),

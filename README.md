@@ -1,116 +1,309 @@
-**📱 MobileNC - Bus Ticket Booking App**
+# 📱 MobileNC – Bus Ticket Booking System
 
-MobileNC is a full-stack bus ticket booking system for Nam Hai Bus Company.
-The system includes a mobile application for customers and an admin management system for company staff.
+A full-stack Bus Ticket Booking System developed for **Nam Hai Bus Company**, providing a complete solution for customers to search routes, book tickets, select seats, and manage their journeys through a mobile application, while enabling administrators to efficiently manage transportation operations through a centralized management system.
 
-**🎯 System Overview**
+---
 
-This project is built with:
+# 🚀 Project Overview
 
-📱 Flutter (Mobile Application)
+MobileNC is designed to digitize the ticket booking process and simplify transportation management.
 
-🖥 Node.js + Express.js (Backend API)
+The system consists of:
 
-🗄 MySQL (Database)
+* 📱 **Flutter Mobile Application** for customers
+* 🖥️ **Node.js + Express.js REST API**
+* 🗄️ **MySQL Database**
 
-The mobile app communicates with the backend server via REST APIs, and the backend connects to the MySQL database to store and manage all system data.
+The mobile application communicates with the backend through RESTful APIs, while the backend manages business logic and stores all system data in MySQL.
 
-**👤 Customer Features (Mobile App)**
+---
 
-The Nam Hai Bus Booking App allows customers to:
+# ✨ Key Features
 
-Search for bus trips based on their desired destination.
+## 👤 Customer Mobile Application
 
-Select their preferred bus type and choose available seats.
+Customers can conveniently perform the following operations:
 
-Choose a preferred payment method to complete the booking process.
+* 🔍 Search available bus trips by departure and destination
+* 🚌 View detailed trip schedules
+* 💺 Select available seats in real time
+* 💳 Choose preferred payment methods
+* 🎫 Book bus tickets online
+* 📄 View purchased tickets
+* 📜 Access booking history
+* 📰 Read company news and announcements
+* 🔔 Receive important notifications
+* 💬 Submit customer feedback
+* 👤 View and update personal profile
+* 🔒 Change account password
+* 📍 Track current location with Google Maps integration
 
-View detailed trip schedules.
+---
 
-View purchased tickets and booking history.
+## 🛠️ Admin Management System
 
-Read news and information about the bus company.
+The administrator dashboard provides complete management capabilities, including:
 
-Provide feedback about the company’s services.
+### 👥 Customer Management
 
-Receive and view notifications related to trips and company announcements.
+* Create, update and delete customer information
+* Search customer records
 
-View and update personal account information, including changing passwords.
+### 👨‍💼 Employee Management
 
-Track their current location through Google Maps integration.
+* Manage employee accounts
+* Update staff information
 
-**🛠️ Admin Features (Management System)**
+### 🚌 Bus & Trip Management
 
-The Admin system allows administrators to:
+* Manage bus stations
+* Manage bus routes
+* Manage bus schedules
+* Manage buses
+* Manage trips
+* Manage ticket information
 
-Manage customer information.
+### 🔐 User Management
 
-Manage employee accounts and related personnel.
+* Manage user accounts
+* Manage login credentials
 
-Manage bus stations, routes, trips, and tickets.
+### 📢 Notification Management
 
-Manage user accounts and system data.
+* Send announcements to customers
+* Notify schedule changes
+* Broadcast company updates
 
-Send notifications to customers regarding company updates, trip changes, and important announcements.
+---
 
-**🚀 How to Install and Run the Project**
-**STEP 1: Install Node.js
-**
-Download and install Node.js from:
-https://nodejs.org/
+# 🏗️ System Architecture
 
-Check installation:
+```text
+Flutter Mobile App
+        │
+        ▼
+REST API (Node.js + Express.js)
+        │
+        ▼
+MySQL Database
+```
 
-node -v
-npm -v
+---
 
-**STEP 2: Install MySQL**
+# 🛠️ Technology Stack
 
-Install MySQL
+## Frontend
 
-Create a database named: mobilenc_db
+* Flutter
+* Dart
+* Google Maps API
+* HTTP Package
 
-Import the provided .sql file (if available)
+## Backend
 
-**STEP 3: Run the Backend Server**
+* Node.js
+* Express.js
+* REST API
 
-Open terminal in the project folder and run:
+## Database
 
+* MySQL
+
+---
+
+# 🗄️ Database Design
+
+Main entities include:
+
+* Customer
+* Employee
+* User Account
+* Bus
+* Bus Station
+* Route
+* Trip
+* Ticket
+* Seat
+* Notification
+* Feedback
+* News
+
+---
+
+# ⚙️ Installation Guide
+
+## Clone Repository
+
+```bash
+git clone https://github.com/FuyutsukiTouka/MobileNC_AppBanVeXe
+
+cd appquanlyvexekhach
+```
+
+---
+
+## Backend Setup
+
+Install dependencies:
+
+```bash
 npm install
+```
+
+Start the backend server:
+
+```bash
 node server.js
+```
 
+The server will run at:
 
-If successful, you should see:
-
-Server running on port 3000
-
-**STEP 4: Install Flutter**
-
-Check Flutter installation:
-
-flutter doctor
-
-**STEP 5: Install Flutter Dependencies**
-flutter pub get
-
-**STEP 6: Update API Base URL**
-
-Inside the lib/ folder, find:
-
+```text
 http://localhost:3000
+```
 
+---
 
-If using Android Emulator, change it to:
+## Database Setup
 
+1. Install MySQL.
+2. Create a database.
+
+```sql
+CREATE DATABASE mobilenc_db;
+```
+
+3. Import the provided SQL file into the database.
+
+4. Update database credentials inside the backend configuration if necessary.
+
+---
+
+## Flutter Setup
+
+Install Flutter dependencies:
+
+```bash
+flutter pub get
+```
+
+Verify your Flutter environment:
+
+```bash
+flutter doctor
+```
+
+---
+
+## Configure API
+
+Update the API base URL inside the Flutter project.
+
+For Android Emulator:
+
+```text
 http://10.0.2.2:3000
+```
 
-**STEP 7: Run the App**
+For a physical Android device:
+
+```text
+http://YOUR_LOCAL_IP:3000
+```
+
+For iOS Simulator:
+
+```text
+http://localhost:3000
+```
+
+---
+
+## Run the Application
+
+```bash
 flutter run
+```
 
-**⚠️ Important Notes**
+---
 
-Make sure the backend server is running before starting the mobile app.
+# 📡 REST API
 
-Make sure the MySQL service is running.
+The backend provides RESTful APIs for:
 
-If the app cannot connect, check port 3000.
+* Authentication
+* Customer Management
+* Employee Management
+* Bus Management
+* Route Management
+* Trip Management
+* Ticket Booking
+* Notification Management
+* News
+* Feedback
+
+---
+
+# 🔐 Authentication & Security
+
+The system includes:
+
+* User Login Authentication
+* Password Encryption
+* Role-Based User Access
+* Protected REST APIs
+
+---
+
+# 📊 System Modules
+
+* Customer Management
+* Employee Management
+* Bus Management
+* Route Management
+* Trip Scheduling
+* Ticket Booking
+* Seat Selection
+* Notifications
+* News
+* Feedback
+* User Profile
+* Booking History
+* Google Maps Integration
+
+---
+
+# 📷 Video
+
+* https://www.youtube.com/watch?v=KiZILs9u0ms&t=4s
+
+---
+
+# 🎯 Future Enhancements
+
+* Online Payment Gateway Integration
+* QR Code E-Tickets
+* Real-Time Bus Tracking
+* Push Notifications
+* Multi-Language Support
+* Dark Mode
+* Online Check-in
+* Driver Management
+* Revenue Dashboard
+* Analytics & Reports
+
+---
+
+# 👨‍💻 Author
+
+**Bao Nguyen**
+
+Bachelor of Software Engineering
+
+Academic Year **2025 – 2026**
+
+---
+
+# 📄 License
+
+This project was developed for educational and academic purposes.

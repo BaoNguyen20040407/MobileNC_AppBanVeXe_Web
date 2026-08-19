@@ -330,15 +330,23 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
   // MỞ DANH SÁCH ĐẦY ĐỦ
   // ============================================================
 
-  void _openSavedLocationsScreen() {
-    Navigator.push(
+  Future<void> _openSavedLocationsScreen() async {
+    final result = await Navigator.push<List<SavedLocation>>(
       context,
-       MaterialPageRoute(
+      MaterialPageRoute(
         builder: (_) => SavedLocationsScreen(
-           locations: _savedLocations,
+          locations: _savedLocations,
         ),
-       ),
+      ),
     );
+
+    if (!mounted || result == null) return;
+
+    setState(() {
+      _savedLocations
+        ..clear()
+        ..addAll(result);
+    });
   }
 
   // ============================================================
@@ -596,8 +604,11 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
       backgroundColor:
           AppColors.softOrangeBackground,
 
-      appBar: const AppBarProfile(
-        title: 'ĐỊA CHỈ CỦA BẠN',
+      appBar: AppBarProfile(
+        title: 'ĐỊA ĐIỂM ĐÃ LƯU',
+        onBack: () {
+          Navigator.pop(context, _savedLocations);
+        },
       ),
 
       body: _currentLatLng == null

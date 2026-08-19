@@ -3,14 +3,29 @@ import 'package:giao_dien_1/config/default.dart';
 import 'package:giao_dien_1/widget/appbar_profile.dart';
 import 'package:giao_dien_1/model/saved_location.dart';
 import 'package:giao_dien_1/widget/saved_location_item.dart';
+import 'package:giao_dien_1/widget/confirm_delete_button.dart';
 
-class SavedLocationsScreen extends StatelessWidget {
+class SavedLocationsScreen extends StatefulWidget {
   final List<SavedLocation> locations;
 
   const SavedLocationsScreen({
     Key? key,
     required this.locations,
   }) : super(key: key);
+
+  @override
+  State<SavedLocationsScreen> createState() =>
+    _SavedLocationsScreenState();
+}
+
+class _SavedLocationsScreenState extends State<SavedLocationsScreen> {
+  late List<SavedLocation> locations;
+
+  @override
+    void initState() {
+      super.initState();
+      locations = List<SavedLocation>.from(widget.locations);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,8 +83,14 @@ class SavedLocationsScreen extends StatelessWidget {
                       ),
                       child: SavedLocationItem(
                         location: location,
-                        onDelete: () {
-                          // TODO: Xóa địa điểm
+                        onDelete: () async {
+                          final confirm = await showConfirmDeleteDialog(context);
+
+                          if (confirm != true) return;
+
+                          setState(() {
+                            locations.remove(location);
+                          });
                         },
                         onTap: () {
                           // TODO: Chọn địa điểm

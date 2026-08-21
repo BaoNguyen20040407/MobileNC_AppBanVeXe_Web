@@ -9,6 +9,7 @@ import 'package:giao_dien_1/view/location/add_location_screen.dart';
 import 'package:giao_dien_1/model/saved_location.dart';
 import 'package:giao_dien_1/view/location/saved_locations_screen.dart';
 import 'package:giao_dien_1/config/default.dart';
+import 'package:giao_dien_1/view/location/edit_location_screen.dart';
 
 class LocationPickerScreen extends StatefulWidget {
   const LocationPickerScreen({Key? key}) : super(key: key);
@@ -111,6 +112,54 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
     }
   }
 
+  // ============================================================
+  // SỬA ĐỊA ĐIỂM MUỐN LƯU
+  // ============================================================
+
+  Future<void> _openEditLocationScreen(SavedLocation location,) async {
+    final result = await Navigator.push<SavedLocation>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => EditLocationScreen(
+          location: location,
+        ),
+      ),
+    );
+
+    if (!mounted || result == null) return;
+    setState(() {
+      final index = _savedLocations.indexOf(location);
+
+      if (index != - 1) {
+        _savedLocations[index] = result;
+      }
+
+      _selectedType = result.type; 
+      
+      if (result.address != null && result.address!.trim().isNotEmpty) {
+        _currentAddress = result.address!;
+      }
+
+      if (result.latitude != null && result.longitude != null) {
+        _currentLatLng = LatLng(
+          result.latitude!, 
+          result.longitude!,
+        );
+      }
+    });
+
+    //Di chuyển bản đồ tới địa điểm vừa sửa
+    if (result.latitude != null && result.longitude != null) {
+      _mapController?.animateCamera(
+        CameraUpdate.newLatLngZoom(
+          LatLng(
+            result.latitude!, 
+            result.longitude!, 
+          ), 16, 
+        )
+      );
+    }
+  }
   // ============================================================
   // LẤY ĐỊA CHỈ TỪ TỌA ĐỘ
   // ============================================================
@@ -503,11 +552,17 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                           ),
                         ),
 
-                        const Icon(
-                          Icons.chevron_right,
-                          color: AppColors.grey600,
-                          size: 20,
-                        ),
+                        IconButton(
+                          visualDensity: VisualDensity.compact,
+                          onPressed: () {
+                            _openEditLocationScreen(location);
+                          }, 
+                          icon: const Icon(
+                            Icons.chevron_right,
+                            color: AppColors.grey600,
+                            size: 20,
+                          ),
+                        )
                       ],
                     ),
                   ),
@@ -656,7 +711,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
 
                   // ==================================================
                   // Ô ĐỊA CHỈ
@@ -664,7 +719,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
 
                   _buildAddressBox(),
 
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
 
                   // ==================================================
                   // CÁC ĐỊA ĐIỂM ĐÃ LƯU
@@ -673,7 +728,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                   _buildSavedLocations(),
 
                   if (_savedLocations.isNotEmpty)
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
 
                   // ==================================================
                   // THÊM ĐỊA ĐIỂM

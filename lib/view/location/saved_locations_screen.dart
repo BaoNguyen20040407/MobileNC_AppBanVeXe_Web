@@ -4,6 +4,7 @@ import 'package:giao_dien_1/widget/appbar_profile.dart';
 import 'package:giao_dien_1/model/saved_location.dart';
 import 'package:giao_dien_1/widget/saved_location_item.dart';
 import 'package:giao_dien_1/widget/confirm_delete_button.dart';
+import 'package:giao_dien_1/view/location/edit_location_screen.dart';
 
 class SavedLocationsScreen extends StatefulWidget {
   final List<SavedLocation> locations;
@@ -92,8 +93,25 @@ class _SavedLocationsScreenState extends State<SavedLocationsScreen> {
                             locations.remove(location);
                           });
                         },
-                        onTap: () {
-                          // TODO: Chọn địa điểm
+                        onTap: () async {
+                          final result = await Navigator.push<SavedLocation>(
+                            context, 
+                            MaterialPageRoute(
+                              builder: (_) => EditLocationScreen(
+                                location: location,
+                              ),
+                            ),
+                          );
+
+                          if (result == null) return;
+                          
+                          setState(() {
+                            final index = locations.indexOf(location);
+
+                            if (index != - 1){
+                              locations[index] = result; 
+                            }
+                          });
                         },
                       ),
                     );
